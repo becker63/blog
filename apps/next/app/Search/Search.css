@@ -1,0 +1,13 @@
+.topGradient {
+  background: linear-gradient(180deg, rgba(0,0,0,1) 40%, rgba(255,255,255,1) 90%);
+}
+
+.smoothInputCusor {
+  color: transparent;
+  text-shadow: 0 0 0 #2196f3;
+  transition: all 0.80s !important;
+}
+
+.mobileparentsize {
+  min-height: calc(100vh - 60px);
+}

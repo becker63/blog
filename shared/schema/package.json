@@ -1,0 +1,11 @@
+{
+  "name": "mongoschema",
+  "packageManager": "yarn@3.6.4",
+  "dependencies": {
+    "mongoose-zod": "^0.1.1"
+  },
+  "peerDependencies": {
+    "mongoose": "*",
+    "zod": "*"
+  }
+}
