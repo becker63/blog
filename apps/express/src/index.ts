@@ -4,8 +4,11 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { API } from "api";
 import { workspaceDotenv } from "helpers"; 
+import * as dotenv from "dotenv"
+import { sendBlogsToServer } from "./parseBlogs";
 
 workspaceDotenv()
+dotenv.config()
 const app = zodiosApp(API);
 const port = process.env.PORT || 3000;
 
@@ -74,14 +77,20 @@ app.get("/api/getSpecificPost", async (req, res) => {
 
     const blogs = await Blog.findById<BlogSchemaType>(query.slug).then();
   
-    res.status(200).send(MainSchema.parse(blogs));
+    if (blogs != null) {
+      res.status(200).send(blogs)
+    } else {
+      res.status(200).send('doesnt exist')
+    }
     
   } catch (e) {
     errorHandler(req, res, e)
   }
 });
 
-app.listen(port, () => {
-  mongoose.connect(process.env.DATABASE_URL!);
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(port, async () => {
+  await mongoose.connect(process.env.DATABASE_URL!);
+  await sendBlogsToServer()
+  console.log(`Server running at http://localhost:${port}\n`);
 });
+

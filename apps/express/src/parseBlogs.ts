@@ -2,22 +2,9 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-// import mdx from "remark-mdx";
-// import { remark } from "remark";
 import { serialize } from 'next-mdx-remote/serialize'
-// import rehypeHighlight from 'rehype-highlight'
-import mongoose, { Model, connect } from 'mongoose'
-import * as dotenv from 'dotenv'
-import { Blog } from 'mongoschema'
-import { BlogSchemaType } from 'mongoschema'
-import { workspaceDotenv } from 'helpers'
 import workspacesRoot from 'find-yarn-workspace-root'
-
-workspaceDotenv()
-dotenv.config()
-
-//import {serialize, deserialize} from "../../node_modules_tweaked/react-serialize"
-// import { workspaceDotenv } from 'helpers'
+import { Blog, BlogSchemaType } from 'mongoschema'
 
 const removeMeta = (fileContent: string) =>
   fileContent
@@ -59,12 +46,9 @@ const MetaAndContent = async (fileContent: string) => {
   }
   const frontmatter = matter(fileContent).data as metatype
   const ogtags = frontmatter.tags as unknown as string
-  console.log(frontmatter)
   const meta = Object.assign(frontmatter, {
     tags: ogtags.replace(' ', '').split(',')
   })
-
-  console.log(meta)
 
   const content = await serialize(removeMeta(fileContent), {
     parseFrontmatter: false,
@@ -80,9 +64,10 @@ const MetaAndContent = async (fileContent: string) => {
 }
 
 const readAndRrocessBlogs = async () => {
-  // this below is pretty bad this needs fixed
+  console.log("Updating blogs to the db")
+  // this below dir parse code is pretty bad this needs fixed
   const blogDir = path.resolve(((workspacesRoot() as string) + process.env.BLOGS_PATH?.replace('.', '')) as string)
-  console.log('reading from: ' + blogDir)
+  console.log('reading from: ' + blogDir + '\n')
   const files = fs.readdirSync(path.join(blogDir))
 
   const blogs = await Promise.all(
@@ -100,22 +85,15 @@ const readAndRrocessBlogs = async () => {
       }
     })
   ).catch(e => {
-    console.log(e)
+    console.error(e)
   })
 
   return blogs
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const main = async () => {
+export const sendBlogsToServer = async () => {
+  // parse and get blogs in filesystem
   const processedBlogs = await readAndRrocessBlogs()
-
-  mongoose.set('bufferCommands', false)
-  console.log('connecting')
-  await connect(process.env.DATABASE_URL!, {})
-    .then(() => console.log('Database connected!'))
-    .catch(err => console.log(err))
-
   for (const processedBlog of processedBlogs!) {
     const update = {
       _id: processedBlog.slug,
@@ -126,34 +104,20 @@ const main = async () => {
       added: new Date()
     }
 
+    console.log(`sending blog: ${processedBlog.slug} to db`)
+
     const blog = new Blog<BlogSchemaType>(update)
 
-    //    const blog2 = Blog.findById("blog._id")
-    //    console.log(blog2)
+    const exists = await Blog.findById(processedBlog.slug).then()
 
-    await blog.save().catch(e => console.error('exists' + e))
-
-    console.log('checking if blog exists ', processedBlog.slug)
-    const exists = await Blog.findOne().then()
-
-    //    if (exists == null) {
-    //      console.log(processedBlog.slug + ': blog not found, adding')
-    //      await blog.save().catch(e => console.error('exists' + e))
-    //    } else {
-    //      console.log(processedBlog.slug + ': updating blog')
-    //      Blog.findByIdAndUpdate(processedBlog.slug, update).catch(e => console.error('findByIdAndUpdate' + e))
-    //    }
-    //  }
+    if (exists == null) {
+      console.log(processedBlog.slug + ': blog not found on server, adding..\n')
+      await blog.save().catch(e => console.error(e))
+    } else {
+      console.log(exists._id)
+      console.log(processedBlog.slug + ': updating blog on server')
+      await Blog.findByIdAndUpdate(processedBlog.slug, update).then()
+    }
+    console.log("updated blog\n")
   }
-  // await mongoose.connection.close()
-
-  return
 }
-
-await main()
-
-//readAndRrocessBlogs()
-
-//let str = "test wow test"
-//const comp = lz.compress(str)
-//console.log(comp)

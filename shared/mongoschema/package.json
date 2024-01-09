@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "mongoschema",
   "packageManager": "yarn@3.6.4",
   "dependencies": {

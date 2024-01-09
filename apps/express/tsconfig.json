@@ -11,4 +11,10 @@
   "include": [
     "src/**/*.ts",
   ],
+  "references": [
+    {
+      "mongoschema": "../../shared/mongoschema",
+      "api": "../../shared/api"
+    }
+  ]
 }

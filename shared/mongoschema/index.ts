@@ -3,7 +3,7 @@ import {
   toMongooseSchema,
   toZodMongooseSchema,
 } from "mongoose-zod";
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 
 export const MetaSchema = z.object({
   title: z.string(),
@@ -32,9 +32,12 @@ export const MainSchema = z.object({
 
 export type BlogSchemaType = z.infer<typeof MainSchema>;
 
+// its possible there could already be a model created bc of use on the client and server, if so just index it if not create one
 export const Blog =
-  mongoose.models["BlogSchema"] ||
-  mongoose.model(
-    "BlogSchema",
-    toMongooseSchema(toZodMongooseSchema(MainSchema))
-  );
+   mongoose.models["BlogSchema"] as Model<typeof MainSchema> ||
+   mongoose.model(
+     "BlogSchema",
+     toMongooseSchema(toZodMongooseSchema(MainSchema))
+   );
+
+// export const Blog = mongoose.model("BlogSchema", toMongooseSchema(toZodMongooseSchema(MainSchema)))
