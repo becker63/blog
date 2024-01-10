@@ -21,7 +21,7 @@ const withMDX = require('@next/mdx')({
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     // Optionally, add any other Next.js config below
     reactStrictMode: true,
-
+    transpilePackages: ["api"],
     async rewrites() {
       return [
         {
