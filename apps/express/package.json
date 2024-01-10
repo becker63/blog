@@ -2,7 +2,7 @@
   "name": "express",
   "packageManager": "yarn@3.6.4",
   "scripts": {
-    "dev": "nodemon src/index.ts"
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
     "@types/node": "^20.8.7",
