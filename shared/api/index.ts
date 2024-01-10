@@ -70,4 +70,4 @@ export const API = makeApi([
   },
 ]);
 
-export const API_client = new Zodios("http://localhost:3000", API)
+export const API_client = new Zodios(process.env.EXPRESS_IP as string, API)
