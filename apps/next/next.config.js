@@ -22,6 +22,7 @@ const withMDX = require('@next/mdx')({
     // Optionally, add any other Next.js config below
     reactStrictMode: true,
     transpilePackages: ["api"],
+    externalDir: true,
     async rewrites() {
       return [
         {
