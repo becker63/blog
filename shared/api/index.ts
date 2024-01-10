@@ -6,6 +6,11 @@ import {
 } from "@zodios/core";
 import { z } from "zod";
 import { MainSchema } from "mongoschema";
+import { workspaceDotenv } from "helpers"; 
+import * as dotenv from "dotenv"
+
+workspaceDotenv()
+dotenv.config()
 
 const limitParam = makeParameters([
   {
