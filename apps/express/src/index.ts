@@ -1,5 +1,5 @@
 import { zodiosApp } from "@zodios/express";
-import { Blog, BlogSchemaType, MainSchema } from "mongoschema";
+import { Blog, BlogSchemaType } from "mongoschema";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { API } from "api";
@@ -7,6 +7,7 @@ import { workspaceDotenv } from "helpers";
 import * as dotenv from "dotenv"
 import { sendBlogsToServer } from "./parseBlogs";
 
+process.env.NODE_ENV = 'production';1
 workspaceDotenv()
 dotenv.config()
 const app = zodiosApp(API);

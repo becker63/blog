@@ -65,7 +65,7 @@ export const API = makeApi([
       },
     ],
     description: "Get latest posts",
-    response: z.union([MainSchema, z.string()]),
+    response: z.union([MainSchema, z.null()]),
     errors: errorType,
   },
 ]);

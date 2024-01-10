@@ -53,7 +53,7 @@ const MetaAndContent = async (fileContent: string) => {
   const content = await serialize(removeMeta(fileContent), {
     parseFrontmatter: false,
     mdxOptions: {
-      development: true
+      development: false
       // rehypePlugins: [rehypeHighlight()]
     }
   })
@@ -64,6 +64,7 @@ const MetaAndContent = async (fileContent: string) => {
 }
 
 const readAndRrocessBlogs = async () => {
+  // console.log(process.env.NODE_ENV !== 'production')
   console.log("Updating blogs to the db")
   // this below dir parse code is pretty bad this needs fixed
   const blogDir = path.resolve(((workspacesRoot() as string) + process.env.BLOGS_PATH?.replace('.', '')) as string)
