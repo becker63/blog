@@ -1,6 +1,7 @@
 {
   "type": "module",
   "name": "mongoschema",
+  "version": "1.0",
   "packageManager": "yarn@3.6.4",
   "dependencies": {
     "mongoose-zod": "^0.1.1"
