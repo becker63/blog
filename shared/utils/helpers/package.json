@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "0.1.0",
   "name": "helpers",
   "packageManager": "yarn@3.6.4",
   "dependencies": {
