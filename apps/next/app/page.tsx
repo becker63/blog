@@ -21,7 +21,7 @@ import {
 //</Link>
 //          <Image priority src={bebop} alt="image failed to load" width={350} height={350} />
 
-export const Card = (p: {
+const Card = (p: {
   title: string;
   desc: string;
   icon?: IconDefinition;

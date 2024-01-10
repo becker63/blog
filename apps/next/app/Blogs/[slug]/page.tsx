@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     queries: { slug: params.slug },
   });
 
+  if(blog)
   return {
     title: blog.meta.title,
     description: blog.meta.description,
@@ -53,6 +54,6 @@ export default async function Post({ params }: { params: { slug: string } }) {
     }
   } catch (error) {
     console.error(error);
-    return <p>something broke</p>;
+    return <p>something broke or this blog doesnt exist :/</p>;
   }
 }

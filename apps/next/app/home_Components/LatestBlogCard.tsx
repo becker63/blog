@@ -73,7 +73,6 @@ export const LatestBlogCard = () => {
       <hr className="my-5" />
       <div className="w-full h-[80%] flex flex-col justify-center">
         <Suspense fallback={<LoadingLatest />}>
-          {/* @ts-expect-error Server Component */}
           <FetchBlogs />
         </Suspense>
       </div>
