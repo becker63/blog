@@ -89,7 +89,7 @@ export default function Home() {
     <>
       <HomeNav />
       {/* mobile */}
-      <div className="md:hidden h-[100%] mt-[145px] w-screen flex flex-col items-center justify-center">
+      <div className="md:hidden h-[100%] mt-[calc(100vh_-_85vh)] w-screen flex flex-col items-center justify-center">
         <div className="bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] w-[90vw] relative">
           <div className="w-[90%] flex flex-col content-center justify-center ">
             <Bebop mobile={true} />

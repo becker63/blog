@@ -37,7 +37,7 @@ export default async function Post({ params }: { params: { slug: string } }) {
     if (blog) {
       return (
         <>
-          <div className="opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] bg-[#000000] w-[90%] h-[90%] md:w-[80%] md:h-[80%] lg:w-[70%] lg:h-[70%] mx-auto p-6 mb-5">
+          <div className="opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] bg-[#000000] w-[90%] h-[90%] md:w-[80%] md:h-[80%] lg:w-[70%] lg:h-[70%] mx-auto p-6 mb-5 globalShow">
             <div className="prose prose-base lg:prose-lg 2xl:prose-2xl prose-invert mx-auto prose-hr:hidden">
               <div className="mb-5">
                 <h1 className="font-bold text-3xl xl:mt-24 mb-0">
