@@ -8,6 +8,19 @@
     font-weight: bold;
   }
 
+
+  @container style(--settings_show: true){
+    .globalShow {
+      display: block
+    }
+  }
+  
+  @container style(--settings_show: false){
+    .globalShow {
+      display: none
+    }
+  }
+
 body {
   background-color: #581F37;
   height: 100vh;

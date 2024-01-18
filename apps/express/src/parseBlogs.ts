@@ -53,7 +53,7 @@ const MetaAndContent = async (fileContent: string) => {
   const content = await serialize(removeMeta(fileContent), {
     parseFrontmatter: false,
     mdxOptions: {
-      development: false
+      development: true
       // rehypePlugins: [rehypeHighlight()]
     }
   })

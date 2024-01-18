@@ -7,7 +7,7 @@ import { workspaceDotenv } from "helpers";
 import * as dotenv from "dotenv"
 import { sendBlogsToServer } from "./parseBlogs";
 
-process.env.NODE_ENV = 'production';1
+process.env.NODE_ENV = 'production';
 workspaceDotenv()
 dotenv.config()
 const app = zodiosApp(API);

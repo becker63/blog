@@ -6,18 +6,6 @@
   Version: 2021.09.0
 */
 
-@container style(--settings_show: true){
-  .globalShow {
-    display: block
-  }
-}
-
-@container style(--settings_show: false){
-  .globalShow {
-    display: none
-  }
-}
-
 pre code.hljs {
   display: block;
   overflow-x: auto;

@@ -4,9 +4,10 @@ import './global_components.css'
 import { Route } from './client/linkwithloading'
 import { useEffect, useState } from 'react'
 import { disableBodyScroll, enableBodyScroll} from 'body-scroll-lock';
+import { SettingsEditor } from './global_settings';
  
 export const Navbar = () => {
-  const [displaySettings, setDsiplaySettings] = useState(false)
+  const [displaySettings, setDsiplaySettings] = useState(true)
   // when scrolled use a less obstrusive version of navbar
   const [LessNav, setLessNav] = useState(false)
 
@@ -73,7 +74,7 @@ export const Navbar = () => {
   return (
     <>
       <nav
-        className="z-50 bg-black px-2 sm:px-4 shadow-[#00000F_0_0_10px] mb-6 transition-[top,margin] duration-[1s] ease-[ease] delay-[0s]"
+        className="z-50 bg-black px-2 px-4 shadow-[#00000F_0_0_10px] mb-6 transition-[top,margin] duration-[1s] ease-[ease] delay-[0s]"
         style={
           LessNav
             ? {
@@ -127,14 +128,14 @@ export const Navbar = () => {
         </div>
       </nav>
       <div
-        className="z-50 opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] bg-[#000000] w-[90%] md:w-[80%] md:h-[80%] lg:w-[70%] mx-auto p-6 mb-5"
+        className="z-50 opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] bg-[#000000] mx-12 md:w-[640px] md:mx-auto p-6 my-5"
         style={{
           height: 'calc(100vh - 80px)',
-          position: LessNav ? 'fixed' : 'relative',
+          position: 'relative',
           display: displaySettings ? 'flex' : 'none'
         }}
       >
-
+        <SettingsEditor />
       </div>
     </>
   )
