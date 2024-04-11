@@ -6,3 +6,6 @@ export const workspaceDotenv = () => {
   dotenv({ path: `${rootDirectory}/.env` })
 }
 
+export function passByRef<Type>(arg: Type): {value: Type} {
+  return {value: arg};
+}

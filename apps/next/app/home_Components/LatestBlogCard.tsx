@@ -27,7 +27,7 @@ const FetchBlogs = async () => {
         return (
           <Link
             href={"/Blogs/" + blog.slug}
-            className="flex flex-row justify-between align-middle text-gray-800 mb-3"
+            className="flex flex-row justify-between align-middle text-gray-800 mb-3 overflow-x-scroll"
             key={blog.slug}
           >
             <div className="flex flex-col max-w-[120]">
@@ -44,15 +44,17 @@ const FetchBlogs = async () => {
               </div>
             </div>
 
-            <Suspense fallback={LoadingCard()}>
-              <Image
-                src={blog.meta.image}
-                alt="blogcontent"
-                width={200}
-                height={200}
-                className=""
-              />
-            </Suspense>
+            {!(blog.meta.image === undefined) ? <>
+              <Suspense fallback={LoadingCard()}>
+                <Image
+                  src={blog.meta.image}
+                  alt="blogcontent"
+                  width={200}
+                  height={200}
+                  className=""
+                />
+              </Suspense>
+            </> : <></>}
           </Link>
         );
       })}
@@ -68,7 +70,7 @@ const LoadingLatest = () => (
 
 export const LatestBlogCard = () => {
   return (
-    <div className="sm:px-20 md:px-5 py-5 px-5 h-full">
+    <div className="sm:px-20 lg:px-5 py-5 px-5 h-full">
       <h3 className="text-2xl text-bold text-blue-300">Latest</h3>
       <hr className="my-5" />
       <div className="w-full h-[80%] flex flex-col justify-center">

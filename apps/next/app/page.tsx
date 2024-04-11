@@ -75,7 +75,7 @@ const Socials = () => (
 
 const BebopContainer = () => {
   return (
-    <div className=" md:w-[100%] lg:w-[70%] flex flex-col content-center justify-center">
+    <div className=" lg:w-[100%] items-center flex flex-col content-center justify-center">
       <Bebop />
       <p className="pr-16 " style={{ textAlign: "right" }}>
         see ya space cowboy...
@@ -89,9 +89,9 @@ export default function Home() {
     <>
       <HomeNav />
       {/* mobile */}
-      <div className="md:hidden h-[100%] mt-[145px] w-screen flex flex-col items-center justify-center">
+      <div className="lg:hidden w-screen flex flex-col items-center justify-center">
         <div className="bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] w-[90vw] relative">
-          <div className="w-[90%] flex flex-col content-center justify-center ">
+          <div className="w-[90%] flex flex-col content-center items-center">
             <Bebop mobile={true} />
             <p className="pr-11 " style={{ textAlign: "right" }}>
               see ya space cowboy...
@@ -131,12 +131,12 @@ export default function Home() {
       </div>
 
       {/* desktop */}
-      <div className="hidden md:flex h-[calc(100vh_-_50px)] w-screen flex-col justify-center">
-        <div className="self-center w-[95%] h-[95%] max-w-[1250px] desktopgrid ">
-          <div className="Svg flex justify-center content-center bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px]">
+      <div className="hidden lg:flex h-[100%] w-screen flex-col">
+        <div className="self-center w-[95%] h-[100%] max-w-[1250px] desktopgrid ">
+          <div className="Svg flex justify-center content-center bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] items-center">
             <BebopContainer />
           </div>
-          <div className="CV flex flex-col justify-center sm:px-20 md:px-5 py-5 px-5 bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px]">
+          <div className="CV flex flex-col justify-center sm:px-20 lg:px-5 py-5 px-5 bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px]">
             <Card
               title="Resume"
               desc="My Background."
@@ -145,7 +145,7 @@ export default function Home() {
               icon={faPaperclip}
             />
           </div>
-          <div className="Blog flex flex-col justify-center sm:px-20 md:px-5 py-5 px-5 bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px]">
+          <div className="Blog flex flex-col justify-center sm:px-20 lg:px-5 py-5 px-5 bg-[#000000] opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px]">
             <Card
               title="Blogs"
               desc="Search through my back catalog."

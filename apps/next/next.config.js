@@ -14,6 +14,17 @@ const withMDX = require('@next/mdx')({
    
   /** @type {import('next').NextConfig} */
   const nextConfig = {
+    headers: () => [
+      {
+        source: '/Search/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store',
+          },
+        ],
+      },
+    ],
     images: {
       domains: ["google.com"]
     },
@@ -22,7 +33,6 @@ const withMDX = require('@next/mdx')({
     // Optionally, add any other Next.js config below
     reactStrictMode: true,
     transpilePackages: ["api"],
-    externalDir: true,
     async rewrites() {
       return [
         {

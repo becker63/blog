@@ -16,6 +16,7 @@
     "@mdx-js/loader": "^2.3.0",
     "@next/mdx": "^13.5.5",
     "@tailwindcss/typography": "^0.5.10",
+    "@zodyac/zod-mongoose": "^1.1.2",
     "next": "^13.5.5",
     "next-mdx-remote": "^4.4.1",
     "react": "^18.2.0",

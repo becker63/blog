@@ -2,5 +2,8 @@
   "version": "0.1.0",
   "type": "module",
   "name": "api",
-  "packageManager": "yarn@3.6.4"
+  "packageManager": "yarn@3.6.4",
+  "dependencies": {
+    "tozod": "^3.0.0"
+  }
 }
