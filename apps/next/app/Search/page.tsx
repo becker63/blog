@@ -7,7 +7,6 @@ export default function BlogHomepage() {
   return (
     <>
       <div>
-        {/* @ts-expect-error Server Component */}
         <Fetchblogmeta />
       </div>
     </>

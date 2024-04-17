@@ -92,6 +92,6 @@ app.get("/api/getSpecificPost", async (req, res) => {
 app.listen(port, async () => {
   await mongoose.connect(process.env.DATABASE_URL!);
   await sendBlogsToServer()
-  console.log(`Server running at http://localhost:${port}\n`);
+  console.log(`Server running at ${process.env.EX}\n`);
 });
 
