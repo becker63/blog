@@ -90,6 +90,7 @@ app.get("/api/getSpecificPost", async (req, res) => {
 });
 
 app.listen(port, async () => {
+  console.log(process.env.NODE_ENV)
   await mongoose.connect(process.env.DATABASE_URL!);
   await sendBlogsToServer()
   console.log(`Server running at ${process.env.EXPRESS_IP}\n`);
