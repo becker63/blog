@@ -76,7 +76,7 @@ app.get("/api/getSpecificPost", async (req, res) => {
   try {
     const query = API_findByID.parse(req.query);
 
-    const blogs = await Blog.findById<BlogSchemaType>(query.slug).then();
+    const blogs = await Blog.findById(query.slug).then();
   
     if (blogs != null) {
       res.status(200).send(blogs)
@@ -92,6 +92,6 @@ app.get("/api/getSpecificPost", async (req, res) => {
 app.listen(port, async () => {
   await mongoose.connect(process.env.DATABASE_URL!);
   await sendBlogsToServer()
-  console.log(`Server running at ${process.env.EX}\n`);
+  console.log(`Server running at ${process.env.EXPRESS_IP}\n`);
 });
 
