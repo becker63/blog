@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import './globals.css'
+import "./globals.css";
+import { css } from "../styled-system/css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false;
@@ -15,10 +16,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className='text-white'>
+    <html lang="en" className={css({ color: "white" })}>
       <body>
-      <img
-          className="z-[-1] fixed inset-0 mx-auto my-auto max-w-[70%] h-auto w-auto"
+        <img
+          className={css({
+            zIndex: "-1",
+            position: "fixed",
+            inset: "0",
+            margin: "auto",
+            maxWidth: "70%",
+            height: "auto",
+            width: "auto",
+            pointerEvents: "none",
+          })}
           src="/img/backgroundImage.jpg"
           alt="blogcontent"
         />

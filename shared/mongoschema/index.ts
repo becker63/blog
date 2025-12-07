@@ -24,7 +24,7 @@ export const mainBase = z.object({
   text: z.string().optional(),
   meta: MetaSchema,
   slug: z.string(),
-  added: z.date().or(z.string().pipe( z.coerce.date() )),
+  added: z.date().or(z.string().pipe(z.coerce.date())),
   mdx: MdxSchema,
   __v: z.any().optional(),
 })
@@ -38,6 +38,7 @@ export const MainSchema = mainBase.extend({
 }).strict()
 
 export type BlogSchemaType = z.infer<typeof MainSchema>;
+// @ts-ignore
 const MongoSchema = zodSchema(MainSchema);
 
 // its possible there could already be a model created bc of use on the client and server, if so just index it if not create one

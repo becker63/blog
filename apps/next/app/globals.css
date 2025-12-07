@@ -1,21 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer reset, base, tokens, recipes, utilities;
+
+@layer utilities {
+  [class*="bebop_svg__path"] {
+    stroke-dasharray: 5000;
+    stroke-dashoffset: 5000;
+    animation: dash 5s linear alternate infinite;
+  }
+
+  .topGradient {
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 1) 40%,
+        rgba(255, 255, 255, 1) 90%);
+  }
+
+  .smoothInputCusor {
+    color: transparent;
+    text-shadow: 0 0 0 #2196f3;
+    transition: all 0.8s !important;
+  }
+
+  .mobileparentsize {
+    min-height: calc(100vh - 60px);
+  }
+}
 
 @font-face {
-    font-family: "pixel";
-    src: local("pixel"), url("/fonts/pixeldown.ttf") format("truetype");
-    font-weight: bold;
-  }
+  font-family: "pixel";
+  src: local("pixel"), url("/fonts/pixeldown.ttf") format("truetype");
+  font-weight: bold;
+}
 
 body {
   background-color: #581F37;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .fancyFont {
-    font-family: "pixel";
+  font-family: "pixel";
 }
 
 
@@ -29,19 +52,33 @@ body {
   animation: typewriter 2s steps(44) 1s 1 normal both,
     blinkTextCursor 500ms steps(44) infinite normal;
 }
+
 @keyframes typewriter {
   from {
     width: 0;
   }
+
   to {
     width: 100%;
   }
 }
+
 @keyframes blinkTextCursor {
   from {
     border-right-color: rgba(0, 0, 0, 0.75);
   }
+
   to {
     border-right-color: transparent;
+  }
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 5000;
+  }
+
+  to {
+    stroke-dashoffset: 0;
   }
 }

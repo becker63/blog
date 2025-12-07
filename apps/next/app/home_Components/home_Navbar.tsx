@@ -1,12 +1,49 @@
-export const HomeNav = () => {
+import { css } from "../../styled-system/css";
+
+interface HomeNavProps {
+  /** When true, removes fixed positioning (for mobile layout integration) */
+  inline?: boolean;
+}
+
+export const HomeNav = ({ inline = false }: HomeNavProps) => {
   return (
     <nav
-      className="sticky z-50 bg-[#000000] px-2 sm:px-4 opacity-70 rounded-[10px] shadow-[#00000F_0_0_10px] top-2 mx-2 my-[15px]"
+      className={css({
+        layerStyle: "navbar",
+        // For inline mode: use relative positioning and full width
+        // Override the fixed positioning values from layerStyle
+        position: inline ? "relative" : "fixed",
+        w: inline ? "100%" : undefined,
+        left: inline ? "unset" : undefined,
+        right: inline ? "unset" : undefined,
+        top: inline ? "unset" : undefined,
+        mb: inline ? "0" : undefined, // MobileLayout handles the gap
+      })}
     >
-      <div className="container flex flex-wrap justify-center items-center mx-auto">
+      <div
+        className={css({
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          mx: "auto",
+          w: "100%",
+          maxW: "1536px", // 2xl
+        })}
+      >
         {/* home view */}
-        <div className="flex">
-          <span className="self-center text-[30px] font-semibold whitespace-nowrap dark:text-white anim-typewriter font-[pixel]">
+        <div className={css({ display: "flex" })}>
+          <span
+            className={`anim-typewriter ${css({
+              alignSelf: "center",
+              fontSize: "30px",
+              fontWeight: "semibold",
+              whiteSpace: "nowrap",
+              _dark: { color: "white" },
+              color: "white",
+              fontFamily: "pixel",
+            })}`}
+          >
             becker63
           </span>
         </div>

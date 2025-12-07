@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <>
-    <Navbar/>
+      <Navbar mode="sticky" />
       <div>{children}</div>
     </>
   )
