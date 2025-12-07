@@ -46,14 +46,14 @@ export default defineConfig({
             left: "{spacing.layout}",
             right: "{spacing.layout}",
             mb: "{spacing.layout}",
-          },
+          } as any,
         },
         pageContainer: {
           description: "Top-level page container matching fixed navbar",
           value: {
             pt: "{spacing.navHeight}",
             pb: "{spacing.layout}",
-          },
+          } as any,
         },
       },
       keyframes: {

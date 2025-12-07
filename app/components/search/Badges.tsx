@@ -40,7 +40,8 @@ export type tags =
 
 export const DescriptionTags = (tags: tags[]) => {
   const components = [] as JSX.Element[];
-  tags.forEach((el, i) => {
+  const safeTags = Array.isArray(tags) ? tags : [];
+  safeTags.forEach((el, i) => {
     if (i < 3) { // Increased limit slightly
       const tag = el.toLowerCase();
       if (tag === "tech") {

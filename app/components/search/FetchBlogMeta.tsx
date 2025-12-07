@@ -19,11 +19,16 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
   };
 
   const Log = (p: { data: any }) => {
-    console.log(p.data)
-    return <></>
-  }
+    console.log(p.data);
+    return <></>;
+  };
 
-  const Lines = (p: { index: number, last: number, lineLength: number, child?: boolean }) => {
+  const Lines = (p: {
+    index: number;
+    last: number;
+    lineLength: number;
+    child?: boolean;
+  }) => {
     return (
       <>
         <div className={css({ opacity: 1 })}>
@@ -54,7 +59,9 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
               />
             )
           ) : (
-            <div className={`${topOrBottomLines(p.index, p.last)} ${css({ bg: "white", w: "1px" })}`} />
+            <div
+              className={`${topOrBottomLines(p.index, p.last)} ${css({ bg: "white", w: "1px" })}`}
+            />
           )}
         </div>
         <div
@@ -86,20 +93,34 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
         className={
           !(blog.meta.image === undefined)
             ? css({
-              display: "grid",
-              gridTemplateColumns: {
-                base: "70% 30%",
-                md: "50% 50%",
-                lg: "60% 40%",
-              },
-            })
-            : css({ display: "flex", justifyContent: "center", alignItems: "center" })
+                display: "grid",
+                gridTemplateColumns: {
+                  base: "70% 30%",
+                  md: "50% 50%",
+                  lg: "60% 40%",
+                },
+              })
+            : css({
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              })
         }
       >
         <div className={css({ display: "flex", flexDirection: "column" })}>
           <div>
-            <h3 className={css({ fontSize: "2xl", fontWeight: "bold", color: "white" })}>{blog.meta.title}</h3>
-            <p className={css({ color: "gray.400", overflow: "scroll" })}>{blog.meta.description}</p>
+            <h3
+              className={css({
+                fontSize: "2xl",
+                fontWeight: "bold",
+                color: "white",
+              })}
+            >
+              {blog.meta.title}
+            </h3>
+            <p className={css({ color: "gray.400", overflow: "scroll" })}>
+              {blog.meta.description}
+            </p>
           </div>
 
           <div
@@ -111,7 +132,14 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
               py: "4",
             })}
           >
-            <span className={css({ display: "inline-block", verticalAlign: "middle" })}>{blog.text}</span>
+            <span
+              className={css({
+                display: "inline-block",
+                verticalAlign: "middle",
+              })}
+            >
+              {blog.text}
+            </span>
           </div>
 
           <div>
@@ -123,7 +151,13 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
         <div className={css({ display: "flex", justifyContent: "center" })}>
           {!(blog.meta.image === undefined) ? (
             <>
-              <Image src={blog.meta.image} alt="blogcontent" width={200} height={200} className="" />
+              <Image
+                src={blog.meta.image}
+                alt="blogcontent"
+                width={200}
+                height={200}
+                className=""
+              />
             </>
           ) : (
             <></>
@@ -137,7 +171,9 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
     return (
       <>
         {/*parent*/}
-        <div className={css({ display: "flex", flexDirection: "row", mx: "5" })}>
+        <div
+          className={css({ display: "flex", flexDirection: "row", mx: "5" })}
+        >
           <Lines index={index} last={blogs.length - 1} lineLength={15} />
           <div
             className={css({
@@ -157,16 +193,42 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
             <InnerCard blog={blog} />
           </div>
         </div>
-        {/* child */
+        {
+          /* child */
           blog.children && blog.children.length !== 0 ? (
             blog.children.map((child, childindex) => {
               console.log(index, blogs.length);
               const returned = (
                 <>
-                  <div className={css({ display: "flex", flexDirection: "row", mx: "auto", justifyContent: "flex-end" })}>
-                    {index !== blogs.length - 1 ? <div className={css({ mr: "auto", bg: "white", w: "1px" })} /> : <></>}
-                    <Lines index={childindex} last={blog.children!.length - 1} lineLength={15} child={true} />
-                    <div className={css({ display: "flex", flexDirection: "row", w: "85%" })} key={child.slug}>
+                  <div
+                    className={css({
+                      display: "flex",
+                      flexDirection: "row",
+                      mx: "auto",
+                      justifyContent: "flex-end",
+                    })}
+                  >
+                    {index !== blogs.length - 1 ? (
+                      <div
+                        className={css({ mr: "auto", bg: "white", w: "1px" })}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                    <Lines
+                      index={childindex}
+                      last={blog.children!.length - 1}
+                      lineLength={15}
+                      child={true}
+                    />
+                    <div
+                      className={css({
+                        display: "flex",
+                        flexDirection: "row",
+                        w: "85%",
+                      })}
+                      key={child.slug}
+                    >
                       <div
                         className={css({
                           alignSelf: "center",
@@ -191,23 +253,42 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
             })
           ) : (
             <></>
-          )}
+          )
+        }
       </>
     );
   };
   // this is a modified version of the index in map, that is set to 0 when we encounter a child
   // so that our lines will end at the right points
-  const renderBlogs: React.JSX.Element[] = []
+  const renderBlogs: React.JSX.Element[] = [];
 
-  console.log()
+  console.log();
   for (const [index, blog] of blogs.entries()) {
-    console.log(index, blog.slug)
-    renderBlogs.push(Card(blog, index))
+    console.log(index, blog.slug);
+    renderBlogs.push(Card(blog, index));
   }
 
   return (
-    <div className={css({ w: "full", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", alignContent: "center" })}>
-      <ul className={css({ display: "flex", flexDirection: "column", w: "full", justifyContent: "center", alignItems: "center", alignContent: "center" })}>
+    <div
+      className={css({
+        w: "full",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        alignContent: "center",
+      })}
+    >
+      <ul
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          w: "full",
+          justifyContent: "center",
+          alignItems: "center",
+          alignContent: "center",
+        })}
+      >
         {renderBlogs}
       </ul>
     </div>
