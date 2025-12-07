@@ -1,9 +1,0 @@
-{
-  "version": "0.1.0",
-  "name": "helpers",
-  "packageManager": "yarn@3.6.4",
-  "dependencies": {
-    "dotenv": "^16.3.1",
-    "find-yarn-workspace-root": "^2.0.0"
-  }
-}
