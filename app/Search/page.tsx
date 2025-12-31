@@ -11,9 +11,7 @@ export default function BlogHomepage() {
     <>
       <div
         className={css({
-          layerStyle: "pageContainer",
-          minH: "100vh",
-          w: "100vw",
+          layerStyle: "pageWithMargins",
         })}
       >
         <SearchWrapper posts={posts} />

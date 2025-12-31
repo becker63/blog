@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { DescriptionTags, tags } from "./Badges";
@@ -5,268 +7,296 @@ import React from "react";
 import { BlogPost } from "../../../lib/blogs";
 import { css } from "../../../styled-system/css";
 
+// Layout gap size - this should match 'layout' token value
+const LAYOUT_GAP = "12px";
+
 export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
   const blogs = posts;
 
-  const topOrBottomLines = (index: number, last: number) => {
-    if (index == 0) {
-      return css({ h: "50%", translateY: "100%" });
-    }
-    if (index == last) {
-      return css({ h: "50%" });
-    }
-    return css({ h: "100%" });
-  };
+  /**
+   * Blog card inner content - compact by default, expands on hover
+   * Uses CSS group hover for reliable hover detection
+   */
+  const InnerCard = ({ blog }: { blog: BlogPost }) => {
+    const blogTags = blog.meta.tags;
+    const DescripTags = DescriptionTags(blogTags as tags[]);
+    const hasImage = blog.meta.image !== undefined;
 
-  const Log = (p: { data: any }) => {
-    console.log(p.data);
-    return <></>;
-  };
-
-  const Lines = (p: {
-    index: number;
-    last: number;
-    lineLength: number;
-    child?: boolean;
-  }) => {
-    return (
-      <>
-        <div className={css({ opacity: 1 })}>
-          {p.child == true && p.index == 0 ? (
-            p.index == p.last ? (
-              <div
-                className={css({
-                  h: "calc(50% + 20px)",
-                  translateY: "-20%",
-                  sm: { translateY: "-13%" },
-                  md: { translateY: "-10%" },
-                  lg: { translateY: "-13%" },
-                  bg: "white",
-                  w: "1px",
-                })}
-              />
-            ) : (
-              <div
-                className={css({
-                  h: "calc(100% + 20px)",
-                  translateY: "-10%",
-                  sm: { translateY: "-7%" },
-                  md: { h: "calc(100% + 25px)", translateY: "-5%" },
-                  lg: { h: "calc(100% + 25px)", translateY: "-7%" },
-                  bg: "white",
-                  w: "1px",
-                })}
-              />
-            )
-          ) : (
-            <div
-              className={`${topOrBottomLines(p.index, p.last)} ${css({ bg: "white", w: "1px" })}`}
-            />
-          )}
-        </div>
-        <div
-          className={css({
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignContent: "center",
-          })}
-        >
-          <div
-            className={css({ h: "1px", bg: "white" })}
-            style={{ width: p.lineLength.toString() + "px" }}
-          />
-        </div>
-      </>
-    );
-  };
-
-  const InnerCard = (p: { blog: BlogPost }) => {
-    const blog = p.blog;
-    const tags = blog.meta.tags;
-    const DescripTags = DescriptionTags(tags as tags[]); // formatting tag type needed? assuming DescriptionTags works
+    // Truncate description to ~100 characters
+    const truncatedDesc = blog.meta.description.length > 100
+      ? blog.meta.description.slice(0, 100) + "..."
+      : blog.meta.description;
 
     return (
       <Link
         href={"/Blogs/" + blog.slug}
-        key={blog.slug}
-        className={
-          !(blog.meta.image === undefined)
-            ? css({
-                display: "grid",
-                gridTemplateColumns: {
-                  base: "70% 30%",
-                  md: "50% 50%",
-                  lg: "60% 40%",
-                },
-              })
-            : css({
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              })
-        }
+        className={css({
+          display: "block",
+          // Using CSS custom properties for hover state transitions
+          "& .expanded-content": {
+            maxHeight: "0",
+            opacity: 0,
+            overflow: "hidden",
+            transition: "max-height 0.3s ease-in-out, opacity 0.3s ease-in-out",
+          },
+          "& .truncated-desc": {
+            display: "block",
+            transition: "opacity 0.2s ease-in-out",
+          },
+          "& .full-desc": {
+            display: "none",
+            opacity: 0,
+            transition: "opacity 0.2s ease-in-out",
+          },
+          _hover: {
+            "& .expanded-content": {
+              maxHeight: "500px",
+              opacity: 1,
+            },
+            "& .truncated-desc": {
+              display: "none",
+            },
+            "& .full-desc": {
+              display: "block",
+              opacity: 1,
+            },
+          },
+        })}
       >
+        {/* Always visible: title, tags, date */}
         <div className={css({ display: "flex", flexDirection: "column" })}>
-          <div>
-            <h3
-              className={css({
-                fontSize: "2xl",
-                fontWeight: "bold",
-                color: "white",
-              })}
-            >
-              {blog.meta.title}
-            </h3>
-            <p className={css({ color: "gray.400", overflow: "scroll" })}>
-              {blog.meta.description}
-            </p>
-          </div>
-
-          <div
+          <h3
             className={css({
-              display: { base: "none", sm: "flex" },
-              color: "gray.500",
-              flexGrow: 1,
-              alignItems: "center",
-              py: "4",
+              fontSize: "xl",
+              fontWeight: "bold",
+              color: "white",
+              mb: "1",
             })}
           >
-            <span
-              className={css({
-                display: "inline-block",
-                verticalAlign: "middle",
-              })}
-            >
-              {blog.text}
-            </span>
-          </div>
+            {blog.meta.title}
+          </h3>
 
-          <div>
-            <p className={css({ color: "gray.200" })}>{blog.meta.date}</p>
+          {/* Description - truncated by default, full on hover */}
+          <p className={`truncated-desc ${css({ color: "gray.400", mb: "2" })}`}>
+            {truncatedDesc}
+          </p>
+          <p className={`full-desc ${css({ color: "gray.400", mb: "2" })}`}>
+            {blog.meta.description}
+          </p>
+
+          {/* Tags and date - always visible */}
+          <div className={css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "2" })}>
+            <span className={css({ color: "gray.200", fontSize: "sm" })}>{blog.meta.date}</span>
             <div>{DescripTags}</div>
           </div>
         </div>
 
-        <div className={css({ display: "flex", justifyContent: "center" })}>
-          {!(blog.meta.image === undefined) ? (
-            <>
+        {/* Expandable content: read time and image */}
+        <div
+          className={`expanded-content ${css({
+            mt: "3",
+          })}`}
+        >
+          {/* Read time */}
+          <div
+            className={css({
+              color: "gray.500",
+              mb: hasImage ? "3" : "0",
+            })}
+          >
+            <span>{blog.text}</span>
+          </div>
+
+          {/* Image */}
+          {hasImage && (
+            <div className={css({ display: "flex", justifyContent: "center" })}>
               <Image
-                src={blog.meta.image}
+                src={blog.meta.image!}
                 alt="blogcontent"
                 width={200}
                 height={200}
-                className=""
               />
-            </>
-          ) : (
-            <></>
+            </div>
           )}
         </div>
       </Link>
     );
   };
 
-  const Card = (blog: BlogPost, index: number) => {
+
+
+  // Build flat list of items with context
+  type BlogItem = {
+    blog: BlogPost;
+    isFirst: boolean;
+    isLast: boolean;
+    isChild: boolean;
+    parentContinues: boolean;
+  };
+
+  const items: BlogItem[] = [];
+  blogs.forEach((blog, blogIndex) => {
+    const isLastParent = blogIndex === blogs.length - 1;
+    const hasChildren = blog.children && blog.children.length > 0;
+
+    items.push({
+      blog,
+      isFirst: items.length === 0,
+      isLast: false, // Will set properly at the end
+      isChild: false,
+      parentContinues: false,
+    });
+
+    if (hasChildren) {
+      blog.children!.forEach((child, childIndex) => {
+        items.push({
+          blog: child,
+          isFirst: false,
+          isLast: false,
+          isChild: true,
+          parentContinues: !isLastParent,
+        });
+      });
+    }
+  });
+
+  // Mark actual last item
+  if (items.length > 0) {
+    items[items.length - 1].isLast = true;
+  }
+
+  /**
+   * BlogRow component - renders a single blog card with its tree line
+   */
+  const BlogRow = ({
+    item,
+    index,
+    isLastItem,
+  }: {
+    item: BlogItem;
+    index: number;
+    isLastItem: boolean;
+  }) => {
+    // Determine line visibility
+    const showTopLine = !item.isFirst;
+    const showBottomLine = !isLastItem;
+
     return (
-      <>
-        {/*parent*/}
+      <div
+        className={css({
+          display: "flex",
+          justifyContent: "center",
+          w: "full",
+        })}
+      >
+        {/* Row container - strict 800px max to match search bar */}
         <div
-          className={css({ display: "flex", flexDirection: "row", mx: "5" })}
+          className={css({
+            display: "flex",
+            flexDirection: "row",
+            w: "full",
+            maxW: "800px",
+          })}
         >
-          <Lines index={index} last={blogs.length - 1} lineLength={15} />
+          {/* Tree line section - takes space within the 800px */}
+          {items.length > 1 && (
+            <div
+              className={css({
+                display: "flex",
+                flexDirection: "row",
+                flexShrink: 0,
+                width: "20px",
+                position: "relative",
+                ml: item.isChild ? "20px" : "0",
+                pointerEvents: "none",
+              })}
+            >
+              {/* Parent continuation line for child items */}
+              {item.isChild && item.parentContinues && (
+                <div
+                  className={css({
+                    position: "absolute",
+                    left: "-20px",
+                    top: 0,
+                    w: "1px",
+                    bg: "white",
+                  })}
+                  style={{
+                    height: isLastItem ? "50%" : `calc(100% + ${LAYOUT_GAP})`,
+                  }}
+                />
+              )}
+
+              {/* Main vertical line container */}
+              <div
+                className={css({
+                  position: "relative",
+                  w: "1px",
+                  h: "full",
+                })}
+              >
+                {showTopLine && (
+                  <div
+                    className={css({
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      w: "1px",
+                      h: "50%",
+                      bg: "white",
+                    })}
+                  />
+                )}
+                {showBottomLine && (
+                  <div
+                    className={css({
+                      position: "absolute",
+                      top: "50%",
+                      left: 0,
+                      w: "1px",
+                      bg: "white",
+                    })}
+                    style={{
+                      height: `calc(50% + ${LAYOUT_GAP})`,
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Horizontal connector */}
+              <div
+                className={css({
+                  position: "absolute",
+                  top: "50%",
+                  left: 0,
+                  w: "15px",
+                  h: "1px",
+                  bg: "white",
+                })}
+              />
+            </div>
+          )}
+
+          {/* Blog card - flexible, takes remaining space */}
           <div
             className={css({
-              alignSelf: "center",
+              flex: 1,
+              minW: 0,
               color: "gray.800",
-              w: { base: "90vw", sm: "80vw", md: "60vw" },
               px: "5",
               py: "5",
-              mb: "5",
               opacity: 0.7,
               borderRadius: "10px",
               boxShadow: "#00000F 0 0 10px",
               bg: "#000000",
             })}
-            key={blog.slug}
           >
-            <InnerCard blog={blog} />
+            <InnerCard blog={item.blog} />
           </div>
         </div>
-        {
-          /* child */
-          blog.children && blog.children.length !== 0 ? (
-            blog.children.map((child, childindex) => {
-              console.log(index, blogs.length);
-              const returned = (
-                <>
-                  <div
-                    className={css({
-                      display: "flex",
-                      flexDirection: "row",
-                      mx: "auto",
-                      justifyContent: "flex-end",
-                    })}
-                  >
-                    {index !== blogs.length - 1 ? (
-                      <div
-                        className={css({ mr: "auto", bg: "white", w: "1px" })}
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <Lines
-                      index={childindex}
-                      last={blog.children!.length - 1}
-                      lineLength={15}
-                      child={true}
-                    />
-                    <div
-                      className={css({
-                        display: "flex",
-                        flexDirection: "row",
-                        w: "85%",
-                      })}
-                      key={child.slug}
-                    >
-                      <div
-                        className={css({
-                          alignSelf: "center",
-                          color: "gray.800",
-                          w: { base: "90vw", sm: "80vw", md: "60vw" },
-                          px: "5",
-                          py: "5",
-                          mb: "5",
-                          opacity: 0.7,
-                          borderRadius: "10px",
-                          boxShadow: "#00000F 0 0 10px",
-                          bg: "#000000",
-                        })}
-                      >
-                        <InnerCard blog={child} />
-                      </div>
-                    </div>
-                  </div>
-                </>
-              );
-              return returned;
-            })
-          ) : (
-            <></>
-          )
-        }
-      </>
+      </div>
     );
   };
-  // this is a modified version of the index in map, that is set to 0 when we encounter a child
-  // so that our lines will end at the right points
-  const renderBlogs: React.JSX.Element[] = [];
-
-  console.log();
-  for (const [index, blog] of blogs.entries()) {
-    console.log(index, blog.slug);
-    renderBlogs.push(Card(blog, index));
-  }
 
   return (
     <div
@@ -274,23 +304,28 @@ export const Fetchblogmeta = ({ posts }: { posts: BlogPost[] }) => {
         w: "full",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
-        alignContent: "center",
       })}
     >
-      <ul
+      <div
         className={css({
           display: "flex",
           flexDirection: "column",
-          w: "full",
-          justifyContent: "center",
-          alignItems: "center",
-          alignContent: "center",
+          w: "full", // Allow full width so centered 800px items fit
+          // Remove maxW on container since items constrain themselves
+          alignItems: "center", // Center the items
+          gap: "layout",
         })}
       >
-        {renderBlogs}
-      </ul>
+        {items.map((item, index) => (
+          <BlogRow
+            key={item.blog.slug}
+            item={item}
+            index={index}
+            isLastItem={index === items.length - 1}
+          />
+        ))}
+      </div>
     </div>
   );
 };

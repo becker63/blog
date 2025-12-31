@@ -8,46 +8,59 @@ import { Fetchblogmeta } from "./FetchBlogMeta";
 export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
     const [search, setSearch] = useState("");
 
-    const filteredPosts = posts.filter((post) =>
-        post.meta.title.toLowerCase().includes(search.toLowerCase()) ||
-        post.meta.description.toLowerCase().includes(search.toLowerCase()) ||
-        post.meta.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
-    );
+    const filteredPosts = posts.filter((post) => {
+        const searchLower = search.toLowerCase();
+        const tags = Array.isArray(post.meta.tags) ? post.meta.tags : [];
+        return (
+            post.meta.title.toLowerCase().includes(searchLower) ||
+            post.meta.description.toLowerCase().includes(searchLower) ||
+            tags.some(tag => tag.toLowerCase().includes(searchLower))
+        );
+    });
 
     return (
-        <div className={css({ w: "full", display: "flex", flexDirection: "column", alignItems: "center", pb: "5" })}>
+        <div className={css({ w: "full", display: "flex", flexDirection: "column", alignItems: "center", pb: "layout" })}>
+            {/* Glassy sticky header strip */}
             <div className={css({
                 w: "full",
-                maxW: "800px",
-                p: "4",
                 position: "sticky",
-                top: "100px",
+                top: "navHeight", // Dock below navbar
                 zIndex: 40,
                 display: "flex",
-                justifyContent: "center"
+                justifyContent: "center",
+                backdropFilter: "blur(10px)", // Glass effect
+                py: "2", // Vertical padding for toolbar feel
+                mb: "layout", // Gap below the strip
+                // removed manual mt to fix jumpiness
             })}>
-                <input
-                    type="text"
-                    placeholder="Search blogs..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className={css({
-                        w: "100%",
-                        p: "4",
-                        bg: "rgba(0,0,0,0.5)",
-                        backdropFilter: "blur(4px)",
-                        borderRadius: "lg",
-                        border: "1px solid rgba(255,255,255,0.2)",
-                        color: "white",
-                        outline: "none",
-                        fontSize: "xl",
-                        _focus: {
-                            borderColor: "white",
-                            boxShadow: "0 0 15px rgba(255,255,255,0.2)"
-                        },
-                        transition: "all 0.3s ease"
-                    })}
-                />
+                {/* Inner input container - centered and limited width */}
+                <div className={css({
+                    w: "full",
+                    maxW: "800px",
+                })}>
+                    <input
+                        type="text"
+                        placeholder="Search blogs..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className={css({
+                            w: "100%",
+                            p: "5", // Match blog card padding
+                            bg: "#000000", // Match blog card background
+                            opacity: 0.7, // Match blog card opacity
+                            borderRadius: "10px", // Match blog card radius
+                            boxShadow: "#00000F 0 0 10px", // Match blog card shadow
+                            color: "white",
+                            outline: "none",
+                            fontSize: "xl",
+                            _focus: {
+                                borderColor: "white", // Keep focus indication
+                                boxShadow: "0 0 15px rgba(255,255,255,0.4)" // Enhanced focus shadow
+                            },
+                            transition: "all 0.3s ease"
+                        })}
+                    />
+                </div>
             </div>
             <Fetchblogmeta posts={filteredPosts} />
         </div>

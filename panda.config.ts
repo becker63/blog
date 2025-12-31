@@ -55,6 +55,17 @@ export default defineConfig({
             pb: "{spacing.layout}",
           } as any,
         },
+        pageWithMargins: {
+          description: "Page container with consistent viewport margins matching navbar",
+          value: {
+            pt: "{spacing.navHeight}",
+            pb: "{spacing.layout}",
+            px: "{spacing.layout}",
+            minH: "100vh",
+            w: "100%",
+            boxSizing: "border-box",
+          } as any,
+        },
       },
       keyframes: {
         typewriter: {

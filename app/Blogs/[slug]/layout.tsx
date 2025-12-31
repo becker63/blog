@@ -1,4 +1,6 @@
 import { Navbar } from "../../components/shared/Navbar";
+import { BlogNavbarWrapper } from "../../components/blog/BlogNavbarWrapper";
+import { css } from "../../../styled-system/css";
 
 export default function RootLayout({
   children,
@@ -6,9 +8,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      <Navbar mode="sticky" />
-      <div>{children}</div>
-    </>
+    <div className={css({ px: "layout", pt: "layout" })}>
+      <BlogNavbarWrapper>
+        <Navbar mode="sticky" />
+      </BlogNavbarWrapper>
+      {children}
+    </div>
   )
 }

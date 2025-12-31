@@ -45,37 +45,70 @@ const FetchBlogs = async () => {
               alignItems: "center",
               color: "gray.800",
               mb: "3",
-              overflow: "hidden", // Changed from scroll to hidden
+              overflow: "hidden",
               textOverflow: "ellipsis",
               wordBreak: "break-word",
             })}
             key={blog.slug}
+            data-group
           >
-            <div className={css({ display: "flex", flexDirection: "column", maxW: "120" })}>
-              <div>
-                <h3 className={css({ fontSize: "2xl", fontWeight: "bold", color: "white" })}>
-                  {blog.meta.title}
-                </h3>
-                <p className={css({ color: "gray.400" })}>{blog.meta.description}</p>
+            {blog.meta.image ? (
+              // Layout with image: text left, image right
+              <>
+                <div className={css({
+                  display: "flex",
+                  flexDirection: "column",
+                  maxW: "120",
+                  gap: "2",
+                })}>
+                  <div>
+                    <h3 className={css({ fontSize: "xl", fontWeight: "bold", color: "white" })}>
+                      {blog.meta.title}
+                    </h3>
+                    <p className={css({ color: "gray.400" })}>{blog.meta.date}</p>
+                  </div>
+                  <div className={css({
+                    display: { base: "flex", lg: "none" },
+                    flexWrap: "wrap",
+                    gap: "1",
+                    transition: "all 0.2s ease-in-out",
+                    _groupHover: { display: "flex" },
+                  })}>{descomp}</div>
+                </div>
+                <Suspense fallback={LoadingCard()}>
+                  <Image
+                    src={blog.meta.image}
+                    alt="blogcontent"
+                    width={200}
+                    height={200}
+                  />
+                </Suspense>
+              </>
+            ) : (
+              // Layout without image: column layout with tags appearing on hover
+              <div className={css({
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                gap: "1",
+              })}>
+                <div className={css({ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" })}>
+                  <h3 className={css({ fontSize: "xl", fontWeight: "bold", color: "white" })}>
+                    {blog.meta.title}
+                  </h3>
+                  <p className={css({ color: "gray.400" })}>{blog.meta.date}</p>
+                </div>
+                <div className={css({
+                  display: { base: "flex", lg: "none" },
+                  flexWrap: "wrap",
+                  gap: "1",
+                  transition: "all 0.2s ease-in-out",
+                  _groupHover: { display: "flex" },
+                })}>
+                  {descomp}
+                </div>
               </div>
-
-              <div>
-                <p className={css({ color: "gray.200" })}>{blog.meta.date}</p>
-                <div>{descomp}</div>
-              </div>
-            </div>
-
-            {!(blog.meta.image === undefined) ? <>
-              <Suspense fallback={LoadingCard()}>
-                <Image
-                  src={blog.meta.image}
-                  alt="blogcontent"
-                  width={200}
-                  height={200}
-                  className=""
-                />
-              </Suspense>
-            </> : <></>}
+            )}
           </Link>
         );
       })}

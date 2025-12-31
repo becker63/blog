@@ -20,7 +20,7 @@ export default function RootLayout({
       <body>
         <img
           className={css({
-            zIndex: "-1",
+            zIndex: "0",
             position: "fixed",
             inset: "0",
             margin: "auto",
@@ -32,7 +32,9 @@ export default function RootLayout({
           src="/img/backgroundImage.jpg"
           alt="blogcontent"
         />
-        {children}
+        <div className={css({ position: "relative", zIndex: "1" })}>
+          {children}
+        </div>
       </body>
     </html>
   )

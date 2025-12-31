@@ -17,13 +17,19 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@mdx-js/loader": "^2.3.0",
     "@next/mdx": "^13.5.5",
+    "@xstate/react": "^6.0.0",
     "@zodyac/zod-mongoose": "^1.1.2",
     "framer-motion": "^12.23.25",
     "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
     "next-mdx-remote": "^5.0.0",
+    "prism-themes": "^1.9.0",
     "react-inlinesvg": "^4.2.0",
+    "rehype-highlight": "^7.0.2",
     "rehype-mdx-code-props": "^1.0.0",
-    "webpack": "^5.89.0"
+    "rehype-prism-plus": "^2.0.1",
+    "webpack": "^5.89.0",
+    "xstate": "^5.24.0"
   },
   "devDependencies": {
     "@pandacss/dev": "^1.6.1",
