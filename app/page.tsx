@@ -44,7 +44,15 @@ export default function Home() {
             })}
           >
             <Bebop />
-            <p className={css({ pr: "11", textAlign: "right", position: "absolute", bottom: 0, right: 0 })}>
+            <p
+              className={css({
+                pr: "11",
+                textAlign: "right",
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+              })}
+            >
               see ya space cowboy...
             </p>
           </div>
@@ -73,7 +81,13 @@ export default function Home() {
               px: { base: "5", sm: "20" },
             })}
           >
-            <Card title="Resume" desc="My Background." color="#86efac" href="#" icon={faPaperclip} />
+            <Card
+              title="Resume"
+              desc="My Background."
+              color="#86efac"
+              href="https://docs.google.com/document/d/1PVuM1n5Q1qQNWRAvfe058KQaeYeUVvKFx681bQuDjVE/edit?usp=sharing"
+              icon={faPaperclip}
+            />
           </div>
 
           {/* Blogs Card */}
@@ -87,7 +101,13 @@ export default function Home() {
               px: { base: "5", sm: "20" },
             })}
           >
-            <Card title="Blogs" desc="Search through my back catalog." color="#fca5a5" href="/Search" icon={faMarkdown} />
+            <Card
+              title="Blogs"
+              desc="Search through my back catalog."
+              color="#fca5a5"
+              href="/Search"
+              icon={faMarkdown}
+            />
           </div>
 
           {/* Latest Blog Card */}
@@ -143,7 +163,8 @@ export default function Home() {
             maxWidth: "1250px",
             display: "grid",
             gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
-            gridTemplateRows: "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)",
+            gridTemplateRows:
+              "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)",
             gridGap: "layout",
             gridAutoFlow: "row",
             gridTemplateAreas: `
@@ -186,7 +207,13 @@ export default function Home() {
               minH: "0",
             })}
           >
-            <Card title="Resume" desc="My Background." color="#86efac" href="/#" icon={faPaperclip} />
+            <Card
+              title="Resume"
+              desc="My Background."
+              color="#86efac"
+              href="https://docs.google.com/document/d/1PVuM1n5Q1qQNWRAvfe058KQaeYeUVvKFx681bQuDjVE/edit?usp=sharing"
+              icon={faPaperclip}
+            />
           </div>
 
           {/* Blogs Card */}
@@ -203,7 +230,13 @@ export default function Home() {
               minH: "0",
             })}
           >
-            <Card title="Blogs" desc="Search through my back catalog." color="#fca5a5" href="/Search" icon={faMarkdown} />
+            <Card
+              title="Blogs"
+              desc="Search through my back catalog."
+              color="#fca5a5"
+              href="/Search"
+              icon={faMarkdown}
+            />
           </div>
 
           {/* Latest Blog Card */}
