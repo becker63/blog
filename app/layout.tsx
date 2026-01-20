@@ -3,6 +3,7 @@ import "./globals.css";
 import { css } from "../styled-system/css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { Analytics } from "@vercel/analytics/next";
 config.autoAddCss = false;
 
 export const metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({
         <div className={css({ position: "relative", zIndex: "1" })}>
           {children}
         </div>
+        <Analytics />
       </body>
     </html>
   )
