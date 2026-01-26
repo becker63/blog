@@ -23,6 +23,7 @@
     "framer-motion": "^12.29.0",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
+    "lowlight": "^3.3.0",
     "next-mdx-remote": "^5.0.0",
     "prism-themes": "^1.9.0",
     "react-inlinesvg": "^4.2.0",
