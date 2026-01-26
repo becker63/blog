@@ -2,10 +2,9 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { Loading } from "../shared/Loading";
 import { DescriptionTags, tags } from "../search/Badges";
-
 import Link from "next/link";
-
 import { css } from "../../../styled-system/css";
+import { getAllPosts } from "../../../lib/blogs";
 
 const LoadingCard = () => {
   return (
@@ -23,8 +22,6 @@ const LoadingCard = () => {
   );
 };
 
-import { getAllPosts } from "../../../lib/blogs";
-
 const FetchBlogs = async () => {
   const allBlogs = getAllPosts();
   const blogs = allBlogs.slice(0, 3);
@@ -32,9 +29,8 @@ const FetchBlogs = async () => {
   return (
     <ul className={css({ overflowY: "auto", flex: 1, minH: 0 })}>
       {blogs.map((blog) => {
-        const descomp = DescriptionTags(
-          blog.meta.description.replace(" ", "").split(",") as tags[]
-        );
+        const tagBadges = DescriptionTags(blog.meta.tags as tags[]);
+
         return (
           <Link
             href={"/Blogs/" + blog.slug}
@@ -53,28 +49,58 @@ const FetchBlogs = async () => {
             data-group
           >
             {blog.meta.image ? (
-              // Layout with image: text left, image right
               <>
-                <div className={css({
-                  display: "flex",
-                  flexDirection: "column",
-                  maxW: "120",
-                  gap: "2",
-                })}>
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "column",
+                    maxW: "120",
+                    gap: "2",
+                  })}
+                >
                   <div>
-                    <h3 className={css({ fontSize: "xl", fontWeight: "bold", color: "white" })}>
+                    <h3
+                      className={css({
+                        fontSize: "xl",
+                        fontWeight: "bold",
+                        color: "white",
+                      })}
+                    >
                       {blog.meta.title}
                     </h3>
-                    <p className={css({ color: "gray.400" })}>{blog.meta.date}</p>
+                    <p className={css({ color: "gray.400" })}>
+                      {blog.meta.date}
+                    </p>
+
+                    {/* MOBILE DESCRIPTION */}
+                    <p
+                      className={css({
+                        display: { base: "block", lg: "none" },
+                        color: "gray.400",
+                        fontSize: "sm",
+                        mt: "1",
+                        lineHeight: "short",
+                      })}
+                    >
+                      {blog.meta.description}
+                    </p>
                   </div>
-                  <div className={css({
-                    display: { base: "flex", lg: "none" },
-                    flexWrap: "wrap",
-                    gap: "1",
-                    transition: "all 0.2s ease-in-out",
-                    _groupHover: { display: "flex" },
-                  })}>{descomp}</div>
+
+                  {/* DESKTOP TAGS */}
+                  <div
+                    className={css({
+                      display: { base: "none", lg: "flex" },
+                      flexWrap: "wrap",
+                      gap: "1",
+                      opacity: 0,
+                      transition: "opacity 0.2s ease-in-out",
+                      _groupHover: { opacity: 1 },
+                    })}
+                  >
+                    {tagBadges}
+                  </div>
                 </div>
+
                 <Suspense fallback={LoadingCard()}>
                   <Image
                     src={blog.meta.image}
@@ -85,27 +111,58 @@ const FetchBlogs = async () => {
                 </Suspense>
               </>
             ) : (
-              // Layout without image: column layout with tags appearing on hover
-              <div className={css({
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-                gap: "1",
-              })}>
-                <div className={css({ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" })}>
-                  <h3 className={css({ fontSize: "xl", fontWeight: "bold", color: "white" })}>
+              <div
+                className={css({
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  gap: "1",
+                })}
+              >
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  })}
+                >
+                  <h3
+                    className={css({
+                      fontSize: "xl",
+                      fontWeight: "bold",
+                      color: "white",
+                    })}
+                  >
                     {blog.meta.title}
                   </h3>
                   <p className={css({ color: "gray.400" })}>{blog.meta.date}</p>
                 </div>
-                <div className={css({
-                  display: { base: "flex", lg: "none" },
-                  flexWrap: "wrap",
-                  gap: "1",
-                  transition: "all 0.2s ease-in-out",
-                  _groupHover: { display: "flex" },
-                })}>
-                  {descomp}
+
+                {/* MOBILE DESCRIPTION */}
+                <p
+                  className={css({
+                    display: { base: "block", lg: "none" },
+                    color: "gray.400",
+                    fontSize: "sm",
+                    lineHeight: "short",
+                  })}
+                >
+                  {blog.meta.description}
+                </p>
+
+                {/* DESKTOP TAGS */}
+                <div
+                  className={css({
+                    display: { base: "none", lg: "flex" },
+                    flexWrap: "wrap",
+                    gap: "1",
+                    opacity: 0,
+                    transition: "opacity 0.2s ease-in-out",
+                    _groupHover: { opacity: 1 },
+                  })}
+                >
+                  {tagBadges}
                 </div>
               </div>
             )}
@@ -137,19 +194,27 @@ export const LatestBlogCard = () => {
         px: { sm: "20", lg: "5", base: "5" },
         py: "5",
         h: "full",
-        minH: 0, // CRITICAL: Prevents content from expanding beyond grid cell
+        minH: 0,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       })}
     >
-      <h3 className={css({ fontSize: "2xl", fontWeight: "bold", color: "blue.300" })}>Latest</h3>
+      <h3
+        className={css({
+          fontSize: "2xl",
+          fontWeight: "bold",
+          color: "blue.300",
+        })}
+      >
+        Latest
+      </h3>
       <hr className={css({ my: "5" })} />
       <div
         className={css({
           w: "full",
-          flex: 1, // Take remaining space
-          minH: 0, // CRITICAL: Prevents content from expanding
+          flex: 1,
+          minH: 0,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",

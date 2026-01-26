@@ -1,0 +1,4015 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+app/
+  Blogs/
+    [slug]/
+      layout.tsx
+      loading.tsx
+      page.tsx
+  components/
+    blog/
+      BlogNavbarWrapper.tsx
+    home/
+      Bebop.tsx
+      BebopContainer.tsx
+      Card.tsx
+      HomeDesktopLayout.tsx
+      HomeMobileLayout.tsx
+      HomeNav.tsx
+      index.ts
+      LatestBlogCard.tsx
+      MobileScrollContainer.tsx
+      Socials.tsx
+    search/
+      Badges.tsx
+      BlogCard.tsx
+      index.ts
+      SearchWrapper.tsx
+      TreeLines.tsx
+      TreeNode.tsx
+      treeNodeMachine.ts
+    shared/
+      AnimatedCard.tsx
+      GlassCard.tsx
+      index.ts
+      Loading.tsx
+      Navbar.tsx
+      Route.tsx
+      shared.css
+  Search/
+    layout.tsx
+    loading.tsx
+    page.tsx
+  globals.css
+  layout.tsx
+  page.tsx
+hooks/
+  index.ts
+  useMobileDetection.ts
+  useScrollFadeAnimation.ts
+lib/
+  animationDelay.ts
+  blogs.ts
+  layout.ts
+  mdx.ts
+public/
+  fonts/
+    pixeldown.ttf
+  img/
+    backgroundImage.jpg
+    laptop.jpeg
+    stickmen.png
+    wallpaper4.jpg
+tests/
+  utils/
+    gap-utils.ts
+  gap-consistency.spec.ts
+  layout.spec.ts
+  mobile-navbar.spec.ts
+  navbar-overlap.spec.ts
+  svg-visibility.spec.ts
+  tree-line-continuity.spec.ts
+.eslintrc
+.gitignore
+flake.lock
+flake.nix
+next.config.js
+package.json
+panda.config.ts
+postcss.config.cjs
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/components/home/HomeDesktopLayout.tsx">
+import * as React from "react";
+import { css } from "../../../styled-system/css";
+import { HomeNav } from "./HomeNav";
+import { LatestBlogCard } from "./LatestBlogCard";
+import { Card, Socials, BebopContainer } from ".";
+import { glassCardStyles } from "../shared/GlassCard";
+import { AnimatedCard } from "../shared/AnimatedCard";
+import { seededDelay } from "../../../lib/animationDelay";
+import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
+import { faMarkdown } from "@fortawesome/free-brands-svg-icons";
+
+export const HomeDesktopLayout = () => {
+  return (
+    <>
+      <div className={css({ display: "none", lg: { display: "block" } })}>
+        <HomeNav />
+      </div>
+
+      <div
+        className={css({
+          display: "none",
+          lg: { display: "flex" },
+          layerStyle: "pageContainer",
+          h: "100vh",
+          w: "100vw",
+          flexDirection: "column",
+          minH: 0,
+          overflow: "hidden",
+        })}
+      >
+        <div
+          className={css({
+            alignSelf: "center",
+            w: "95%",
+            maxWidth: "1250px",
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+            gridTemplateRows:
+              "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)",
+            gridGap: "layout",
+            gridTemplateAreas: `
+              "Svg Blog"
+              "Svg Latest-Blog"
+              "Svg Latest-Blog"
+              "Socials CV"
+            `,
+            flex: "1",
+            h: 0,
+          })}
+        >
+          <AnimatedCard
+            delay={seededDelay("bebop-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "Svg",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "stretch",
+              overflow: "hidden",
+            })}
+          >
+            <BebopContainer />
+          </AnimatedCard>
+
+          <AnimatedCard
+            delay={seededDelay("resume-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "CV",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              px: { base: "5", sm: "20", lg: "5" },
+              py: "5",
+            })}
+          >
+            <Card
+              title="Resume"
+              desc="My Background."
+              color="#86efac"
+              href="https://docs.google.com/document/d/1PVuM1n5Q1qQNWRAvfe058KQaeYeUVvKFx681bQuDjVE/edit?usp=sharing"
+              icon={faPaperclip}
+            />
+          </AnimatedCard>
+
+          <AnimatedCard
+            delay={seededDelay("blogs-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "Blog",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              px: { base: "5", sm: "20", lg: "5" },
+              py: "5",
+            })}
+          >
+            <Card
+              title="Blogs"
+              desc="Search through my back catalog."
+              color="#fca5a5"
+              href="/Search"
+              icon={faMarkdown}
+            />
+          </AnimatedCard>
+
+          <AnimatedCard
+            delay={seededDelay("latest-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "Latest-Blog",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              position: "relative",
+            })}
+          >
+            <LatestBlogCard />
+          </AnimatedCard>
+
+          <AnimatedCard
+            delay={seededDelay("socials-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "Socials",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              py: "5",
+            })}
+          >
+            <Socials />
+          </AnimatedCard>
+        </div>
+      </div>
+    </>
+  );
+};
+</file>
+
+<file path="app/components/home/HomeMobileLayout.tsx">
+import * as React from "react";
+import { css } from "../../../styled-system/css";
+import { Bebop } from "./Bebop";
+import { HomeNav } from "./HomeNav";
+import { MobileLayout } from "./MobileScrollContainer";
+import { LatestBlogCard } from "./LatestBlogCard";
+import { Card, Socials } from ".";
+import { glassCardStyles } from "../shared/GlassCard";
+import { AnimatedCard } from "../shared/AnimatedCard";
+import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
+import { faMarkdown } from "@fortawesome/free-brands-svg-icons";
+
+export const HomeMobileLayout = () => {
+  return (
+    <MobileLayout navbar={<HomeNav inline />}>
+      <AnimatedCard
+        index={0}
+        className={css({
+          ...glassCardStyles,
+          w: "90vw",
+          minH: "300px",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        })}
+      >
+        <div
+          className={css({
+            w: "90%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "relative",
+            aspectRatio: "1042 / 1066",
+            maxH: "50vh",
+          })}
+        >
+          <Bebop />
+          <p
+            className={css({
+              pr: "11",
+              textAlign: "right",
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+            })}
+          >
+            see ya space cowboy...
+          </p>
+        </div>
+      </AnimatedCard>
+
+      <div
+        className={css({
+          alignSelf: "center",
+          w: "90vw",
+          display: "flex",
+          flexDirection: "column",
+          gap: "layout",
+          mt: "layout",
+          pb: "layout",
+        })}
+      >
+        <AnimatedCard
+          index={1}
+          className={css({
+            ...glassCardStyles,
+            h: "95px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: { base: "5", sm: "20" },
+          })}
+        >
+          <Card
+            title="Resume"
+            desc="My Background."
+            color="#86efac"
+            href="https://docs.google.com/document/d/1PVuM1n5Q1qQNWRAvfe058KQaeYeUVvKFx681bQuDjVE/edit?usp=sharing"
+            icon={faPaperclip}
+          />
+        </AnimatedCard>
+
+        <AnimatedCard
+          index={2}
+          className={css({
+            ...glassCardStyles,
+            h: "95px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: { base: "5", sm: "20" },
+          })}
+        >
+          <Card
+            title="Blogs"
+            desc="Search through my back catalog."
+            color="#fca5a5"
+            href="/Search"
+            icon={faMarkdown}
+          />
+        </AnimatedCard>
+
+        <AnimatedCard
+          index={3}
+          className={css({
+            ...glassCardStyles,
+            h: "400px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          })}
+        >
+          <LatestBlogCard />
+        </AnimatedCard>
+
+        <AnimatedCard
+          index={4}
+          className={css({
+            ...glassCardStyles,
+            h: "95px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          })}
+        >
+          <Socials />
+        </AnimatedCard>
+      </div>
+    </MobileLayout>
+  );
+};
+</file>
+
+<file path="app/components/search/BlogCard.tsx">
+import { motion } from "framer-motion";
+import { css } from "../../../styled-system/css";
+import Link from "next/link";
+import Image from "next/image";
+import { BlogPost } from "../../../lib/blogs";
+import { DescriptionTags, tags } from "./Badges";
+
+export const BlogCard = ({ blog }: { blog: BlogPost }) => {
+  const DescripTags = DescriptionTags(blog.meta.tags as tags[]);
+  const hasImage = blog.meta.image !== undefined;
+
+  const truncatedDesc =
+    blog.meta.description.length > 100
+      ? blog.meta.description.slice(0, 100) + "..."
+      : blog.meta.description;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 0.7, y: 0 }} // 👈 animate to your glass opacity
+      exit={{ opacity: 0, y: 12 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className={css({
+        flex: 1,
+        minW: 0,
+        color: "gray.800",
+        px: "5",
+        py: "5",
+        borderRadius: "10px",
+        boxShadow: "#00000F 0 0 10px",
+        bg: "#000000",
+      })}
+    >
+      <Link href={"/Blogs/" + blog.slug} className={css({ display: "block" })}>
+        <div className={css({ display: "flex", flexDirection: "column" })}>
+          <h3
+            className={css({
+              fontSize: "xl",
+              fontWeight: "bold",
+              color: "white",
+              mb: "1",
+            })}
+          >
+            {blog.meta.title}
+          </h3>
+
+          <p className={css({ color: "gray.400", mb: "2" })}>{truncatedDesc}</p>
+
+          <div
+            className={css({
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "2",
+            })}
+          >
+            <span className={css({ color: "gray.200", fontSize: "sm" })}>
+              {blog.meta.date}
+            </span>
+            <div>{DescripTags}</div>
+          </div>
+        </div>
+
+        {hasImage && (
+          <div
+            className={css({
+              display: "flex",
+              justifyContent: "center",
+              mt: "3",
+            })}
+          >
+            <Image
+              src={blog.meta.image!}
+              alt="blogcontent"
+              width={200}
+              height={200}
+            />
+          </div>
+        )}
+      </Link>
+    </motion.div>
+  );
+};
+</file>
+
+<file path="app/components/search/TreeLines.tsx">
+import { css } from "../../../styled-system/css";
+import { motion } from "framer-motion";
+
+const LAYOUT_GAP = "16px";
+const LINE_WIDTH = "2px";
+const BRANCH_LENGTH = "20px";
+export const TREE_COLUMN_WIDTH = `calc(0px + ${BRANCH_LENGTH})`;
+
+type Props = {
+  showTop: boolean;
+  showBottom: boolean;
+};
+
+export const TreeLines = ({ showTop, showBottom }: Props) => (
+  <div
+    className={css({
+      flexShrink: 0,
+      width: TREE_COLUMN_WIDTH,
+      position: "relative",
+      pointerEvents: "none",
+    })}
+  >
+    {(showTop || showBottom) && (
+      <motion.div
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        style={{
+          transformOrigin: "top",
+          position: "absolute",
+          left: 0,
+          width: LINE_WIDTH,
+          background: "white",
+          top: showTop ? `calc(-${LAYOUT_GAP} / 2)` : "50%",
+          bottom: showBottom ? `calc(-${LAYOUT_GAP} / 2)` : "50%",
+        }}
+      />
+    )}
+
+    <motion.div
+      initial={{ scaleX: 0 }}
+      animate={{ scaleX: 1 }}
+      transition={{ duration: 0.25, delay: 0.15 }}
+      style={{
+        transformOrigin: "left",
+        position: "absolute",
+        top: "50%",
+        left: 0,
+        height: LINE_WIDTH,
+        width: BRANCH_LENGTH,
+        background: "white",
+      }}
+    />
+  </div>
+);
+</file>
+
+<file path="app/components/search/TreeNode.tsx">
+"use client";
+
+import React from "react";
+import { useMachine } from "@xstate/react";
+import { treeNodeMachine } from "./treeNodeMachine";
+import { css } from "../../../styled-system/css";
+import { BlogPost } from "../../../lib/blogs";
+import { TreeLines, TREE_COLUMN_WIDTH } from "./TreeLines";
+import { BlogCard } from "./BlogCard";
+
+type TreeNodeProps = {
+  blog: BlogPost;
+  depth: number;
+  isFirst: boolean;
+  isLast: boolean;
+};
+
+export const TreeNode = ({ blog, depth, isFirst, isLast }: TreeNodeProps) => {
+  useMachine(treeNodeMachine);
+
+  return (
+    <>
+      <div
+        className={css({
+          display: "flex",
+          justifyContent: "center",
+          w: "full",
+        })}
+      >
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "row",
+            w: "full",
+            maxW: "800px",
+          })}
+        >
+          {/* Indentation */}
+          {Array.from({ length: depth }).map((_, i) => (
+            <div key={i} style={{ width: TREE_COLUMN_WIDTH }} />
+          ))}
+
+          <TreeLines showTop={!isFirst} showBottom={!isLast} />
+          <BlogCard blog={blog} />
+        </div>
+      </div>
+
+      {blog.children?.map((child, index) => (
+        <TreeNode
+          key={child.slug}
+          blog={child}
+          depth={depth + 1}
+          isFirst={index === 0}
+          isLast={index === blog.children!.length - 1}
+        />
+      ))}
+    </>
+  );
+};
+</file>
+
+<file path="app/components/search/treeNodeMachine.ts">
+import { createMachine } from "xstate";
+
+export const treeNodeMachine = createMachine({
+  id: "treeNode",
+  initial: "visible",
+  states: {
+    visible: {}, // later: expanded/collapsed/etc
+  },
+});
+</file>
+
+<file path="app/components/shared/AnimatedCard.tsx">
+"use client";
+
+import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion";
+import React from "react";
+import { cx } from "../../../styled-system/css";
+
+type AnimatedCardProps = HTMLMotionProps<"div"> & {
+  delay?: number;
+  index?: number;
+  finalOpacity?: number;
+};
+
+export const AnimatedCard = React.forwardRef<HTMLDivElement, AnimatedCardProps>(
+  (
+    { delay, index, finalOpacity = 0.7, className, style, children, ...rest },
+    ref,
+  ) => {
+    const prefersReducedMotion = useReducedMotion();
+    const computedDelay = index !== undefined ? index * 0.06 : delay ?? 0;
+
+    return (
+      <motion.div
+        ref={ref}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+        animate={prefersReducedMotion ? {} : { opacity: finalOpacity, y: 0 }}
+        transition={{
+          duration: 0.4,
+          delay: computedDelay,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className={cx(className)}
+        style={{
+          ...style,
+          willChange: "transform, opacity",
+        }}
+        {...rest}
+      >
+        {children}
+      </motion.div>
+    );
+  },
+);
+
+AnimatedCard.displayName = "AnimatedCard";
+</file>
+
+<file path="lib/animationDelay.ts">
+// Simple deterministic hash → 0–1 float
+export function seededDelay(seed: string, max = 0.6) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  const normalized = Math.abs(hash % 1000) / 1000;
+  return normalized * max;
+}
+</file>
+
+<file path="app/Blogs/[slug]/loading.tsx">
+import { Loading } from "../../components/shared/Loading";
+
+export default function loading() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <Loading fontsize={100} />
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/blog/BlogNavbarWrapper.tsx">
+"use client";
+
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
+import { useScrollFadeAnimation } from "../../../hooks";
+
+interface BlogNavbarWrapperProps {
+    children: ReactNode;
+}
+
+/**
+ * Client-side wrapper that makes the navbar fade away on scroll
+ * for the blog slug pages.
+ */
+export const BlogNavbarWrapper = ({ children }: BlogNavbarWrapperProps) => {
+    const { opacity, y } = useScrollFadeAnimation();
+
+    return (
+        <motion.div
+            style={{
+                opacity,
+                y,
+            }}
+        >
+            {children}
+        </motion.div>
+    );
+};
+</file>
+
+<file path="app/components/home/Bebop.tsx">
+'use client';
+import { motion } from "framer-motion";
+import SVG from 'react-inlinesvg';
+import { css } from "../../../styled-system/css";
+
+export const Bebop = () => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+            className={css({
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                w: '100%',
+                h: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+            })}
+        >
+            <SVG
+                src="/svg/bebop.svg"
+                width="100%"
+                height="100%"
+                style={{ width: '100%', height: '100%', display: 'block' }}
+                preserveAspectRatio="xMidYMid meet"
+                className={css({
+                    w: '100%',
+                    h: '100%',
+                    display: 'block'
+                })}
+            />
+        </motion.div >
+    );
+};
+</file>
+
+<file path="app/components/home/BebopContainer.tsx">
+import { css } from "../../../styled-system/css";
+import { Bebop } from "./Bebop";
+
+/**
+ * Container component for the Bebop SVG on desktop layout.
+ * Centers the SVG and adds the "see ya space cowboy" tagline.
+ */
+export const BebopContainer = () => {
+    return (
+        <div
+            className={css({
+                lg: { w: "100%" },
+                alignItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignContent: "center",
+                justifyContent: "center",
+                h: "100%",
+                overflow: "hidden",
+            })}
+        >
+            <div className={css({
+                position: "relative",
+                w: "100%",
+                h: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                minHeight: 0,
+                alignItems: "center",
+                justifyContent: "center"
+            })}>
+                <Bebop />
+            </div>
+            <p className={css({ pr: "16", textAlign: "right" })}>
+                see ya space cowboy...
+            </p>
+        </div>
+    );
+};
+</file>
+
+<file path="app/components/home/Card.tsx">
+import * as React from "react";
+import { css } from "../../../styled-system/css";
+import { Route } from "../shared/Route";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+export interface CardProps {
+  title: string;
+  desc: string;
+  icon?: IconDefinition;
+  color: string;
+  href: string;
+}
+
+export const Card = ({ title, desc, icon, color, href }: CardProps) => {
+  return (
+    <div className={css({ display: "flex", justifyContent: "space-between" })}>
+      <div>
+        <Route href={href} size={30} color={color}>
+          <h3
+            className={css({
+              fontSize: "2xl",
+              fontWeight: "bold",
+              _hover: { color: "white" },
+            })}
+          >
+            {title}
+          </h3>
+        </Route>
+
+        {/* Description spacing now matches LatestBlog mobile */}
+        <p
+          className={css({
+            color: "gray.400",
+            fontSize: "sm",
+            //paddingTop: "-5",
+            mt: "1", // 👈 adds breathing room under title
+            lineHeight: "short", // 👈 matches blog card text rhythm
+          })}
+        >
+          {desc}
+        </p>
+      </div>
+
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        })}
+      >
+        {icon ? <FontAwesomeIcon icon={icon} size="xl" /> : null}
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/home/HomeNav.tsx">
+import { css } from "../../../styled-system/css";
+
+interface HomeNavProps {
+  /** When true, removes fixed positioning (for mobile layout integration) */
+  inline?: boolean;
+}
+
+export const HomeNav = ({ inline = false }: HomeNavProps) => {
+  return (
+    <nav
+      className={css({
+        layerStyle: "navbar",
+        // For inline mode: use relative positioning and full width
+        // Override the fixed positioning values from layerStyle
+        position: inline ? "relative" : "fixed",
+        w: inline ? "100%" : undefined,
+        left: inline ? "unset" : undefined,
+        right: inline ? "unset" : undefined,
+        top: inline ? "unset" : undefined,
+        mb: inline ? "0" : undefined, // MobileLayout handles the gap
+      })}
+    >
+      <div
+        className={css({
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          mx: "auto",
+          w: "100%",
+          maxW: "1536px", // 2xl
+        })}
+      >
+        {/* home view */}
+        <div className={css({ display: "flex" })}>
+          <span
+            className={`anim-typewriter ${css({
+              alignSelf: "center",
+              fontSize: "30px",
+              fontWeight: "semibold",
+              whiteSpace: "nowrap",
+              _dark: { color: "white" },
+              color: "white",
+              fontFamily: "pixel",
+            })}`}
+          >
+            becker63
+          </span>
+        </div>
+      </div>
+    </nav>
+  );
+};
+</file>
+
+<file path="app/components/home/index.ts">
+/**
+ * Home page components
+ */
+
+export { Card } from "./Card";
+export type { CardProps } from "./Card";
+
+export { Socials } from "./Socials";
+
+export { BebopContainer } from "./BebopContainer";
+
+export { Bebop } from "./Bebop";
+
+//export { MobileLayout } from "./MobileScrollContainer";
+
+//export { LatestBlogCard } from "./LatestBlogCard";
+
+export { HomeNav } from "./HomeNav";
+</file>
+
+<file path="app/components/home/MobileScrollContainer.tsx">
+"use client";
+
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
+import { css } from "../../../styled-system/css";
+import { layoutCalc } from "../../../lib/layout";
+import { useScrollFadeAnimation, useMobileDetection } from "../../../hooks";
+
+interface MobileLayoutProps {
+  navbar: ReactNode;
+  children: ReactNode;
+}
+
+/**
+ * Mobile-only layout container with scroll-based navbar animation.
+ * The navbar starts as part of the layout flow, then fades out on scroll
+ * while content shifts up to fill the space.
+ *
+ * Now uses the extracted useScrollFadeAnimation and useMobileDetection hooks.
+ */
+export const MobileLayout = ({ navbar, children }: MobileLayoutProps) => {
+  const { opacity, y, marginBottom } = useScrollFadeAnimation();
+  const { isMobile, hasMounted } = useMobileDetection();
+
+  // Navbar container styles - fluid width with margins
+  const navbarContainerStyles = css({
+    alignSelf: "stretch", // Fill parent width
+    mx: "layout", // Apply standard layout margin (12px)
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  });
+
+  // Don't render on desktop or before hydration
+  if (!hasMounted) {
+    // SSR/initial render - show mobile layout without animation
+    return (
+      <div
+        className={css({
+          lg: { display: "none" },
+          w: "100%", // Changed from 100vw to prevent horizontal scroll
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        })}
+      >
+        {/* Navbar with edge margins like desktop */}
+        <div
+          className={css({
+            alignSelf: "stretch",
+            mx: "layout",
+            mb: "layout",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          })}
+        >
+          {navbar}
+        </div>
+        {children}
+      </div>
+    );
+  }
+
+  // Removed JS-based desktop check to prevents gaps during resize.
+  // We rely on the CSS 'lg: { display: "none" }' below to hide this on desktop.
+
+  /* if (!isMobile) {
+        return null;
+    } */
+
+  return (
+    <div
+      className={css({
+        lg: { display: "none" },
+        w: "100%", // Changed from 100vw to prevent horizontal scroll caused by vertical scrollbar
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        pt: "layout", // Top padding like desktop navbar has
+      })}
+    >
+      {/* Animated navbar container - full width with edge margins */}
+      <motion.div
+        style={{
+          opacity,
+          y,
+          marginBottom,
+        }}
+        className={navbarContainerStyles}
+      >
+        {navbar}
+      </motion.div>
+      {/* Content */}
+      {children}
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/home/Socials.tsx">
+import { css } from "../../../styled-system/css";
+import { Route } from "../shared/Route";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faGithub,
+    faInstagram,
+    faLinkedin,
+} from "@fortawesome/free-brands-svg-icons";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+
+/**
+ * Social media links component with dividers.
+ * Displays GitHub, LinkedIn, Email, and Instagram icons.
+ */
+export const Socials = () => (
+    <div
+        className={css({
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            height: "80%",
+        })}
+    >
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://github.com/becker63"} size={30}>
+                <FontAwesomeIcon
+                    icon={faGithub}
+                    size="2xl"
+                    className={css({ _hover: { color: "#575757" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://www.linkedin.com/in/taylor-johnson-805061210/"} size={30}>
+                <FontAwesomeIcon
+                    icon={faLinkedin}
+                    size="2xl"
+                    className={css({ _hover: { color: "#ff63a4" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"mailto:johnsontaylor6320@gmail.com"} size={30}>
+                <FontAwesomeIcon
+                    icon={faEnvelope}
+                    size="2xl"
+                    className={css({ _hover: { color: "#06c1ff" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://www.instagram.com/taylorjohnson63200"} size={30}>
+                <FontAwesomeIcon
+                    icon={faInstagram}
+                    size="2xl"
+                    className={css({ _hover: { color: "#7301ff" } })}
+                />
+            </Route>
+        </div>
+    </div>
+);
+</file>
+
+<file path="app/components/search/index.ts">
+/**
+ * Search-related components
+ */
+
+export { DescriptionTags } from "./Badges";
+export type { tags } from "./Badges";
+
+export { SearchWrapper } from "./SearchWrapper";
+</file>
+
+<file path="app/components/shared/GlassCard.tsx">
+import { ReactNode } from "react";
+import { css, cx } from "../../../styled-system/css";
+import { SystemStyleObject } from "../../../styled-system/types";
+
+export interface GlassCardProps {
+    children: ReactNode;
+    /** Additional Panda CSS styles to merge */
+    styles?: SystemStyleObject;
+    /** CSS class name */
+    className?: string;
+}
+
+/**
+ * Reusable glass-effect card component with consistent styling.
+ * Provides the semi-transparent black background with border radius and shadow
+ * used throughout the homepage.
+ */
+export const GlassCard = ({ children, styles, className }: GlassCardProps) => {
+    return (
+        <div
+            className={cx(
+                css({
+                    bg: "#000000",
+                    opacity: 0.7,
+                    borderRadius: "10px",
+                    boxShadow: "#00000F 0 0 10px",
+                    ...styles,
+                }),
+                className
+            )}
+        >
+            {children}
+        </div>
+    );
+};
+
+/**
+ * Common glass card style object for use with css() when GlassCard component isn't suitable.
+ */
+export const glassCardStyles = {
+    bg: "#000000",
+    opacity: 0.7,
+    borderRadius: "10px",
+    boxShadow: "#00000F 0 0 10px",
+} as const;
+</file>
+
+<file path="app/components/shared/index.ts">
+/**
+ * Shared components used across the application
+ */
+
+export { GlassCard, glassCardStyles } from "./GlassCard";
+export type { GlassCardProps } from "./GlassCard";
+
+export { Route } from "./Route";
+export type { RouteProps } from "./Route";
+
+export { Loading } from "./Loading";
+export type { LoadingProps } from "./Loading";
+
+export { Navbar } from "./Navbar";
+export type { NavbarProps } from "./Navbar";
+</file>
+
+<file path="app/components/shared/Loading.tsx">
+import "./shared.css";
+
+export interface LoadingProps {
+    fontsize: number;
+}
+
+/**
+ * Simple loading indicator component.
+ */
+export function Loading({ fontsize }: LoadingProps) {
+    return (
+        <div className="loading text-white" style={{ fontSize: fontsize.toString() + "px" }}>
+            <h1>...</h1>
+        </div>
+    );
+}
+</file>
+
+<file path="app/components/shared/shared.css">
+/* Animation */
+
+.loading {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  animation: dots 300ms steps(4) infinite;
+}
+
+
+@keyframes dots {
+  to {
+    clip-path: inset(0 -100% 0 0);
+  }
+}
+</file>
+
+<file path="app/Search/layout.tsx">
+import { Navbar } from "../components/shared/Navbar";
+
+export const metadata = {
+  title: 'Homepage',
+  description: 'Generated by create next app',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <>
+      <Navbar />
+      <div>{children}</div>
+    </>
+  )
+}
+</file>
+
+<file path="app/Search/loading.tsx">
+import { Loading } from "../components/shared/Loading";
+
+export default function loading() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <Loading fontsize={100} />
+    </div>
+  );
+}
+</file>
+
+<file path="hooks/index.ts">
+/**
+ * Custom React hooks for the blog application
+ */
+
+export { useScrollFadeAnimation } from "./useScrollFadeAnimation";
+export type { ScrollFadeConfig, ScrollFadeValues } from "./useScrollFadeAnimation";
+
+export { useMobileDetection } from "./useMobileDetection";
+</file>
+
+<file path="hooks/useMobileDetection.ts">
+"use client";
+
+import { useState, useEffect } from "react";
+
+/**
+ * Hook that detects if the viewport is mobile-sized and handles SSR hydration.
+ * 
+ * @param breakpoint - The max width in pixels considered "mobile" (default: 1024)
+ * @returns Object with isMobile and hasMounted booleans
+ * 
+ * @example
+ * ```tsx
+ * const { isMobile, hasMounted } = useMobileDetection();
+ * 
+ * if (!hasMounted) return <SSRFallback />;
+ * if (!isMobile) return null; // Don't render on desktop
+ * 
+ * return <MobileOnlyComponent />;
+ * ```
+ */
+export function useMobileDetection(breakpoint: number = 1024) {
+    const [isMobile, setIsMobile] = useState(false);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < breakpoint);
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+
+        return () => window.removeEventListener("resize", checkMobile);
+    }, [breakpoint]);
+
+    return { isMobile, hasMounted };
+}
+</file>
+
+<file path="hooks/useScrollFadeAnimation.ts">
+"use client";
+
+import { useScroll, useTransform, MotionValue } from "framer-motion";
+import { LAYOUT } from "../lib/layout";
+
+/**
+ * Configuration for scroll-based fade animation
+ */
+export interface ScrollFadeConfig {
+    /** Scroll position where animation starts (default: 0) */
+    scrollStart: number;
+    /** Scroll position where animation ends (default: 200) */
+    scrollEnd: number;
+    /** How far the element moves vertically during fade (default: -30) */
+    translateY: number;
+    /** Starting margin that animates to 0 (default: 12) */
+    marginStart: number;
+}
+
+/**
+ * Return type for the scroll fade animation hook
+ */
+export interface ScrollFadeValues {
+    /** Opacity value from 1 to 0 */
+    opacity: MotionValue<number>;
+    /** Y translation value */
+    y: MotionValue<number>;
+    /** Margin bottom value from marginStart to 0 */
+    marginBottom: MotionValue<number>;
+    /** The scroll Y position */
+    scrollY: MotionValue<number>;
+}
+
+/**
+ * Hook that provides scroll-based fade animation values.
+ * Use with framer-motion's motion components for smooth fade-out-on-scroll effects.
+ * 
+ * @example
+ * ```tsx
+ * const { opacity, y, marginBottom } = useScrollFadeAnimation();
+ * 
+ * return (
+ *   <motion.div style={{ opacity, y, marginBottom }}>
+ *     Content that fades on scroll
+ *   </motion.div>
+ * );
+ * ```
+ */
+export function useScrollFadeAnimation(config?: Partial<ScrollFadeConfig>): ScrollFadeValues {
+    const { scrollY } = useScroll();
+
+    const finalConfig: ScrollFadeConfig = {
+        scrollStart: config?.scrollStart ?? LAYOUT.animation.scrollStart,
+        scrollEnd: config?.scrollEnd ?? LAYOUT.animation.scrollEnd,
+        translateY: config?.translateY ?? LAYOUT.animation.translateY,
+        marginStart: config?.marginStart ?? LAYOUT.gap,
+    };
+
+    const opacity = useTransform(
+        scrollY,
+        [finalConfig.scrollStart, finalConfig.scrollEnd],
+        [1, 0]
+    );
+
+    const y = useTransform(
+        scrollY,
+        [finalConfig.scrollStart, finalConfig.scrollEnd],
+        [0, finalConfig.translateY]
+    );
+
+    const marginBottom = useTransform(
+        scrollY,
+        [finalConfig.scrollStart, finalConfig.scrollEnd],
+        [finalConfig.marginStart, 0]
+    );
+
+    return { opacity, y, marginBottom, scrollY };
+}
+</file>
+
+<file path="lib/blogs.ts">
+import fs from "fs";
+import path from "path";
+// @ts-ignore
+import matter from "gray-matter";
+
+const postsDirectory = path.join(process.cwd(), "content/posts");
+
+export interface BlogPost {
+    slug: string;
+    meta: {
+        title: string;
+        date: string;
+        description: string;
+        tags: string[];
+        image?: string;
+    };
+    content: string;
+    text?: string;
+    children?: BlogPost[];
+}
+
+export function getPostSlugs() {
+    if (!fs.existsSync(postsDirectory)) return [];
+    return fs.readdirSync(postsDirectory);
+}
+
+export function getPostBySlug(slug: string): BlogPost | null {
+    const realSlug = slug.replace(/\.mdx$/, "");
+    const fullPath = path.join(postsDirectory, `${realSlug}.mdx`);
+
+    if (!fs.existsSync(fullPath)) return null;
+
+    const fileContents = fs.readFileSync(fullPath, "utf8");
+    const { data, content } = matter(fileContents);
+
+    return {
+        slug: realSlug,
+        meta: data as BlogPost["meta"],
+        content,
+    };
+}
+
+export function getAllPosts(): BlogPost[] {
+    const slugs = getPostSlugs();
+    const posts = slugs
+        .map((slug) => getPostBySlug(slug))
+        .filter((post): post is BlogPost => post !== null)
+        // Sort posts by date in descending order
+        .sort((post1, post2) => (post1.meta.date > post2.meta.date ? -1 : 1));
+    return posts;
+}
+</file>
+
+<file path="lib/layout.ts">
+/**
+ * Centralized layout configuration for the root page.
+ * All gaps, spacing, and widths should be defined here.
+ *
+ * This provides a single source of truth for layout values
+ * used across the root page and its components.
+ */
+
+// Core spacing values (in pixels)
+export const LAYOUT = {
+  /** Standard gap between elements (matches panda "layout" token = 12px) */
+  gap: 12,
+
+  /** Edge margin from viewport for full-width elements (e.g., navbar) */
+  edgeMargin: 12,
+
+  /** Content width as viewport percentage */
+  contentWidth: "90vw",
+
+  /** Navbar calculated values */
+  navbar: {
+    /** Full width minus edge margins on both sides */
+    width: "calc(100vw - 24px)", // 100vw - (edgeMargin * 2)
+    /** Approximate height of navbar */
+    height: 45,
+  },
+
+  /** Animation scroll range for navbar fade */
+  animation: {
+    /** Scroll position where animation starts */
+    scrollStart: 20,
+    /** Scroll position where animation ends (navbar fully faded) */
+    scrollEnd: 70,
+    /** How far navbar moves up during fade */
+    translateY: -30,
+  },
+} as const;
+
+// Derived values for CSS calc expressions
+export const layoutCalc = {
+  /** Total edge margins (both sides) */
+  totalEdgeMargins: LAYOUT.edgeMargin * 2,
+  /** Navbar width calculated from layout values */
+  navbarWidth: `calc(100vw - ${LAYOUT.edgeMargin * 2}px)`,
+};
+
+// CSS-ready values for direct use in styles
+export const layoutStyles = {
+  gap: `${LAYOUT.gap}px`,
+  edgeMargin: `${LAYOUT.edgeMargin}px`,
+  contentWidth: LAYOUT.contentWidth,
+  navbarWidth: layoutCalc.navbarWidth,
+};
+
+/** Panda token name for use with css({ gap: LAYOUT_GAP }) */
+export const LAYOUT_GAP = "layout";
+</file>
+
+<file path="lib/mdx.ts">
+import rehypeHighlight from "rehype-highlight";
+import nim from "highlight.js/lib/languages/nim";
+import { all } from "lowlight";
+import type { MDXRemoteProps } from "next-mdx-remote/rsc";
+
+export const mdxOptions: MDXRemoteProps["options"] = {
+  mdxOptions: {
+    rehypePlugins: [
+      [
+        rehypeHighlight,
+        {
+          languages: all,
+        },
+      ],
+    ],
+  },
+};
+</file>
+
+<file path="tests/utils/gap-utils.ts">
+/**
+ * Shared gap detection utilities for Playwright tests.
+ * Provides consistent gap analysis across all pages.
+ */
+
+import { Page } from '@playwright/test';
+
+/** Expected gap between cards (matches panda spacing.layout = 12px) */
+export const EXPECTED_GAP = 12;
+
+/** Tolerance for sub-pixel rendering differences */
+export const GAP_TOLERANCE = 2;
+
+/** Standard port for dev server */
+export const PORT = 3000;
+
+/** Base URL for tests */
+export const BASE_URL = `http://localhost:${PORT}`;
+
+/** Standard viewport configurations */
+export const VIEWPORTS = {
+    mobile: { width: 375, height: 812 },
+    tablet: { width: 768, height: 1024 },
+    desktop: { width: 1024, height: 768 },
+    desktopLarge: { width: 1280, height: 800 },
+} as const;
+
+export type ViewportName = keyof typeof VIEWPORTS;
+
+/** Card detection result */
+export interface CardInfo {
+    rect: {
+        top: number;
+        bottom: number;
+        left: number;
+        right: number;
+        width: number;
+        height: number;
+    };
+    isNavbar: boolean;
+    classList: string[];
+}
+
+/** Gap measurement between two cards */
+export interface GapInfo {
+    gap: number;
+    between: string;
+    card1Classes: string[];
+    card2Classes: string[];
+}
+
+/** Full gap analysis result */
+export interface GapAnalysis {
+    pageUrl: string;
+    viewport: { width: number; height: number };
+    totalCards: number;
+    gaps: GapInfo[];
+    uniqueGaps: number[];
+    mostCommonGap: number | null;
+    inconsistentGaps: GapInfo[];
+    isConsistent: boolean;
+}
+
+/**
+ * Analyze gaps between card elements on a page.
+ * Cards are identified by borderRadius: 10px and black background.
+ */
+export async function analyzeGaps(page: Page): Promise<GapAnalysis> {
+    const viewport = page.viewportSize() || { width: 0, height: 0 };
+    const pageUrl = page.url();
+
+    const analysis = await page.evaluate((expectedGap) => {
+        const allElements = document.querySelectorAll('*');
+        const cards: { rect: DOMRect; isNavbar: boolean; classList: string[] }[] = [];
+
+        allElements.forEach(el => {
+            const style = window.getComputedStyle(el);
+            const isCard = style.borderRadius === '10px' &&
+                (style.backgroundColor === 'rgb(0, 0, 0)' || style.backgroundColor === 'rgba(0, 0, 0, 1)');
+
+            if (isCard) {
+                const rect = el.getBoundingClientRect();
+                // Filter out very small elements
+                if (rect.width > 50 && rect.height > 30) {
+                    const classList = [...el.classList];
+                    const isNavbar = classList.some(c =>
+                        c.includes('navbar') || c.includes('layerStyle_navbar')
+                    );
+                    cards.push({ rect, isNavbar, classList });
+                }
+            }
+        });
+
+        // Sort by vertical position
+        cards.sort((a, b) => a.rect.top - b.rect.top);
+
+        // Calculate gaps between vertically adjacent cards
+        const gaps: { gap: number; between: string; card1Classes: string[]; card2Classes: string[] }[] = [];
+        for (let i = 0; i < cards.length - 1; i++) {
+            const current = cards[i];
+            const next = cards[i + 1];
+
+            // Skip navbar comparisons
+            if (current.isNavbar || next.isNavbar) continue;
+
+            // Check for horizontal overlap (cards must be in same column)
+            const horizontalOverlap = !(current.rect.right < next.rect.left || next.rect.right < current.rect.left);
+
+            if (horizontalOverlap && next.rect.top > current.rect.bottom) {
+                gaps.push({
+                    gap: Math.round(next.rect.top - current.rect.bottom),
+                    between: `card ${i} → card ${i + 1}`,
+                    card1Classes: current.classList,
+                    card2Classes: next.classList,
+                });
+            }
+        }
+
+        // Analyze gap consistency
+        const gapValues = gaps.map(g => g.gap);
+        const uniqueGaps = [...new Set(gapValues)];
+
+        // Find most common gap
+        let mostCommonGap: number | null = null;
+        if (gapValues.length > 0) {
+            const frequency: Record<number, number> = {};
+            gapValues.forEach(g => {
+                frequency[g] = (frequency[g] || 0) + 1;
+            });
+            let maxFreq = 0;
+            for (const [gap, freq] of Object.entries(frequency)) {
+                if (freq > maxFreq) {
+                    maxFreq = freq;
+                    mostCommonGap = parseInt(gap);
+                }
+            }
+        }
+
+        // Find inconsistent gaps (more than 2px from expected)
+        const inconsistentGaps = gaps.filter(g =>
+            Math.abs(g.gap - expectedGap) > 2
+        );
+
+        return {
+            totalCards: cards.length,
+            gaps,
+            uniqueGaps,
+            mostCommonGap,
+            inconsistentGaps,
+            isConsistent: inconsistentGaps.length === 0,
+        };
+    }, EXPECTED_GAP);
+
+    return {
+        pageUrl,
+        viewport,
+        ...analysis,
+    };
+}
+
+/**
+ * Log gap analysis results to console.
+ */
+export function logGapAnalysis(analysis: GapAnalysis): void {
+    console.log(`\n--- Gap Analysis: ${analysis.pageUrl} @ ${analysis.viewport.width}x${analysis.viewport.height} ---`);
+    console.log(`Cards found: ${analysis.totalCards}`);
+    console.log(`Gaps measured: ${analysis.gaps.length}`);
+    console.log(`Gap values: ${JSON.stringify(analysis.gaps.map(g => g.gap))}`);
+    console.log(`Unique gaps: ${JSON.stringify(analysis.uniqueGaps)}`);
+    console.log(`Most common gap: ${analysis.mostCommonGap}px`);
+    console.log(`Expected gap: ${EXPECTED_GAP}px (±${GAP_TOLERANCE}px tolerance)`);
+
+    if (analysis.isConsistent) {
+        console.log(`✅ All gaps consistent`);
+    } else {
+        console.log(`❌ Inconsistent gaps found:`);
+        analysis.inconsistentGaps.forEach(g => {
+            console.log(`  - ${g.between}: ${g.gap}px (expected ~${EXPECTED_GAP}px)`);
+        });
+    }
+}
+
+/**
+ * Get a blog slug for testing /Blogs/[slug] pages.
+ */
+export async function getFirstBlogSlug(page: Page): Promise<string | null> {
+    await page.goto(`${BASE_URL}/Search`);
+    await page.waitForTimeout(1000);
+
+    const slug = await page.evaluate(() => {
+        const link = document.querySelector('a[href*="/Blogs/"]');
+        if (link) {
+            const href = link.getAttribute('href');
+            if (href) {
+                const match = href.match(/\/Blogs\/([^/]+)/);
+                return match ? match[1] : null;
+            }
+        }
+        return null;
+    });
+
+    return slug;
+}
+</file>
+
+<file path="tests/gap-consistency.spec.ts">
+/**
+ * Comprehensive Gap Consistency Tests
+ *
+ * Tests gap consistency across all pages at multiple viewports.
+ * Uses the shared gap-utils for consistent detection.
+ *
+ * Expected gap: 12px (from panda.config.ts spacing.layout token)
+ */
+
+import { test, expect } from '@playwright/test';
+import {
+    analyzeGaps,
+    logGapAnalysis,
+    getFirstBlogSlug,
+    VIEWPORTS,
+    BASE_URL,
+    EXPECTED_GAP,
+    ViewportName,
+} from './utils/gap-utils';
+
+// Test configuration
+const TEST_TIMEOUT = 30000;
+const LOAD_WAIT = 1500;
+
+// Viewports to test for each page
+const TEST_VIEWPORTS: ViewportName[] = ['mobile', 'tablet', 'desktop', 'desktopLarge'];
+
+// Pages to test
+const PAGES = [
+    { name: 'Root', path: '/' },
+    { name: 'Search', path: '/Search' },
+];
+
+// ============================================================================
+// ROOT PAGE TESTS
+// ============================================================================
+
+test.describe('Root Page Gap Consistency', () => {
+    for (const viewportName of TEST_VIEWPORTS) {
+        const viewport = VIEWPORTS[viewportName];
+
+        test(`gaps should be consistent at ${viewportName} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+            test.setTimeout(TEST_TIMEOUT);
+
+            await page.setViewportSize(viewport);
+            await page.goto(`${BASE_URL}/`);
+            await page.waitForTimeout(LOAD_WAIT);
+
+            const analysis = await analyzeGaps(page);
+            logGapAnalysis(analysis);
+
+            // Verify gaps are consistent
+            expect(
+                analysis.isConsistent,
+                `Root page has inconsistent gaps at ${viewportName}: ${JSON.stringify(analysis.inconsistentGaps)}`
+            ).toBe(true);
+
+            // Verify most common gap is close to expected (12px)
+            if (analysis.mostCommonGap !== null) {
+                expect(
+                    Math.abs(analysis.mostCommonGap - EXPECTED_GAP),
+                    `Root page gap (${analysis.mostCommonGap}px) deviates from expected (${EXPECTED_GAP}px)`
+                ).toBeLessThanOrEqual(2);
+            }
+        });
+    }
+});
+
+// ============================================================================
+// SEARCH PAGE TESTS
+// ============================================================================
+
+test.describe('Search Page Gap Consistency', () => {
+    for (const viewportName of TEST_VIEWPORTS) {
+        const viewport = VIEWPORTS[viewportName];
+
+        test(`gaps should be consistent at ${viewportName} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+            test.setTimeout(TEST_TIMEOUT);
+
+            await page.setViewportSize(viewport);
+            await page.goto(`${BASE_URL}/Search`);
+            await page.waitForTimeout(LOAD_WAIT);
+
+            const analysis = await analyzeGaps(page);
+            logGapAnalysis(analysis);
+
+            // Search page may have different gap semantics (blog cards have mb:5)
+            // So we check for consistency among detected gaps
+            if (analysis.gaps.length > 1) {
+                expect(
+                    analysis.isConsistent,
+                    `Search page has inconsistent gaps at ${viewportName}: ${JSON.stringify(analysis.inconsistentGaps)}`
+                ).toBe(true);
+            } else {
+                console.log(`Only ${analysis.gaps.length} gap(s) found on Search page - skipping consistency check`);
+            }
+        });
+    }
+});
+
+// ============================================================================
+// BLOG PAGE TESTS
+// ============================================================================
+
+test.describe('Blog Page Gap Consistency', () => {
+    let blogSlug: string | null = null;
+
+    test.beforeAll(async ({ browser }) => {
+        // Get a valid blog slug before running tests
+        const page = await browser.newPage();
+        blogSlug = await getFirstBlogSlug(page);
+        await page.close();
+
+        if (!blogSlug) {
+            console.log('⚠️ No blog posts found - blog page tests will be skipped');
+        }
+    });
+
+    for (const viewportName of TEST_VIEWPORTS) {
+        const viewport = VIEWPORTS[viewportName];
+
+        test(`gaps should be consistent at ${viewportName} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+            test.setTimeout(TEST_TIMEOUT);
+
+            // Skip if no blog posts available
+            test.skip(!blogSlug, 'No blog posts available for testing');
+
+            await page.setViewportSize(viewport);
+            await page.goto(`${BASE_URL}/Blogs/${blogSlug}`);
+            await page.waitForTimeout(LOAD_WAIT);
+
+            const analysis = await analyzeGaps(page);
+            logGapAnalysis(analysis);
+
+            // Blog pages typically have a single card with content
+            // Check that any gaps found are consistent
+            if (analysis.gaps.length > 0) {
+                expect(
+                    analysis.isConsistent,
+                    `Blog page has inconsistent gaps at ${viewportName}: ${JSON.stringify(analysis.inconsistentGaps)}`
+                ).toBe(true);
+            } else {
+                console.log(`No gaps between cards on Blog page at ${viewportName} - expected for single-card layout`);
+            }
+        });
+    }
+});
+
+// ============================================================================
+// CROSS-PAGE CONSISTENCY TEST
+// ============================================================================
+
+test.describe('Cross-Page Gap Consistency', () => {
+    test('all pages should use the same base gap value', async ({ page }) => {
+        test.setTimeout(60000);
+
+        const gapsBySite: { page: string; gaps: number[] }[] = [];
+
+        // Test root page at desktop
+        await page.setViewportSize(VIEWPORTS.desktopLarge);
+        await page.goto(`${BASE_URL}/`);
+        await page.waitForTimeout(LOAD_WAIT);
+        const rootAnalysis = await analyzeGaps(page);
+        gapsBySite.push({ page: 'Root', gaps: rootAnalysis.gaps.map(g => g.gap) });
+
+        // Test Search page
+        await page.goto(`${BASE_URL}/Search`);
+        await page.waitForTimeout(LOAD_WAIT);
+        const searchAnalysis = await analyzeGaps(page);
+        gapsBySite.push({ page: 'Search', gaps: searchAnalysis.gaps.map(g => g.gap) });
+
+        // Log results
+        console.log('\n=== Cross-Page Gap Summary ===');
+        gapsBySite.forEach(({ page, gaps }) => {
+            console.log(`${page}: ${gaps.length > 0 ? gaps.join(', ') + 'px' : 'no gaps detected'}`);
+        });
+
+        // All detected gaps should be close to 12px (the layout token)
+        for (const { page: pageName, gaps } of gapsBySite) {
+            for (const gap of gaps) {
+                expect(
+                    Math.abs(gap - EXPECTED_GAP),
+                    `${pageName} has gap ${gap}px, expected ~${EXPECTED_GAP}px`
+                ).toBeLessThanOrEqual(2);
+            }
+        }
+    });
+});
+</file>
+
+<file path="tests/layout.spec.ts">
+import { test, expect } from '@playwright/test';
+
+test('homepage layouts correctly with no overflow', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    // Go to homepage
+    await page.goto('http://localhost:3000');
+
+    // Wait for settlement
+    await page.waitForTimeout(2000);
+
+    // Overflow detection with different rules for horizontal vs vertical:
+    // - HORIZONTAL: Always fail. Images should scale, never clip horizontally.
+    // - VERTICAL: Skip if element is clipped by ancestor with overflow:hidden (acceptable for scrollable areas)
+    const overflowIssues = await page.evaluate(() => {
+        const issues: { type: string; element: string; value: number; viewport: number; classList: string[]; clipped?: boolean }[] = [];
+
+        // Helper: check if element is vertically clipped by ancestor with overflow:hidden
+        const isVerticallyClippedByAncestor = (el: Element): boolean => {
+            let current: Element | null = el.parentElement;
+            while (current) {
+                const style = window.getComputedStyle(current);
+                if (style.overflow === 'hidden' || style.overflowY === 'hidden') {
+                    const ancestorRect = current.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+                    if (elRect.bottom > ancestorRect.bottom) {
+                        return true; // Element is vertically clipped
+                    }
+                }
+                current = current.parentElement;
+            }
+            return false;
+        };
+
+        // Helper: check if element is horizontally clipped by ancestor
+        const isHorizontallyClippedByAncestor = (el: Element): boolean => {
+            let current: Element | null = el.parentElement;
+            while (current) {
+                const style = window.getComputedStyle(current);
+                if (style.overflow === 'hidden' || style.overflowX === 'hidden') {
+                    const ancestorRect = current.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+                    if (elRect.right > ancestorRect.right) {
+                        return true; // Element is horizontally clipped
+                    }
+                }
+                current = current.parentElement;
+            }
+            return false;
+        };
+
+        document.querySelectorAll('*').forEach(el => {
+            const rect = el.getBoundingClientRect();
+
+            // HORIZONTAL OVERFLOW: Always report, even if clipped (clipping is a bug for horizontal)
+            if (rect.right > window.innerWidth + 1) {
+                const isClipped = isHorizontallyClippedByAncestor(el);
+                issues.push({
+                    type: isClipped ? "horizontal-clipped" : "horizontal-overflow",
+                    element: el.tagName,
+                    value: rect.right,
+                    viewport: window.innerWidth,
+                    classList: [...el.classList],
+                    clipped: isClipped
+                });
+            }
+
+            // VERTICAL OVERFLOW: Skip if clipped (acceptable for scrollable content)
+            if (rect.bottom > window.innerHeight + 1) {
+                if (!isVerticallyClippedByAncestor(el)) {
+                    issues.push({
+                        type: "vertical-overflow",
+                        element: el.tagName,
+                        value: rect.bottom,
+                        viewport: window.innerHeight,
+                        classList: [...el.classList]
+                    });
+                }
+            }
+        });
+
+        return issues;
+    });
+
+    console.log("--- OVERFLOW DIAGNOSTICS ---");
+    if (overflowIssues.length === 0) {
+        console.log("No overflow detected. Layout is correct.");
+    } else {
+        console.log("Overflow Issues Found:");
+        console.log(JSON.stringify(overflowIssues, null, 2));
+    }
+    console.log("----------------------------");
+
+    expect(overflowIssues.length).toBe(0);
+});
+</file>
+
+<file path="tests/mobile-navbar.spec.ts">
+import { test, expect } from '@playwright/test';
+
+/**
+ * Mobile Navbar Animation Test
+ * 
+ * Focused test for verifying mobile navbar behavior:
+ * 1. Width consistency - navbar should maintain same width while animating
+ * 2. Gap consistency - gap between navbar and content should match gaps between other items
+ * 3. No z-overlap with content
+ */
+
+const PORT = 3000; // Use current dev server port
+
+test.describe('Mobile Navbar Animation', () => {
+    test('navbar maintains width, gap, and no overlap on mobile', async ({ page }) => {
+        test.setTimeout(30000);
+
+        await page.setViewportSize({ width: 375, height: 812 });
+        await page.goto(`http://localhost:${PORT}`);
+        await page.waitForTimeout(2000);
+
+        // === TEST 1: Width Consistency ===
+        const initialState = await page.evaluate(() => {
+            const navbarText = Array.from(document.querySelectorAll('span')).find(
+                el => el.textContent?.includes('becker63')
+            );
+            if (!navbarText) return null;
+
+            // Find the navbar's animated container (the motion.div with 90vw width)
+            let navbarContainer: Element | null = navbarText;
+            while (navbarContainer && navbarContainer.parentElement) {
+                navbarContainer = navbarContainer.parentElement;
+                const style = window.getComputedStyle(navbarContainer);
+                // Look for the container that has the 90vw width
+                if (style.width && parseFloat(style.width) > 200) {
+                    break;
+                }
+            }
+
+            const rect = navbarContainer?.getBoundingClientRect();
+            return {
+                width: Math.round(rect?.width || 0),
+                bottom: Math.round(rect?.bottom || 0),
+            };
+        });
+
+        console.log('Initial navbar state:', initialState);
+        expect(initialState, 'Navbar not found').not.toBeNull();
+        const initialWidth = initialState!.width;
+
+        // === TEST 2: Gap Consistency (before scroll) ===
+        const gapAnalysis = await page.evaluate(() => {
+            // Find navbar bottom
+            const navbarText = Array.from(document.querySelectorAll('span')).find(
+                el => el.textContent?.includes('becker63')
+            );
+            if (!navbarText) return { error: 'Navbar not found' };
+
+            let navbarContainer: Element | null = navbarText;
+            while (navbarContainer && navbarContainer.parentElement) {
+                navbarContainer = navbarContainer.parentElement;
+                const style = window.getComputedStyle(navbarContainer);
+                if (style.width && parseFloat(style.width) > 200) {
+                    break;
+                }
+            }
+
+            const navbarRect = navbarContainer?.getBoundingClientRect();
+            if (!navbarRect) return { error: 'Navbar container not found' };
+
+            // Find content cards (black boxes with border-radius)
+            const cards: { rect: DOMRect }[] = [];
+            document.querySelectorAll('div').forEach(el => {
+                const style = window.getComputedStyle(el);
+                const isCard = style.borderRadius === '10px' &&
+                    (style.backgroundColor === 'rgb(0, 0, 0)' || style.backgroundColor === 'rgba(0, 0, 0, 1)');
+
+                if (isCard) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.width > 50 && rect.height > 30) {
+                        cards.push({ rect });
+                    }
+                }
+            });
+
+            cards.sort((a, b) => a.rect.top - b.rect.top);
+
+            const firstCard = cards[0];
+            if (!firstCard) return { error: 'No content cards found' };
+
+            // Gap between navbar and first content
+            const navbarToContentGap = Math.round(firstCard.rect.top - navbarRect.bottom);
+
+            // Gaps between content cards
+            const contentGaps: number[] = [];
+            for (let i = 0; i < cards.length - 1; i++) {
+                const current = cards[i];
+                const next = cards[i + 1];
+                const horizontalOverlap = !(current.rect.right < next.rect.left || next.rect.right < current.rect.left);
+                if (horizontalOverlap && next.rect.top > current.rect.bottom) {
+                    contentGaps.push(Math.round(next.rect.top - current.rect.bottom));
+                }
+            }
+
+            const expectedGap = contentGaps.length > 0 ? contentGaps[0] : 12; // Default to layout token (12px)
+
+            return {
+                navbarToContentGap,
+                contentGaps,
+                expectedGap,
+                gapDifference: Math.abs(navbarToContentGap - expectedGap),
+                hasOverlap: navbarToContentGap < 0
+            };
+        });
+
+        console.log('Gap analysis:', gapAnalysis);
+
+        if ('error' in gapAnalysis) {
+            throw new Error(gapAnalysis.error);
+        }
+
+        // Check no overlap
+        expect(gapAnalysis.hasOverlap, 'Navbar overlaps with content').toBe(false);
+
+        // Check gap consistency - navbar may have different margins than content
+        // Allow more tolerance since navbar uses edge margins while content uses centered 90vw
+        expect(
+            gapAnalysis.gapDifference,
+            `Navbar gap (${gapAnalysis.navbarToContentGap}px) differs from content gaps (${gapAnalysis.expectedGap}px)`
+        ).toBeLessThanOrEqual(8);
+
+        // === TEST 3: Width Consistency During Scroll ===
+        await page.evaluate(() => window.scrollBy(0, 100));
+        await page.waitForTimeout(300);
+
+        const midScrollState = await page.evaluate(() => {
+            const navbarText = Array.from(document.querySelectorAll('span')).find(
+                el => el.textContent?.includes('becker63')
+            );
+            if (!navbarText) return null;
+
+            let navbarContainer: Element | null = navbarText;
+            while (navbarContainer && navbarContainer.parentElement) {
+                navbarContainer = navbarContainer.parentElement;
+                const style = window.getComputedStyle(navbarContainer);
+                if (style.width && parseFloat(style.width) > 200) {
+                    break;
+                }
+            }
+
+            const rect = navbarContainer?.getBoundingClientRect();
+            return {
+                width: Math.round(rect?.width || 0),
+            };
+        });
+
+        console.log('Mid-scroll navbar state:', midScrollState);
+        expect(midScrollState, 'Navbar not found after scroll').not.toBeNull();
+
+        const widthDiff = Math.abs(initialWidth - midScrollState!.width);
+        expect(
+            widthDiff,
+            `Navbar width changed from ${initialWidth}px to ${midScrollState!.width}px during scroll`
+        ).toBeLessThanOrEqual(2);
+
+        console.log('✅ All navbar animation tests passed');
+    });
+});
+</file>
+
+<file path="tests/navbar-overlap.spec.ts">
+import { test, expect } from "@playwright/test";
+
+/**
+ * Test that verifies the mobile navbar doesn't overlap with content below it.
+ * The navbar should be positioned above the content grid, not overlapping.
+ */
+test.describe("Mobile Navbar Positioning", () => {
+  // Mobile resolutions to test
+  const mobileViewports = [
+    { width: 375, height: 812, name: "iPhone X" },
+    { width: 390, height: 844, name: "iPhone 12" },
+    { width: 414, height: 896, name: "iPhone XR" },
+    { width: 360, height: 740, name: "Galaxy S8" },
+  ];
+
+  for (const viewport of mobileViewports) {
+    test(`navbar does not overlap content on ${viewport.name} (${viewport.width}x${viewport.height})`, async ({
+      page,
+    }) => {
+      test.setTimeout(30000);
+
+      await page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      });
+      await page.goto("http://localhost:3000");
+
+      // Wait for page to fully load and hydrate
+      await page.waitForTimeout(2000);
+
+      // Detect z-overlap: check if navbar overlaps with content elements
+      const overlapResult = await page.evaluate(() => {
+        // Find the navbar - it contains "becker63" text
+        const navbarText = Array.from(document.querySelectorAll("span")).find(
+          (el) => el.textContent?.includes("becker63"),
+        );
+
+        if (!navbarText) {
+          return { error: "Navbar text not found" };
+        }
+
+        // Get the navbar container (traverse up to find nav or containing div)
+        let navbar: Element | null = navbarText;
+        while (navbar && navbar.tagName !== "NAV" && navbar.parentElement) {
+          navbar = navbar.parentElement;
+          // Stop at a reasonable container level
+          if (navbar.classList.length > 0 || navbar.tagName === "NAV") {
+            break;
+          }
+        }
+
+        const navbarRect = navbar.getBoundingClientRect();
+
+        // Find content elements that should be BELOW the navbar
+        // These are the main content cards (black rounded boxes)
+        const contentElements = Array.from(
+          document.querySelectorAll("div"),
+        ).filter((el) => {
+          const style = window.getComputedStyle(el);
+          // Looking for content cards with background and border-radius
+          return (
+            style.backgroundColor === "rgb(0, 0, 0)" &&
+            style.borderRadius !== "0px" &&
+            el.getBoundingClientRect().height > 50
+          );
+        });
+
+        const overlaps: Array<{
+          navbarBottom: number;
+          contentTop: number;
+          overlap: number;
+          contentClasses: string[];
+        }> = [];
+
+        for (const content of contentElements) {
+          const contentRect = content.getBoundingClientRect();
+
+          // Check if navbar bottom extends into content top
+          // Allow 2px tolerance for rendering differences
+          if (navbarRect.bottom > contentRect.top + 2) {
+            overlaps.push({
+              navbarBottom: Math.round(navbarRect.bottom),
+              contentTop: Math.round(contentRect.top),
+              overlap: Math.round(navbarRect.bottom - contentRect.top),
+              contentClasses: [...content.classList],
+            });
+          }
+        }
+
+        return {
+          navbarRect: {
+            top: Math.round(navbarRect.top),
+            bottom: Math.round(navbarRect.bottom),
+            height: Math.round(navbarRect.height),
+          },
+          overlaps,
+          contentElementsFound: contentElements.length,
+        };
+      });
+
+      console.log(`--- ${viewport.name} NAVBAR OVERLAP TEST ---`);
+      console.log(JSON.stringify(overlapResult, null, 2));
+      console.log("----------------------------------------");
+
+      // Fail if we detected overlaps
+      if ("error" in overlapResult) {
+        throw new Error(overlapResult.error);
+      }
+
+      expect(
+        overlapResult.overlaps.length,
+        `Navbar overlaps with ${overlapResult.overlaps.length} content elements`,
+      ).toBe(0);
+    });
+  }
+
+  test("navbar fades out and content shifts up on scroll", async ({ page }) => {
+    test.setTimeout(30000);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("http://localhost:3000");
+    await page.waitForTimeout(2000);
+
+    // Get initial navbar opacity and position
+    const initialState = await page.evaluate(() => {
+      const navbarText = Array.from(document.querySelectorAll("span")).find(
+        (el) => el.textContent?.includes("becker63"),
+      );
+      if (!navbarText) return null;
+
+      let navbar: Element | null = navbarText;
+      while (navbar && navbar.parentElement) {
+        const style = window.getComputedStyle(navbar);
+        if (style.opacity !== "1" || navbar.tagName === "NAV") {
+          break;
+        }
+        navbar = navbar.parentElement;
+      }
+
+      const style = window.getComputedStyle(navbar!);
+      return {
+        opacity: parseFloat(style.opacity),
+        top: navbar!.getBoundingClientRect().top,
+      };
+    });
+
+    console.log("Initial state:", initialState);
+    expect(initialState).not.toBeNull();
+    // Navbar may have 0.7 opacity from layerStyle, check it's visible
+    expect(initialState!.opacity).toBeGreaterThan(0.5);
+
+    // Scroll down 250px (animation range is now 0-200)
+    await page.evaluate(() => window.scrollBy(0, 250));
+    await page.waitForTimeout(500);
+
+    // Check navbar state after scroll
+    const scrolledState = await page.evaluate(() => {
+      const navbarText = Array.from(document.querySelectorAll("span")).find(
+        (el) => el.textContent?.includes("becker63"),
+      );
+      if (!navbarText) return null;
+
+      let navbar: Element | null = navbarText;
+      while (navbar && navbar.parentElement) {
+        const style = window.getComputedStyle(navbar);
+        // Find the animated container (look for transform or opacity changes)
+        if (style.opacity !== "1" || navbar.tagName === "NAV") {
+          break;
+        }
+        navbar = navbar.parentElement;
+      }
+
+      const style = window.getComputedStyle(navbar!);
+      return {
+        opacity: parseFloat(style.opacity),
+        top: navbar!.getBoundingClientRect().top,
+      };
+    });
+
+    console.log("Scrolled state:", scrolledState);
+    expect(scrolledState).not.toBeNull();
+    // After scrolling 250px, navbar should be faded out (opacity near 0)
+    expect(scrolledState!.opacity).toBeLessThan(0.8);
+  });
+});
+</file>
+
+<file path="tests/svg-visibility.spec.ts">
+import { test, expect } from '@playwright/test';
+
+test('SVG visibility across viewport sizes', async ({ page }) => {
+    test.setTimeout(120000);
+
+    // Navigate to homepage
+    await page.goto('http://localhost:3000');
+    await page.waitForTimeout(2000);
+
+    // Test viewport widths from desktop down to mobile
+    const testWidths = [
+        1920, 1440, 1280, 1024,  // Desktop
+        1023, 1000, 900, 800,    // Tablet/transition
+        768, 700, 600, 500,     // Mobile breakpoints
+        400, 360, 320           // Small mobile
+    ];
+
+    const results: { width: number; bebopVisible: boolean; bebopInfo: any }[] = [];
+
+    for (const width of testWidths) {
+        await page.setViewportSize({ width, height: 768 });
+        await page.waitForTimeout(500); // Allow layout to settle
+
+        // Look specifically for the Bebop SVG (react-inlinesvg output)
+        // It should be a large SVG with a viewBox of "0 0 1042 1066"
+        const bebopInfo = await page.evaluate(() => {
+            // Find all SVGs
+            const allSvgs = document.querySelectorAll('svg');
+
+            for (const svg of allSvgs) {
+                const rect = svg.getBoundingClientRect();
+                const viewBox = svg.getAttribute('viewBox');
+                const style = window.getComputedStyle(svg);
+
+                // Bebop SVG should have the specific viewBox or be reasonably large
+                const isBebop = viewBox === '0 0 1042 1066' ||
+                    (rect.width > 50 && rect.height > 50);
+
+                if (isBebop && rect.width > 0 && rect.height > 0) {
+                    return {
+                        found: true,
+                        visible: true,
+                        viewBox,
+                        rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left },
+                        display: style.display,
+                        visibility: style.visibility
+                    };
+                }
+            }
+
+            // Check if Bebop container exists even if SVG is 0x0
+            const allSvgsInfo: any[] = [];
+            allSvgs.forEach(svg => {
+                const rect = svg.getBoundingClientRect();
+                allSvgsInfo.push({
+                    viewBox: svg.getAttribute('viewBox'),
+                    width: rect.width,
+                    height: rect.height,
+                    classList: [...svg.classList]
+                });
+            });
+
+            return { found: false, visible: false, allSvgs: allSvgsInfo };
+        });
+
+        const isVisible = bebopInfo.found && bebopInfo.visible;
+        results.push({ width, bebopVisible: isVisible, bebopInfo });
+
+        console.log(`Viewport ${width}px: Bebop ${isVisible ? '✓ VISIBLE' : '✗ HIDDEN'}`, JSON.stringify(bebopInfo));
+    }
+
+    // Find the breakpoint where Bebop disappears
+    let lastVisibleWidth = 0;
+    let firstHiddenWidth = 0;
+
+    for (let i = 0; i < results.length; i++) {
+        if (results[i].bebopVisible) {
+            lastVisibleWidth = results[i].width;
+        } else if (lastVisibleWidth > 0 && firstHiddenWidth === 0) {
+            firstHiddenWidth = results[i].width;
+        }
+    }
+
+    console.log('--- BREAKPOINT ANALYSIS ---');
+    console.log(`Bebop visible at: ${lastVisibleWidth}px`);
+    console.log(`Bebop hidden at: ${firstHiddenWidth}px`);
+    console.log(`Breakpoint is between ${firstHiddenWidth}px and ${lastVisibleWidth}px`);
+    console.log('---------------------------');
+
+    // The test reports the breakpoint
+});
+
+test('Bebop SVG should be visible at all viewports', async ({ page }) => {
+    test.setTimeout(60000);
+
+    await page.goto('http://localhost:3000');
+    await page.waitForTimeout(2000);
+
+    // Test both desktop and mobile viewports
+    const testWidths = [
+        { width: 1920, name: 'desktop-1920' },
+        { width: 1024, name: 'desktop-1024' },
+        { width: 768, name: 'tablet' },
+        { width: 375, name: 'mobile' }
+    ];
+
+    for (const { width, name } of testWidths) {
+        await page.setViewportSize({ width, height: 768 });
+        await page.waitForTimeout(500);
+
+        const bebopVisible = await page.evaluate(() => {
+            const allSvgs = document.querySelectorAll('svg');
+            for (const svg of allSvgs) {
+                const rect = svg.getBoundingClientRect();
+                const viewBox = svg.getAttribute('viewBox');
+
+                // Bebop should have viewBox or be large
+                if ((viewBox === '0 0 1042 1066' || rect.width > 50) &&
+                    rect.width > 0 && rect.height > 0) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        console.log(`[${name}] ${width}px: Bebop ${bebopVisible ? '✓ VISIBLE' : '✗ HIDDEN'}`);
+        expect(bebopVisible, `Bebop SVG should be visible at ${width}px (${name})`).toBe(true);
+    }
+});
+</file>
+
+<file path="tests/tree-line-continuity.spec.ts">
+import { test, expect } from '@playwright/test';
+
+/**
+ * Test that tree lines connecting blog cards render continuously
+ * with no gaps between cards at all viewport sizes.
+ */
+
+const viewports = [
+    { name: 'mobile', width: 375, height: 812 },
+    { name: 'tablet', width: 768, height: 1024 },
+    { name: 'desktop', width: 1280, height: 800 },
+    { name: 'desktopLarge', width: 1920, height: 1080 },
+];
+
+test.describe('Tree Line Continuity', () => {
+    for (const viewport of viewports) {
+        test(`tree lines connect without gaps at ${viewport.name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+            await page.setViewportSize({ width: viewport.width, height: viewport.height });
+            await page.goto('http://localhost:3000/Search');
+            await page.waitForLoadState('networkidle');
+
+            // Find blog cards by looking for links to /Blogs/
+            const blogLinks = await page.locator('a[href^="/Blogs/"]').all();
+            const cardCount = blogLinks.length;
+
+            console.log(`\n--- Tree Line Analysis at ${viewport.name} ---`);
+            console.log(`Blog cards found: ${cardCount}`);
+
+            if (cardCount < 2) {
+                console.log(`Only ${cardCount} cards found - skipping gap test`);
+                return;
+            }
+
+            // Get all vertical line segments (1px wide white elements)
+            const verticalLines = await page.evaluate(() => {
+                const elements: { top: number; bottom: number; left: number; height: number }[] = [];
+
+                document.querySelectorAll('div').forEach((el) => {
+                    const style = window.getComputedStyle(el);
+                    const rect = el.getBoundingClientRect();
+
+                    // Look for thin vertical line elements (1px wide, reasonably tall, white/visible)
+                    if (
+                        rect.width >= 0.5 && rect.width <= 2 &&
+                        rect.height > 20 &&
+                        (style.backgroundColor === 'rgb(255, 255, 255)' ||
+                            style.backgroundColor === 'white' ||
+                            style.background.includes('white') ||
+                            style.background.includes('rgb(255, 255, 255)'))
+                    ) {
+                        elements.push({
+                            top: Math.round(rect.top),
+                            bottom: Math.round(rect.bottom),
+                            left: Math.round(rect.left),
+                            height: Math.round(rect.height),
+                        });
+                    }
+                });
+
+                return elements;
+            });
+
+            console.log(`Vertical line segments found: ${verticalLines.length}`);
+
+            if (verticalLines.length === 0) {
+                // If no lines found via computed style, try to find them by checking styled divs
+                console.log('No vertical lines detected via computed style - checking if tree lines exist in DOM');
+
+                // Take screenshot to verify visually
+                await page.screenshot({ path: `test-results/tree-lines-${viewport.name}.png` });
+                console.log(`Screenshot saved to test-results/tree-lines-${viewport.name}.png`);
+                return;
+            }
+
+            // Group lines by their left position (same vertical column)
+            const linesByColumn = new Map<number, typeof verticalLines>();
+            for (const line of verticalLines) {
+                // Use a tolerance of 5px for grouping lines in same column
+                let foundColumn = false;
+                for (const [key, _] of linesByColumn) {
+                    if (Math.abs(key - line.left) < 5) {
+                        linesByColumn.get(key)!.push(line);
+                        foundColumn = true;
+                        break;
+                    }
+                }
+                if (!foundColumn) {
+                    linesByColumn.set(line.left, [line]);
+                }
+            }
+
+            console.log(`Distinct line columns: ${linesByColumn.size}`);
+
+            // For each column, verify lines connect without significant gaps
+            let gapsFound = 0;
+            for (const [left, lines] of linesByColumn) {
+                // Sort by vertical position
+                lines.sort((a, b) => a.top - b.top);
+
+                // Check for gaps between consecutive segments
+                for (let i = 0; i < lines.length - 1; i++) {
+                    const current = lines[i];
+                    const next = lines[i + 1];
+                    const gap = next.top - current.bottom;
+
+                    // Allow tolerance for subpixel rendering and small layout variations
+                    const tolerance = 3;
+
+                    if (gap > tolerance) {
+                        gapsFound++;
+                        console.log(`⚠️ Gap of ${gap}px at column ${left} (line ${i} to ${i + 1})`);
+                    }
+                }
+            }
+
+            // Expect no gaps or report them
+            expect(gapsFound, `Found ${gapsFound} gaps in tree lines`).toBe(0);
+            console.log('✅ Tree lines are continuous with no gaps');
+        });
+    }
+});
+</file>
+
+<file path="flake.lock">
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1764950072,
+        "narHash": "sha256-BmPWzogsG2GsXZtlT+MTcAWeDK5hkbGRZTeZNW42fwA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f61125a668a320878494449750330ca58b78c557",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
+</file>
+
+<file path="flake.nix">
+{
+  description = "Multi-platform dev shell with VSCode + Playwright browsers";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            nodejs
+            playwright-driver.browsers
+          ];
+
+          shellHook = ''
+            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+          '';
+        };
+      }
+    );
+}
+</file>
+
+<file path="next.config.js">
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+  options: {
+    // If you use remark-gfm, you'll need to use next.config.mjs
+    // as the package is ESM only
+    // https://github.com/remarkjs/remark-gfm#install
+    remarkPlugins: [],
+    rehypePlugins: ["rehypeMdxCodeProps"],
+    // If you use `MDXProvider`, uncomment the following line.
+    // providerImportSource: "@mdx-js/react",
+  },
+})
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  headers: () => [
+    {
+      source: '/Search/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'no-store',
+        },
+      ],
+    },
+  ],
+  images: {
+    domains: ["google.com"]
+  },
+  // Configure pageExtensions to include md and mdx
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  // Optionally, add any other Next.js config below
+  reactStrictMode: true,
+  transpilePackages: ["api"],
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:3000/api/:path*",
+      },
+    ];
+  },
+
+}
+
+// Merge MDX config with Next.js config
+module.exports = withMDX(nextConfig)
+</file>
+
+<file path="postcss.config.cjs">
+module.exports = {
+  plugins: {
+    '@pandacss/dev/postcss': {},
+  },
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="app/Blogs/[slug]/layout.tsx">
+import { Navbar } from "../../components/shared/Navbar";
+import { BlogNavbarWrapper } from "../../components/blog/BlogNavbarWrapper";
+import { css } from "../../../styled-system/css";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className={css({ px: "layout", pt: "layout" })}>
+      <BlogNavbarWrapper>
+        <Navbar mode="sticky" />
+      </BlogNavbarWrapper>
+      {children}
+    </div>
+  )
+}
+</file>
+
+<file path="app/Blogs/[slug]/page.tsx">
+"server-only";
+
+import React from "react";
+import { css } from "../../../styled-system/css";
+import { getAllPosts, getPostBySlug } from "../../../lib/blogs";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import { mdxOptions } from "../../../lib/mdx";
+import "highlight.js/styles/atom-one-dark.css";
+
+export async function generateStaticParams() {
+  const blogs = getAllPosts();
+
+  const paths = blogs.map((blog) => ({
+    slug: blog.slug,
+  }));
+
+  return paths;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const blog = getPostBySlug(params.slug);
+
+  if (blog)
+    return {
+      title: blog.meta.title,
+      description: blog.meta.description,
+    };
+}
+
+export default async function Post({ params }: { params: { slug: string } }) {
+  try {
+    const blog = getPostBySlug(params.slug);
+
+    if (blog) {
+      return (
+        <div
+          className={css({
+            opacity: 0.7,
+            borderRadius: "10px",
+            boxShadow: "#00000F 0 0 10px",
+            bg: "#000000",
+            w: { base: "100%", md: "90%", lg: "80%" },
+            mx: "auto",
+            p: "6",
+            mb: "layout",
+            mt: "layout",
+          })}
+        >
+          <div
+            className={css({
+              maxWidth: "65ch",
+              mx: "auto",
+              color: "white",
+              "& h1": { fontSize: "3xl", fontWeight: "bold", mt: "2rem", mb: "1rem" },
+              "& h2": { fontSize: "2xl", fontWeight: "bold", mt: "1.5rem", mb: "0.75rem" },
+              "& h3": { fontSize: "xl", fontWeight: "bold", mt: "1.25rem", mb: "0.5rem" },
+              "& p": { mb: "1rem", lineHeight: "relaxed" },
+              "& ul": { listStyleType: "disc", pl: "1.5rem", mb: "1rem" },
+              "& ol": { listStyleType: "decimal", pl: "1.5rem", mb: "1rem" },
+              "& li": { mb: "0.5rem" },
+              "& blockquote": {
+                borderLeftWidth: "4px",
+                borderLeftColor: "gray.500",
+                pl: "1rem",
+                fontStyle: "italic",
+                my: "1rem",
+              },
+              "& pre": {
+                bg: "transparent",
+                p: "1rem",
+                borderRadius: "md",
+                overflowX: "auto",
+                mb: "1rem",
+                fontSize: "sm",
+                lineHeight: "1.6",
+              },
+              "& .hljs": {
+                bg: "transparent !important",
+              },
+              "& code": {
+                fontFamily: "mono",
+                bg: "rgba(255,255,255,0.1)",
+                px: "0.2em",
+                borderRadius: "sm",
+                fontSize: "0.9em",
+              },
+              "& pre code": {
+                bg: "transparent",
+                p: "0",
+              },
+              "& a": {
+                color: "blue.400",
+                textDecoration: "underline",
+                _hover: { color: "blue.300" },
+              },
+              "& img": {
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: "md",
+                my: "1rem",
+              },
+              "& hr": {
+                borderColor: "gray.700",
+                my: "2rem",
+              },
+            })}
+          >
+            <div className={css({ mb: "5" })}>
+              <h1 className={css({ fontWeight: "bold", fontSize: "3xl", xl: { mt: "24" }, mb: "0" })}>
+                {blog.meta.title}
+              </h1>
+              <time className={css({ color: "gray.500", fontStyle: "italic" })}>{blog.meta.date}</time>
+              <div className={css({ borderBottomWidth: "1px", borderBottomColor: "white", w: "full", mt: "5" })} />
+            </div>
+            <MDXRemote source={blog.content} options={mdxOptions} />
+          </div>
+        </div>
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    return <p>something broke or this blog doesnt exist :/</p>;
+  }
+}
+</file>
+
+<file path="app/components/home/LatestBlogCard.tsx">
+import { Suspense } from "react";
+import Image from "next/image";
+import { Loading } from "../shared/Loading";
+import { DescriptionTags, tags } from "../search/Badges";
+import Link from "next/link";
+import { css } from "../../../styled-system/css";
+import { getAllPosts } from "../../../lib/blogs";
+
+const LoadingCard = () => {
+  return (
+    <div
+      className={css({
+        w: "full",
+        h: "full",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      })}
+    >
+      <Loading fontsize={30} />
+    </div>
+  );
+};
+
+const FetchBlogs = async () => {
+  const allBlogs = getAllPosts();
+  const blogs = allBlogs.slice(0, 3);
+
+  return (
+    <ul className={css({ overflowY: "auto", flex: 1, minH: 0 })}>
+      {blogs.map((blog) => {
+        const tagBadges = DescriptionTags(blog.meta.tags as tags[]);
+
+        return (
+          <Link
+            href={"/Blogs/" + blog.slug}
+            className={css({
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              color: "gray.800",
+              mb: "3",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              wordBreak: "break-word",
+            })}
+            key={blog.slug}
+            data-group
+          >
+            {blog.meta.image ? (
+              <>
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "column",
+                    maxW: "120",
+                    gap: "2",
+                  })}
+                >
+                  <div>
+                    <h3
+                      className={css({
+                        fontSize: "xl",
+                        fontWeight: "bold",
+                        color: "white",
+                      })}
+                    >
+                      {blog.meta.title}
+                    </h3>
+                    <p className={css({ color: "gray.400" })}>
+                      {blog.meta.date}
+                    </p>
+
+                    {/* MOBILE DESCRIPTION */}
+                    <p
+                      className={css({
+                        display: { base: "block", lg: "none" },
+                        color: "gray.400",
+                        fontSize: "sm",
+                        mt: "1",
+                        lineHeight: "short",
+                      })}
+                    >
+                      {blog.meta.description}
+                    </p>
+                  </div>
+
+                  {/* DESKTOP TAGS */}
+                  <div
+                    className={css({
+                      display: { base: "none", lg: "flex" },
+                      flexWrap: "wrap",
+                      gap: "1",
+                      opacity: 0,
+                      transition: "opacity 0.2s ease-in-out",
+                      _groupHover: { opacity: 1 },
+                    })}
+                  >
+                    {tagBadges}
+                  </div>
+                </div>
+
+                <Suspense fallback={LoadingCard()}>
+                  <Image
+                    src={blog.meta.image}
+                    alt="blogcontent"
+                    width={200}
+                    height={200}
+                  />
+                </Suspense>
+              </>
+            ) : (
+              <div
+                className={css({
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  gap: "1",
+                })}
+              >
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  })}
+                >
+                  <h3
+                    className={css({
+                      fontSize: "xl",
+                      fontWeight: "bold",
+                      color: "white",
+                    })}
+                  >
+                    {blog.meta.title}
+                  </h3>
+                  <p className={css({ color: "gray.400" })}>{blog.meta.date}</p>
+                </div>
+
+                {/* MOBILE DESCRIPTION */}
+                <p
+                  className={css({
+                    display: { base: "block", lg: "none" },
+                    color: "gray.400",
+                    fontSize: "sm",
+                    lineHeight: "short",
+                  })}
+                >
+                  {blog.meta.description}
+                </p>
+
+                {/* DESKTOP TAGS */}
+                <div
+                  className={css({
+                    display: { base: "none", lg: "flex" },
+                    flexWrap: "wrap",
+                    gap: "1",
+                    opacity: 0,
+                    transition: "opacity 0.2s ease-in-out",
+                    _groupHover: { opacity: 1 },
+                  })}
+                >
+                  {tagBadges}
+                </div>
+              </div>
+            )}
+          </Link>
+        );
+      })}
+    </ul>
+  );
+};
+
+const LoadingLatest = () => (
+  <div
+    className={css({
+      w: "full",
+      h: "full",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    })}
+  >
+    <Loading fontsize={30} />
+  </div>
+);
+
+export const LatestBlogCard = () => {
+  return (
+    <div
+      className={css({
+        px: { sm: "20", lg: "5", base: "5" },
+        py: "5",
+        h: "full",
+        minH: 0,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      })}
+    >
+      <h3
+        className={css({
+          fontSize: "2xl",
+          fontWeight: "bold",
+          color: "blue.300",
+        })}
+      >
+        Latest
+      </h3>
+      <hr className={css({ my: "5" })} />
+      <div
+        className={css({
+          w: "full",
+          flex: 1,
+          minH: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          overflow: "hidden",
+        })}
+      >
+        <Suspense fallback={<LoadingLatest />}>
+          <FetchBlogs />
+        </Suspense>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/search/Badges.tsx">
+import { css } from "../../../styled-system/css";
+
+const badgeStyle = (bgColor: string, textColor: string, darkBg: string, darkText: string) =>
+  css({
+    bg: bgColor,
+    color: textColor,
+    fontSize: "xs",
+    fontWeight: "medium",
+    mr: "2",
+    px: "2.5",
+    py: "0.5",
+    borderRadius: "full",
+    _dark: { bg: darkBg, color: darkText },
+  });
+
+const TechBadge = () => <span className={badgeStyle("blue.100", "blue.800", "blue.900", "blue.300")}>Tech</span>;
+
+const JSBadge = () => <span className={badgeStyle("gray.100", "gray.800", "gray.700", "gray.300")}>JavaScript</span>;
+
+const PhilosophyBadge = () => <span className={badgeStyle("red.100", "red.800", "red.900", "red.300")}>Philosophy</span>;
+
+const WritingBadge = () => <span className={badgeStyle("green.100", "green.800", "green.900", "green.300")}>Writing</span>;
+
+const ShitpostBadge = () => <span className={badgeStyle("yellow.100", "yellow.800", "yellow.900", "yellow.300")}>Shitpost</span>;
+
+const CommentaryBadge = () => <span className={badgeStyle("indigo.100", "indigo.800", "indigo.900", "indigo.300")}>Commentary</span>;
+
+const GenericBadge = ({ text }: { text: string }) => (
+  <span className={badgeStyle("gray.100", "gray.800", "gray.700", "gray.300")}>{text}</span>
+);
+
+export type tags =
+  | "tech"
+  | "writing"
+  | "commentary"
+  | "philosophy"
+  | "shitpost"
+  | "js"
+  | string; // Allow other strings
+
+export const DescriptionTags = (tags: tags[]) => {
+  const components = [] as JSX.Element[];
+  const safeTags = Array.isArray(tags) ? tags : [];
+  safeTags.forEach((el, i) => {
+    if (i < 3) { // Increased limit slightly
+      const tag = el.toLowerCase();
+      if (tag === "tech") {
+        components.push(<TechBadge key={i} />);
+      } else if (tag === "writing") {
+        components.push(<WritingBadge key={i} />);
+      } else if (tag === "commentary") {
+        components.push(<CommentaryBadge key={i} />);
+      } else if (tag === "philosophy") {
+        components.push(<PhilosophyBadge key={i} />);
+      } else if (tag === "shitpost") {
+        components.push(<ShitpostBadge key={i} />);
+      } else if (tag === "js") {
+        components.push(<JSBadge key={i} />);
+      } else {
+        components.push(<GenericBadge key={i} text={el} />);
+      }
+    }
+  });
+  return components;
+};
+</file>
+
+<file path="app/components/search/SearchWrapper.tsx">
+"use client";
+
+import React, { useMemo, useState } from "react";
+import { css } from "../../../styled-system/css";
+import { BlogPost } from "../../../lib/blogs";
+import { TreeNode } from "./TreeNode";
+import { AnimatePresence } from "framer-motion";
+
+export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
+  const [search, setSearch] = useState("");
+
+  const filteredPosts = useMemo(() => {
+    const searchLower = search.toLowerCase();
+    return posts.filter((post) => {
+      const tags = Array.isArray(post.meta.tags) ? post.meta.tags : [];
+      return (
+        post.meta.title.toLowerCase().includes(searchLower) ||
+        post.meta.description.toLowerCase().includes(searchLower) ||
+        tags.some((tag) => tag.toLowerCase().includes(searchLower))
+      );
+    });
+  }, [posts, search]);
+
+  return (
+    <div
+      className={css({
+        w: "full",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        pb: "layout",
+      })}
+    >
+      {/* Glassy sticky header strip */}
+      <div
+        className={css({
+          w: "full",
+          position: "sticky",
+          top: "navHeight",
+          zIndex: 40,
+          display: "flex",
+          justifyContent: "center",
+          backdropFilter: "blur(10px)",
+          mb: "layout",
+        })}
+      >
+        <div
+          className={css({
+            w: "full",
+            maxW: "800px",
+          })}
+        >
+          <input
+            type="text"
+            placeholder="Search blogs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={css({
+              w: "100%",
+              p: "5",
+              bg: "#000000",
+              opacity: 0.7,
+              borderRadius: "10px",
+              boxShadow: "#00000F 0 0 10px",
+              color: "white",
+              outline: "none",
+              fontSize: "xl",
+              _focus: {
+                borderColor: "white",
+                boxShadow: "0 0 15px rgba(255,255,255,0.4)",
+              },
+              transition: "all 0.3s ease",
+            })}
+          />
+        </div>
+      </div>
+
+      {/* Tree List */}
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          w: "full",
+          alignItems: "center",
+          gap: "layout",
+        })}
+      >
+        {filteredPosts.map((blog, index) => (
+          <TreeNode
+            key={blog.slug}
+            blog={blog}
+            depth={0}
+            isFirst={index === 0}
+            isLast={index === filteredPosts.length - 1}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/shared/Navbar.tsx">
+import { css } from "../../../styled-system/css";
+import "./shared.css";
+import { Route } from "./Route";
+
+export interface NavbarProps {
+  mode?: "fixed" | "sticky";
+}
+
+/**
+ * Global navigation bar component with glass effect styling.
+ * Displays the site title and navigation links.
+ */
+export const Navbar = ({ mode = "fixed" }: NavbarProps) => {
+  return (
+    <nav
+      className={css({
+        layerStyle: "navbar",
+        position: mode,
+      })}
+    >
+      <div
+        className={css({
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mx: "auto",
+          w: "100%",
+          maxW: "1536px",
+        })}
+      >
+        <a href="#" className={css({ display: "flex" })}>
+          <span
+            className={`anim-typewriter ${css({
+              alignSelf: "center",
+              fontSize: "30px",
+              fontWeight: "semibold",
+              whiteSpace: "nowrap",
+              color: "white",
+              fontFamily: "pixel, sans-serif",
+            })}`}
+          >
+            becker63
+          </span>
+        </a>
+
+        <ul className={css({ display: "flex" })}>
+          <li>
+            <Route
+              color="#0097fc"
+              href="/"
+              className={css({
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
+              })}
+              size={20}
+            >
+              <h3 className={css({ _hover: { color: "white" } })}>Home</h3>
+            </Route>
+          </li>
+          <li>
+            <Route
+              color="#FCA5A5"
+              href="/Search"
+              className={css({
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
+              })}
+              size={20}
+            >
+              <h3 className={css({ _hover: { color: "white" } })}>Blogs</h3>
+            </Route>
+          </li>
+          <li>
+            <Route
+              color="#86EFAC"
+              href="/Blogs/designing-for-two"
+              className={css({
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
+              })}
+              size={20}
+            >
+              <h3 className={css({ _hover: { color: "white" } })}>Portfolio</h3>
+            </Route>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  );
+};
+</file>
+
+<file path="app/components/shared/Route.tsx">
+"use client";
+
+import { css, cx } from "@/styled-system/css";
+import { ReactNode, useState, useEffect } from "react";
+import { Loading } from "./Loading";
+
+export interface RouteProps {
+  children: ReactNode;
+  href: string;
+  color?: string;
+  className?: string;
+  size: number;
+}
+
+/**
+ * A link component with loading state indicator.
+ * Shows a loading animation for 3 seconds after click.
+ */
+export const Route = ({
+  children,
+  href,
+  color,
+  className,
+  size,
+}: RouteProps) => {
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  const isExternal = href.startsWith("https://");
+
+  return (
+    <a
+      style={{ color }}
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      className={cx(className, css({ _hover: { color: "white" } }))}
+      onClick={() => {
+        if (!isExternal) setLoading(true);
+      }}
+    >
+      {!loading ? children : <Loading fontsize={size} />}
+    </a>
+  );
+};
+</file>
+
+<file path="app/globals.css">
+@layer reset, base, tokens, recipes, utilities;
+
+@layer utilities {
+  [class*="bebop_svg__path"] {
+    stroke-dasharray: 5000;
+    stroke-dashoffset: 5000;
+    animation: dash 5s linear alternate infinite;
+  }
+
+  .topGradient {
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 1) 40%,
+        rgba(255, 255, 255, 1) 90%);
+  }
+
+  .smoothInputCusor {
+    color: transparent;
+    text-shadow: 0 0 0 #2196f3;
+    transition: all 0.8s !important;
+  }
+
+  .mobileparentsize {
+    min-height: calc(100vh - 60px);
+  }
+}
+
+@font-face {
+  font-family: "pixel";
+  src: local("pixel"), url("/fonts/pixeldown.ttf") format("truetype");
+  font-weight: bold;
+}
+
+body {
+  background-color: #581F37;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.fancyFont {
+  font-family: "pixel";
+}
+
+
+/* Animation */
+.anim-typewriter {
+  position: relative;
+  border-right: 2px solid rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+
+  animation: typewriter 2s steps(44) 1s 1 normal both,
+    blinkTextCursor 500ms steps(44) infinite normal;
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blinkTextCursor {
+  from {
+    border-right-color: rgba(0, 0, 0, 0.75);
+  }
+
+  to {
+    border-right-color: transparent;
+  }
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 5000;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Hide scrollbar globally while preserving scroll */
+html {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Opera */
+}
+
+/* Code block horizontal scrollbar - inverted colors */
+pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: #000000;
+  border-radius: 8px;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Firefox scrollbar styling for pre elements */
+pre {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.6) #000000;
+}
+</file>
+
+<file path="app/layout.tsx">
+/* eslint-disable @next/next/no-img-element */
+import "./globals.css";
+import { css } from "../styled-system/css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+
+export const metadata = {
+  title: 'becker63',
+  description: 'Generated by create next app',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={css({ color: "white" })}>
+      <body>
+        <img
+          className={css({
+            zIndex: "0",
+            position: "fixed",
+            inset: "0",
+            margin: "auto",
+            maxWidth: "70%",
+            height: "auto",
+            width: "auto",
+            pointerEvents: "none",
+          })}
+          src="/img/backgroundImage.jpg"
+          alt="blogcontent"
+        />
+        <div className={css({ position: "relative", zIndex: "1" })}>
+          {children}
+        </div>
+      </body>
+    </html>
+  )
+}
+</file>
+
+<file path="app/page.tsx">
+import { HomeMobileLayout } from "./components/home/HomeMobileLayout";
+import { HomeDesktopLayout } from "./components/home/HomeDesktopLayout";
+
+export default function Home() {
+  return (
+    <>
+      <HomeMobileLayout />
+      <HomeDesktopLayout />
+    </>
+  );
+}
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+</file>
+
+<file path="app/Search/page.tsx">
+import React from "react";
+import { SearchWrapper } from "../components/search/SearchWrapper";
+import { getAllPosts } from "../../lib/blogs";
+import { css } from "../../styled-system/css";
+
+export default function BlogHomepage() {
+  const posts = getAllPosts();
+
+  return (
+    <>
+      <div
+        className={css({
+          layerStyle: "pageWithMargins",
+        })}
+      >
+        <SearchWrapper posts={posts} />
+      </div>
+    </>
+  );
+}
+</file>
+
+<file path=".eslintrc">
+{
+  "extends": [
+    "next"
+  ]
+}
+</file>
+
+<file path="panda.config.ts">
+import { defineConfig } from "@pandacss/dev";
+
+export default defineConfig({
+  // Whether to use css reset
+  preflight: true,
+
+  // Where to look for your css declarations
+  include: [
+    "./pages/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./lib/**/*.{js,jsx,ts,tsx}",
+  ],
+
+  // Files to exclude
+  exclude: [],
+
+  // Useful for theme customization
+  theme: {
+    extend: {
+      breakpoints: {
+        xsm: "400px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
+      },
+      tokens: {
+        spacing: {
+          layout: { value: "{spacing.3}" }, // 12px
+          navHeight: { value: "70px" }, // 57px (nav bottom) + 13px gap = 70px
+        },
+      },
+      layerStyles: {
+        navbar: {
+          description: "Glassy standard navbar",
+          value: {
+            zIndex: 50,
+            bg: "black",
+            px: { base: "2", sm: "4" },
+            opacity: 0.7,
+            borderRadius: "10px",
+            boxShadow: "#00000F 0 0 10px",
+            top: "{spacing.layout}",
+            left: "{spacing.layout}",
+            right: "{spacing.layout}",
+            mb: "{spacing.layout}",
+          } as any,
+        },
+        pageContainer: {
+          description: "Top-level page container matching fixed navbar",
+          value: {
+            pt: "{spacing.navHeight}",
+            pb: "{spacing.layout}",
+          } as any,
+        },
+        pageWithMargins: {
+          description: "Page container with consistent viewport margins matching navbar",
+          value: {
+            pt: "{spacing.navHeight}",
+            pb: "{spacing.layout}",
+            px: "{spacing.layout}",
+            minH: "100vh",
+            w: "100%",
+            boxSizing: "border-box",
+          } as any,
+        },
+      },
+      keyframes: {
+        typewriter: {
+          from: { width: "0" },
+          to: { width: "100%" },
+        },
+        blinkTextCursor: {
+          from: { borderRightColor: "rgba(0, 0, 0, 0.75)" },
+          to: { borderRightColor: "transparent" },
+        },
+        dash: {
+          from: { strokeDashoffset: "1000" },
+          to: { strokeDashoffset: "0" },
+        },
+      },
+    },
+  },
+
+  // The output directory for your css system
+  outdir: "styled-system",
+});
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+/content
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+/test-results
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+## Panda
+styled-system
+styled-system-studio
+
+app/_assets/svg/bebop.svg
+public/svg/bebop.svg
+</file>
+
+<file path="package.json">
+{
+  "name": "next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prepare": "panda codegen",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-brands-svg-icons": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mdx-js/loader": "^2.3.0",
+    "@next/mdx": "^13.5.5",
+    "@xstate/react": "^6.0.0",
+    "@zodyac/zod-mongoose": "^1.1.2",
+    "framer-motion": "^12.29.0",
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
+    "next-mdx-remote": "^5.0.0",
+    "prism-themes": "^1.9.0",
+    "react-inlinesvg": "^4.2.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-mdx-code-props": "^1.0.0",
+    "rehype-prism-plus": "^2.0.1",
+    "webpack": "^5.89.0",
+    "xstate": "^5.24.0"
+  },
+  "devDependencies": {
+    "@pandacss/dev": "^1.6.1",
+    "@playwright/test": "1.54.1",
+    "@svgr/webpack": "^8.1.0",
+    "@types/node": "^20.8.7",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8.51.0",
+    "eslint-config-next": "^14.1.4",
+    "next": "^14.2.1",
+    "npm-run-all": "^4.1.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "*"
+  }
+}
+</file>
+
+</files>

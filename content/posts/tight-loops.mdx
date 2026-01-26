@@ -1,0 +1,319 @@
+---
+title: Tight Loops
+date: '25 January 2026'
+description: How frontend instincts about tooling and feedback loops shaped a structured fuzzing workflow.
+tags: tech
+---
+
+Believe it or not I used to be a frontend guy. Like a real frontend guy. I did the spa thing, I wrote react. I did the things the industry tells you your not supposed to do in order to move fast. At one of my jobs I owned a fork of Chartjs. 
+
+So yeah, I was deep in it. And honestly, that was fine, because the problems I was solving _did_ genuinely require the kinds of complex architectures the modern web incentivizes. My early battle scars came from fighting state-management libraries like Recoil (which was still relatively new at the time), and from interfacing with strange windowing libraries like `react-mosaic`. Then I had to take all of that and iteratively plumb _just enough_ of it together to turn into something demoable.
+
+But what actually made that work possible — what made frontend _fast_ — wasn’t React itself, or clever abstractions. It was the fact that frontend development lives inside an unusually consistent runtime environment, backed by extremely strong build and tooling conventions.
+
+CLIs, project templates, formatters, hot reloaders, package managers, and predictable dev servers meant that you could spin something up quickly, share it immediately, and expect it to behave roughly the same on someone else’s machine. The setup path was well-worn. The feedback loop was tight. You spent your time _inside_ the problem, not negotiating the environment.
+
+I’m sharing this frontend background because that need to productize, to move quickly, to package work so it’s legible and runnable by someone else, to ship something that looks intentional to users rather than impressive only to engineers, has deeply infected how I work. Even when the work is abstract or low-level, I instinctively wrap it in tooling, structure, and affordances.
+
+I think that producty mother tongue, my first language, and the habits it produced mostly serve me well, especially as I work almost exclusively in technical layers of the stack. What frontend really taught me wasn’t exclusively UI polish, it was how much speed comes from a consistent runtime environment and good tooling.
+
+When I’m deep in a system and I see a nice Makefile, a CMake setup, a Bash script, or even someone pointing to proper setup docs, I see the person behind the repo who put in the non-trivial effort to make the project easier to understand and less of a burden for the next person.
+
+And to me, that effort isn’t just courtesy. You can feel how much faster you’re able to move when setup code is reliable and you let your computer do work for you. The feedback loop tightens in the same way it does in application or web development.
+
+You can fork casually, move things around in non-trivial ways, make fewer assumptions, and you stop hearing “it doesn’t run on my machine.”
+
+That’s what lets you explore novel state spaces faster.
+
+You know what else does that?
+
+---
+## Coverage guided fuzzing
+
+Coverage guided fuzzing is one way of turning program behavior into a search problem.
+
+The basic loop is simple: generate inputs, observe execution, keep the ones that lead somewhere new. Coverage is just one heuristic for “newness” among many. It’s not a guarantee of correctness or completeness, and it’s not especially interesting on its own.
+
+What *is* interesting is the workflow it enables.
+
+Instead of manually enumerating cases or relying on intuition about where a system might break, you define a boundary, give the machine a signal, and let it explore. The tighter and more reliable that loop is, the more useful it becomes. Most of the work ends up looking less like writing tests and more like designing the surface the fuzzer is allowed to search.
+
+That framing is what drew me to fuzzing here. Not as a vulnerability-hunting technique, but as a way to externalize exploration and reduce the amount of implicit reasoning I was doing by hand.
+
+## libnftnl/libmnl motivation
+
+The concrete system I ended up exploring this way was nftables’ userland stack, specifically `libnftnl` and `libmnl`.
+
+I didn’t set out to fuzz them.
+
+Originally, I was writing a small, user-facing Nim wrapper around `libnftnl` for another project. I wanted something typed, ergonomic, and pleasant enough to use without constantly reaching for the C headers. As I worked through the API surface and tried to model it faithfully, something else started to stand out.
+
+This wasn’t just a large or awkward API. It had many of the structural properties that usually make security-relevant code hard to reason about: deeply nested objects, implicit invariants, ownership rules that depend on call order, and a lot of silent normalization happening between representations.
+
+At some point, the work stopped feeling like “just” binding a library and started feeling like I was mapping an attack surface.
+
+I didn’t have a concrete exploit in mind, and I wasn’t confident enough in my understanding to make strong claims. But I *was* confident that this was the kind of surface where fuzzing could replace a lot of guesswork with signal.
+
+---
+## The fuzzer
+
+Rather than fuzzing this stack by generating arbitrary Netlink packets, I focused on the userland serialization path itself. The goal wasn’t to bypass validation, but to explore the space of valid-looking structures and iteratively determine where the edges actually were.
+
+That choice let me lean directly on instincts I picked up from years of frontend work. Instead of treating the fuzzer as a black box, I treated it like an interactive system. Something you shape, iterate on, and make pleasant enough to live inside for a long time.
+
+It gave me an excuse to build small DSLs, write automation, and aggressively abstract over sharp edges. Not for elegance’s sake, but because every bit of friction in the harness showed up immediately as slower exploration.
+
+Before I worried about corpus quality or coverage curves, I spent most of my time trying to make the surface I was fuzzing legible. That work ended up mattering more than any individual heuristic.
+
+### Pretty macros
+
+The first place that legibility really broke down was attribute handling.
+
+`libnftnl` exposes a large family of getters and setters for chain and rule attributes. Each attribute has an expected type, but that expectation is implicit. It lives in documentation, examples, and tribal knowledge rather than in the type system.
+
+Getting it wrong usually doesn’t fail immediately. You just end up with malformed objects that behave strangely later, often far away from the code that introduced the mistake.
+
+For interactive exploration, that’s poison. It forces you to keep too much state in your head and turns even small mutations into acts of faith.
+
+I wanted to make those expectations explicit and enforce them mechanically.
+
+In Nim, that turned into a small macro-driven layer that does three things:
+
+- encodes the expected type of each attribute at compile time
+- collapses the raw get and set calls into a single interface
+- fails early when I try to do something unsupported
+
+I wrote the harness in Nim for very practical reasons. `libnftnl` is a C library with strict ownership rules and a large, loosely-typed surface. Nim’s ARC/RAII-style memory model and move semantics let me wrap those raw pointers in types that automatically free resources and prevent accidental copies, while still compiling down to straightforward C interop. 
+
+Its compile-time macros then made it possible to encode attribute invariants directly into the type system without adding runtime overhead. I wasn’t looking for a new ecosystem — just a way to make a C API behave more like a memory-safe, structured interface while staying close to the metal.
+
+The goal wasn’t to make `libnftnl` “safe.” It was to make it harder for me to lie to myself while experimenting. Nim helped me do that.
+
+What I wanted was something that behaved like a property accessor.
+
+Reading an attribute should look like:
+
+```cpp
+chain.name
+```
+
+Setting one should look like:
+
+```nim
+chain.policy = NF_ACCEPT
+```
+
+The core of that mechanism is a small Nim macro. At first glance, the signature is completely opaque.
+
+```nim
+macro attrOp*(c: typed,
+              attr: enum_nftnl_chain_attr,
+              args: varargs[untyped]): untyped =
+```
+
+That’s not accidental. This macro sits right at the boundary between “nice” code and raw C calls.
+
+There are three inputs:
+
+- `c` is the chain object we’re operating on. It’s marked `typed` so the macro can inspect its structure and extract the underlying raw pointer it needs to call into `libnftnl`.
+    
+- `attr` is a compile-time enum constant identifying a specific chain attribute. These enums are generated directly from `libnftnl`’s headers, so each value corresponds to a fixed attribute ID and an expected value type known at compile time.
+    
+- `args` is a variable-length list of expressions representing the value we might be setting.
+    
+
+The trick is that the _number_ of arguments determines the operation.
+
+```nim
+if args.len == 0:
+    # getter
+elif args.len == 1:
+    # setter
+else:
+    error "attrOp takes 0 or 1 arguments"
+```
+
+If no value is provided, the macro expands into a getter.  
+If exactly one value is provided, it expands into a setter.  
+Anything else is rejected at compile time.
+
+---
+
+### Getter expansion
+
+In the getter case, the macro expands to something equivalent to:
+
+```nim
+rawGetAttr[expectedType(attr)](c.raw, attr.uint16)
+```
+
+A few important things are happening here:
+
+- `expectedType(attr)` is a compile-time mapping from attribute → type.  
+    For example, `NFTNL_CHAIN_NAME` maps to `string`, while `NFTNL_CHAIN_POLICY` maps to `uint32`.
+    
+- That type is used to specialize the underlying getter at compile time.
+    
+- The enum itself is lowered to the numeric attribute ID (`uint16`) that `libnftnl` expects.
+
+If I try to read an attribute using the wrong type, the code simply doesn’t compile.
+
+---
+
+### Setter expansion
+
+The setter case expands into a call that looks like this conceptually:
+
+```nim
+rawSetAttr(c.raw, attr.uint16, value)
+```
+
+The interesting part is how `rawSetAttr` behaves.
+
+Instead of a single monolithic setter, it dispatches _on the Nim type of the value_:
+
+- strings call `nftnl_chain_set_str`
+    
+- `uint32` calls `nftnl_chain_set_u32`
+    
+- `uint64` calls `nftnl_chain_set_u64`
+    
+- enums and other integers are coerced and width-checked before dispatch
+    
+- anything else fails at compile time
+
+So when I write:
+
+```nim
+chain.policy = NF_ACCEPT
+```
+
+What I actually get is:
+
+- compile-time validation that `policy` expects a `uint32`
+    
+- compile-time validation that `NF_ACCEPT` is representable
+    
+- a concrete call to the correct `libnftnl` setter
+    
+- zero dynamic checks at runtime
+
+That’s the entire point of this layer. Not abstraction for its own sake, but collapsing a wide, error-prone surface into something I could reason about _locally_ while fuzzing.
+
+Once this was in place, building and mutating chains stopped feeling like poking at a C API and started feeling like manipulating a data structure.
+
+And that change mattered far more than any individual fuzzing heuristic.
+
+---
+## One-click fuzzing
+
+Up to this point, everything I’ve described lives inside the harness itself: the API modeling, the macros, the abstractions that made exploration tractable.
+
+That work mattered, but it wasn’t enough.
+
+In practice, fuzzing lives or dies on how easy it is to _run_. If starting the fuzzer requires negotiating permissions, SSHing into machines, remembering flags, or cleaning up state by hand, the feedback loop collapses. You stop iterating. You stop exploring. You start procrastinating.
+
+This became very real for me because I wasn’t fuzzing on my own machine.
+
+A close friend of mine is a very capable operator. He owns and maintains several large servers, understands hardware deeply, and is understandably protective of his systems. He was happy to let me use the hardware, but not at the cost of handing out root, editing systemd units by hand, or running half-baked fuzzing setups directly on a shared host.
+
+That boundary was reasonable, and it ended up being productive.
+
+It forced me to treat the _deployment_ of the fuzzer as part of the system I was designing, not an afterthought.
+
+### Three iterations of automation
+
+I didn’t get this right on the first try. It took three distinct iterations before the setup stopped fighting me.
+
+**First**, I automated the build itself.  
+That meant reproducible builds of the fuzzer, the harness, and coverage-instrumented versions of `libnftnl` and `libmnl`. If I couldn’t rebuild everything deterministically, nothing else mattered.
+
+**Second**, I automated observability.  
+I added Prometheus and Grafana, wired up log parsing and coverage export, and made it possible to see what the fuzzer was doing without SSHing into a box and tailing files. This helped, but it didn’t solve the biggest problem.
+
+**Third**, the system OOM-killed itself.
+
+Running many libFuzzer workers against a complex userland library is brutal on memory. Even with reasonable limits, the host would eventually hit OOM pressure. At that point, I stopped trying to be clever and changed the shape of the problem entirely.
+
+### Containing the blast radius
+
+Instead of running the fuzzer directly on the host, I moved it into a dedicated microVM.
+
+That one decision unlocked everything else.
+
+Inside the VM, I could:
+
+- hard-cap memory with cgroups
+    
+- auto-scale the number of fuzzing workers based on available RAM
+    
+- enable zram to absorb short-lived memory spikes
+    
+- tune kernel parameters specifically for sanitizer-heavy workloads
+    
+- crash and restart the entire environment without affecting the host
+    
+
+The VM mounts a single shared directory via virtiofs for corpora and logs. That’s the only bridge. Everything else is isolated.
+
+From my friend’s perspective, this was suddenly acceptable.  
+From my perspective, it was liberating.
+
+### From setup to button
+
+Once the fuzzer lived inside a microVM, the remaining pieces snapped into place quickly.
+
+- One command builds everything.
+    
+- One command starts observability.
+    
+- One command launches the VM.
+    
+- The fuzzer auto-scales, auto-restarts, and never OOMs the host.
+    
+- Metrics and coverage show up immediately.
+    
+- Logs stream continuously.
+    
+- Corpora persist across restarts.
+    
+
+There’s no fragile choreography. No manual cleanup. No “don’t touch this while it’s running.”
+
+I could hand the entire setup to someone else and say: _run this_, without a 30-minute explanation.
+
+That’s the same bar frontend tooling set years ago, and it’s still surprisingly rare in fuzzing.
+
+The harness, macros, and VM automation described here live in the project repository:
+
+[`https://github.com/becker63/libnet/`](https://github.com/becker63/libnet/)
+
+---
+## Why this mattered
+
+None of this made the fuzzer “smarter.”
+
+What it did was remove excuses.
+
+When running the fuzzer costs a click instead of a commitment, you experiment more freely. You try things you’re not sure will work. You re-run after small changes. You let it explore while you think.
+
+That’s the same dynamic that made frontend work feel fast in the first place. The tooling fades into the background, and what’s left is a tight loop between intention and observation.
+
+Once I had that loop, fuzzing stopped feeling like a special activity and started feeling like a normal part of development.
+
+That shift mattered more than any individual result.
+
+I want to be explicit about the scope here: I’m not a traditional security researcher, and this wasn’t a disciplined vulnerability discovery effort in the academic or professional sense. I didn’t arrive with a threat model, a target class, or a plan to grind through minimization until a clean exploit fell out.
+
+What I _did_ have was a working mental model of a complicated system, a suspicion that the userland boundary was doing more work than most people assume, and a workflow that let me explore that surface without constantly second-guessing myself.
+
+The fuzzer did generate a non-trivial corpus and exercised parts of `libnftnl` in ways I wouldn’t have written by hand. Some of that behavior was genuinely surprising. Other parts were messy, ambiguous, or hard to interpret without deeper tooling than I had time to build.
+
+Eventually, the work started to drift away from what I’m good at, designing systems and feedback loops, and toward the kind of sustained forensic analysis that real security research demands. At that point, I stopped.
+
+That decision was intentional.
+
+What I _do_ have are clearer models: of how `libnftnl` structures its objects in memory, where normalization happens, how userland serialization feeds the kernel boundary, and why that space is interesting at all. I also have a handful of concrete observations and leads that I think are worth following up on—by people who actually want to do that work.
+
+The next post is about those models.  
+Not exploits, not claims, just a closer look at the surface itself, why it’s shaped the way it is, and why I think it deserves more deliberate attention than it usually gets.

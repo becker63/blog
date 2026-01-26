@@ -11,8 +11,8 @@ export { BebopContainer } from "./BebopContainer";
 
 export { Bebop } from "./Bebop";
 
-export { MobileLayout } from "./MobileScrollContainer";
+//export { MobileLayout } from "./MobileScrollContainer";
 
-export { LatestBlogCard } from "./LatestBlogCard";
+//export { LatestBlogCard } from "./LatestBlogCard";
 
 export { HomeNav } from "./HomeNav";
