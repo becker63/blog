@@ -1,31 +1,27 @@
-"use client";
-
 import { css } from "../../../styled-system/css";
 import "./shared.css";
 import { Route } from "./Route";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHouse,
-  faBookOpen,
-  faDiagramProject,
-} from "@fortawesome/free-solid-svg-icons";
 
 export interface NavbarProps {
   mode?: "fixed" | "sticky";
 }
 
+/**
+ * Global navigation bar component with glass effect styling.
+ * Displays the site title and navigation links.
+ */
 export const Navbar = ({ mode = "fixed" }: NavbarProps) => {
   return (
     <nav
       className={css({
         layerStyle: "navbar",
         position: mode,
-        backdropFilter: "blur(10px)",
       })}
     >
       <div
         className={css({
           display: "flex",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
           mx: "auto",
@@ -33,8 +29,7 @@ export const Navbar = ({ mode = "fixed" }: NavbarProps) => {
           maxW: "1536px",
         })}
       >
-        {/* Logo */}
-        <a href="/" className={css({ display: "flex" })}>
+        <a href="#" className={css({ display: "flex" })}>
           <span
             className={`anim-typewriter ${css({
               alignSelf: "center",
@@ -43,94 +38,59 @@ export const Navbar = ({ mode = "fixed" }: NavbarProps) => {
               whiteSpace: "nowrap",
               color: "white",
               fontFamily: "pixel, sans-serif",
-              letterSpacing: "0.04em",
-              textShadow: "0 0 4px rgba(255,255,255,0.25)",
             })}`}
           >
             becker63
           </span>
         </a>
 
-        {/* Links */}
-        <ul
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            gap: "3",
-          })}
-        >
+        <ul className={css({ display: "flex" })}>
           <li>
             <Route
               color="#0097fc"
               href="/"
-              size={18}
               className={css({
-                display: "flex",
-                alignItems: "center",
-                gap: "2",
-                py: "1",
-                px: "2",
-                fontSize: "14px",
-                borderBottom: "1px solid transparent",
-                transition: "all 0.15s ease",
-                _hover: {
-                  borderColor: "#0097fc",
-                  textShadow: "0 0 6px rgba(0,151,252,0.6)",
-                },
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
               })}
+              size={20}
             >
-              <FontAwesomeIcon icon={faHouse} />
-              <span>Home</span>
+              <h3 className={css({ _hover: { color: "white" } })}>Home</h3>
             </Route>
           </li>
-
           <li>
             <Route
               color="#FCA5A5"
               href="/Search"
-              size={18}
               className={css({
-                display: "flex",
-                alignItems: "center",
-                gap: "2",
-                py: "1",
-                px: "2",
-                fontSize: "14px",
-                borderBottom: "1px solid transparent",
-                transition: "all 0.15s ease",
-                _hover: {
-                  borderColor: "#FCA5A5",
-                  textShadow: "0 0 6px rgba(252,165,165,0.6)",
-                },
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
               })}
+              size={20}
             >
-              <FontAwesomeIcon icon={faBookOpen} />
-              <span>Blogs</span>
+              <h3 className={css({ _hover: { color: "white" } })}>Blogs</h3>
             </Route>
           </li>
-
           <li>
             <Route
               color="#86EFAC"
               href="/Blogs/designing-for-two"
-              size={18}
               className={css({
-                display: "flex",
-                alignItems: "center",
-                gap: "2",
-                py: "1",
-                px: "2",
-                fontSize: "14px",
-                borderBottom: "1px solid transparent",
-                transition: "all 0.15s ease",
-                _hover: {
-                  borderColor: "#86EFAC",
-                  textShadow: "0 0 6px rgba(134,239,172,0.6)",
-                },
+                display: "block",
+                py: "2",
+                px: { base: "1", sm: "4" },
+                pl: "3",
+                fontSize: "15px",
               })}
+              size={20}
             >
-              <FontAwesomeIcon icon={faDiagramProject} />
-              <span>Portfolio</span>
+              <h3 className={css({ _hover: { color: "white" } })}>Portfolio</h3>
             </Route>
           </li>
         </ul>
