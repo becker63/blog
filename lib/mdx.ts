@@ -1,17 +1,12 @@
 import rehypeHighlight from "rehype-highlight";
-import nim from "highlight.js/lib/languages/nim";
+import rehypeRaw from "rehype-raw";
 import { all } from "lowlight";
+import remarkMermaidStatic from "./remark-mermaid-static";
 import type { MDXRemoteProps } from "next-mdx-remote/rsc";
 
 export const mdxOptions: MDXRemoteProps["options"] = {
   mdxOptions: {
-    rehypePlugins: [
-      [
-        rehypeHighlight,
-        {
-          languages: all,
-        },
-      ],
-    ],
+    remarkPlugins: [remarkMermaidStatic],
+    rehypePlugins: [rehypeRaw, [rehypeHighlight, { languages: all }]] as any,
   },
 };

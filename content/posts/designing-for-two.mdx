@@ -7,7 +7,7 @@ tags: tech
 
 Modern cloud work is hard. I’ve seen this firsthand from both sides — developers trying to ship features, and operators trying to keep systems coherent as they scale.
 
-In response, the industry has produced an enormous body of tooling to manage complexity. Entire subindustries now exist around scheduling, isolation, observability, and deployment. We have systems like Kubernetes and HashiCorp Nomad for scheduling, containers and microVMs for isolation, and observability satacks built on OpenTelemetry, Prometheus, and Grafana.
+In response, the industry has produced an enormous body of tooling to manage complexity. Entire subindustries now exist around scheduling, isolation, observability, and deployment. We have systems like Kubernetes and HashiCorp Nomad for scheduling, containers and microVMs for isolation, and observability stacks built on OpenTelemetry, Prometheus, and Grafana.
 
 These components are mature, powerful, and widely accessible. The internet has had time to grow up, and it shows. I’m genuinely proud of what this industry has built. The CNCF landscape is an incredible artifact of collective engineering effort.
 
@@ -17,7 +17,7 @@ But that pride comes with a quieter anxiety. The same ecosystem that demonstrate
 
 My read is that much of this tension comes from how we coordinate across such a vast surface area. Many of the tools we rely on are deliberately general-purpose: maximally expressive, broadly applicable, and flexible enough to model almost anything. In practice, however, real teams are heterogeneous. They consist of people with different intuitions, tolerances for abstraction, and relationships to code.
 
-Some engineers thrive inside a Turing-complete configuration language. Others prefer constrained, declarative systems. Some are comfortable writing shell glue; others actively avoid it. Generalist tools flatten these differences, often pushing complexity into shadow work — ad-hoc scripts, translation layers, and tests written to recover clarity that the tooling itself cannot express directly.
+Some engineers thrive inside a Turing-complete configuration language. Others prefer constrained, declarative systems. Some are comfortable writing shell glue; others actively avoid it. Generalist tools flatten these differences, often pushing complexity into shadow work — ad-hoc scripts, translation layers, and tests written to recover clarity the tooling itself cannot express.
 
 This project grew out of an attempt to address that tension more directly.
 
@@ -29,9 +29,34 @@ I approached these challenges by studying how existing tools resolve coordinatio
 
 My project is motivated by a different core principle than much of the existing tooling: **less power, more understanding** — where power is the ability to express arbitrary behavior, and understanding is the ability to reason locally about outcomes.
 
+One way I’ve found it helpful to visualize this tradeoff space is:
+
+```mermaid
+quadrantChart
+    title Configuration Design Tradeoffs
+    x-axis Low Understanding --> High Understanding
+    y-axis Low Expressive Power --> High Expressive Power
+    quadrant-1 Powerful but Opaque
+    quadrant-2 Powerful and Legible
+    quadrant-3 Simple and Legible
+    quadrant-4 Simple but Limited
+    "Terraform (stateful IaC)": [0.55, 0.75]
+    "Pulumi (GP languages)": [0.25, 0.9]
+    "YAML + Bash": [0.8, 0.3]
+    "This Project": [0.85, 0.55]
+```
+
+> **Understanding** here means being able to predict, with confidence, how the system will behave when acted upon.
+
+> A **legible** system is one where the truth about behavior lives in artifacts you can read, rather than being buried inside program execution.
+
+The tension here is not technical capability, but how easily different people can share a correct mental model of the system.
+
 I first developed these intuitions in application systems, where state and behavior were tightly coupled and often implicit. In those environments, ad-hoc abstractions and localized logic made global reasoning difficult, even when individual components were well-designed. Systems that instead made dataflow explicit — modeling dependencies as directed graphs and centralizing state transitions — dramatically improved correctness and debuggability. The same tradeoffs reappear at infrastructure scale, where hidden execution paths and implicit authority have even larger consequences.
 
-The system I built exposes distinct interfaces for different audiences, designed to reinforce rather than obscure one another, while keeping both initial provisioning and ongoing operational change within a single, continuously reconciled control plane. Developers interact with it primarily through executable tests that assert deployment invariants. Operators work through schema-driven configuration that constrains and validates system shape. Hermetic build tooling ties these layers together without collapsing them into a single abstraction.
+The system I built exposes distinct interfaces for different audiences. These are designed to reinforce rather than obscure one another, while keeping both initial provisioning and ongoing operational change within a single, continuously reconciled control plane.
+
+Developers interact with it primarily through executable tests that assert deployment invariants. Operators work through schema-driven configuration that constrains and validates system shape. Hermetic build tooling ties these layers together without collapsing them into a single abstraction.
 
 This project is a design experiment. It is not battle-tested at scale and should not be used in production. The goal is not replacement, but exploration.
 
@@ -145,6 +170,8 @@ KCL is not used here as a code generation language. It is used as a **structured
 
 These KCL functions act as **pure transformations over observed state**. They cannot perform I/O, spawn processes, or introduce side effects. They exist entirely within the reconciliation loop and can only emit declarative resources.
 
+In practice, this means the control plane evaluates configuration as data transformations, not as programs.
+
 The result is a control plane that is:
 
 - statically analyzable,
@@ -163,6 +190,28 @@ Operators can read the emitted YAML. Reviewers can diff it. CI systems can valid
 I did not want to give up the benefits of code entirely. Real systems require conditional logic, schema alignment, and cross-resource wiring that is brittle to express in raw YAML alone.
 
 To address this, the system introduces **code only at the edges**, where it can be reasoned about locally and executed outside the control plane.
+
+```mermaid
+flowchart LR
+    subgraph Inputs
+        A[Upstream APIs<br/>CRDs • Go Types • JSON Schema]
+    end
+
+    subgraph Build["Hermetic Build (Buck2 + Nix)"]
+        B1[Python Model<br/>Codegen]
+        B2[KCL Schema<br/>Codegen]
+        B3[Protocol / App<br/>Schema Codegen]
+    end
+
+    subgraph Outputs
+        C1[Typed Python Models]
+        C2[Typed KCL Schemas]
+    end
+
+    A --> B1 --> C1
+    A --> B2 --> C2
+    B3 --> C2
+```
 
 Schemas are generated from upstream sources — CRDs, Go structs, and JSON Schema — using hermetic build rules. These schemas are imported into KCL, providing strong typing and editor support without turning configuration into a general-purpose program.
 
@@ -259,6 +308,6 @@ Terraform centralizes coordination. Pulumi maximizes expressive power. CDK8s con
 
 The system described here explores a different point in that design space. By treating infrastructure coordination as a **control-plane problem**, and by insisting on static, inspectable interfaces between roles, it becomes possible to automate aggressively without obscuring intent.
 
-Infrastructure does not have to be either fully programmable or fully declarative. With deliberate constraints, it can be composed, audited, and shared across heterogeneous teams — without asking everyone to trust the same abstractions.
+Infrastructure systems shape how teams think, collaborate, and make changes under pressure. By designing for legibility as carefully as we design for power, we can build control planes that more than just automate infrastructure — they make coordination itself easier.
 
 That tradeoff — **less power, more understanding** — is the one I’m most interested in exploring.

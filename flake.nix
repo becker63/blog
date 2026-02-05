@@ -24,11 +24,16 @@
           nativeBuildInputs = with pkgs; [
             nodejs
             playwright-driver.browsers
+            chromium
           ];
 
           shellHook = ''
             export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
             export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+
+            # Tell Puppeteer to use Nix Chromium
+            export PUPPETEER_EXECUTABLE_PATH=${pkgs.chromium}/bin/chromium
+            export PUPPETEER_SKIP_DOWNLOAD=true
           '';
         };
       }

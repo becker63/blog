@@ -1,16 +1,34 @@
 @layer reset, base, tokens, recipes, utilities;
 
 @layer utilities {
-  [class*="bebop_svg__path"] {
-    stroke-dasharray: 5000;
-    stroke-dashoffset: 5000;
-    animation: dash 5s linear alternate infinite;
+  /* Bebop line drawing — long, slow, full-path sweep */
+  .bebop-container path {
+    animation: bebop-draw 16s ease-in-out infinite;
+    opacity: 0.9;
+  }
+
+  /* todo this aint do nothin */
+  @keyframes bebop-draw {
+    0% {
+      stroke-dashoffset: 100%;
+    }
+    20% {
+      stroke-dashoffset: 0;
+    }
+    70% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 100%;
+    }
   }
 
   .topGradient {
-    background: linear-gradient(180deg,
-        rgba(0, 0, 0, 1) 40%,
-        rgba(255, 255, 255, 1) 90%);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(255, 255, 255, 1) 90%
+    );
   }
 
   .smoothInputCusor {
@@ -22,16 +40,31 @@
   .mobileparentsize {
     min-height: calc(100vh - 60px);
   }
+
+  .mermaid-diagram {
+    display: flex;
+    justify-content: center;
+    margin: 3rem 0;
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .mermaid-diagram svg {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 @font-face {
   font-family: "pixel";
-  src: local("pixel"), url("/fonts/pixeldown.ttf") format("truetype");
+  src:
+    local("pixel"),
+    url("/fonts/pixeldown.ttf") format("truetype");
   font-weight: bold;
 }
 
 body {
-  background-color: #581F37;
+  background-color: #581f37;
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
@@ -41,7 +74,6 @@ body {
   font-family: "pixel";
 }
 
-
 /* Animation */
 .anim-typewriter {
   position: relative;
@@ -49,7 +81,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
 
-  animation: typewriter 2s steps(44) 1s 1 normal both,
+  animation:
+    typewriter 2s steps(44) 1s 1 normal both,
     blinkTextCursor 500ms steps(44) infinite normal;
 }
 

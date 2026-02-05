@@ -1,0 +1,206 @@
+---
+title: Control Planes All the Way Down
+date: '4 February 2026'
+description: Seeing system layers as successive control planes, from human intent to kernel enforcement.
+tags: tech
+---
+
+One of the patterns I keep rediscovering is that modern infrastructure isn’t just “software controlling hardware.”
+
+It’s **control planes stacked on top of other control planes**.
+
+Each layer doesn’t directly do the work. It *describes* the work for the layer beneath it.
+
+```mermaid
+---
+title: Simple sample
+---
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
+
+```
+
+At the very top is something fuzzy and human:
+
+> “Block traffic from this IP.”  
+> “Spin up three replicas.”  
+> “Drop packets that don’t match this policy.”
+
+By the time that intention reaches the kernel, it’s no longer fuzzy. It’s bytes. Flags. Struct fields. Bitmasks.
+
+Somewhere between those two points, the system had to **translate meaning into mechanism**.
+
+
+
+```python
+import schemas.kcl.fluxcd_helm_controller_kcl.models.v2.helm_toolkit_fluxcd_io_v2_helm_release as fluxcd_release
+
+fluxcd_release.HelmRelease {
+    metadata.name = "traefik"
+    metadata.namespace = "traefik"
+    spec = {
+        interval = "10m"
+        chart = {
+            spec = {
+                chart = "traefik"
+                version = "21.2.0"
+                sourceRef = {
+                    kind = "HelmRepository"
+                    name = "traefik"
+                    namespace = "traefik"
+                }
+            }
+        }
+        install = {
+            createNamespace = True
+        }
+    }
+}
+```
+
+And its corresponding test.
+
+```python
+@make_kcl_named_test(["crossplane_release.k"], lambda kf: "helm_releases" in kf.path.parts)
+def e2e_frp_kuttl(crossplane_release: KFile) -> None:
+    # Run flux sync
+    subprocess.run(["flux", "run"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Parse HelmRelease from KCL output
+    result = Exec(crossplane_release.path).json_result
+    release = HelmRelease.model_validate(json.loads(result))
+    metadata = release.metadata
+
+    # Check required metadata fields
+    if not metadata or not metadata.namespace or not metadata.name:
+        raise ValueError("HelmRelease.metadata.namespace and name are required")
+
+    namespace_name = metadata.namespace
+    release_name = metadata.name
+
+    # Ensure namespace exists
+    try:
+        Namespace.get(name=namespace_name)
+        print(f"Namespace '{namespace_name}' already exists.")
+    except ResourceNotFound:
+        ns = Namespace.builder().metadata(lambda m: m.name(namespace_name)).build().create()
+        for event, _ in ns.watch():
+            if event == "ADDED":
+                print(f"Namespace '{namespace_name}' created.")
+                break
+
+    # Ensure HelmRelease exists
+    try:
+        HelmRelease.get(name=release_name, namespace=namespace_name)
+        print(f"HelmRelease '{release_name}' already exists.")
+    except ResourceNotFound:
+        for event, _ in release.create().watch(namespace=namespace_name):
+            if event == "ADDED":
+                print(f"HelmRelease '{release_name}' created.")
+                break
+```
+---
+
+## Each Layer Narrows Possibility
+
+Every control plane layer does the same job in a different form:
+
+- Take a **wide, expressive space** of human intent  
+- Project it into a **narrower, more rigid structure**
+- Pass that structure downward
+
+That projection is where most of the real engineering lives.
+
+```mermaid
+flowchart LR
+  A[Flexible Human Concepts] --> B[Validated API Schema]
+  B --> C[Strongly Typed Objects]
+  C --> D[Serialized Wire Format]
+  D --> E[Deterministic Kernel Behavior]
+```
+
+At each step:
+
+- Ambiguity is removed  
+- Invalid states are ruled out  
+- Freedom is traded for predictability  
+
+By the time we reach the bottom, there’s no room left for interpretation. Only execution.
+
+---
+
+## The Illusion of a “Single System”
+
+When we talk about “the firewall” or “the scheduler” or “the database,” we talk like it’s one thing.
+
+But what we really have is a **pipeline of representations**:
+
+1. A user-facing surface that captures intent  
+2. An intermediate language that normalizes it  
+3. A library or control client that structures it  
+4. A transport that encodes it  
+5. A runtime that enforces it  
+
+Each of those is its own system, with its own invariants, failure modes, and edge cases.
+
+The “system” is the *composition* of those layers.
+
+---
+
+## Where Bugs Actually Live
+
+When something goes wrong, it’s tempting to blame the bottom:
+
+> “The kernel did something weird.”  
+> “The runtime is buggy.”
+
+But in layered control planes, failures are often **translation failures**, not execution failures.
+
+```mermaid
+flowchart TD
+  A[User Intention] --> B[CLI Parses Flags]
+  B --> C[API Normalizes Fields]
+  C --> D[Library Builds Objects]
+  D --> E[Serializer Encodes Message]
+  E --> F[Kernel Executes]
+  F --> G[Unexpected Behavior]
+
+  G -.-> C
+  G -.-> D
+  G -.-> E
+```
+
+The kernel might be doing *exactly* what it was told — but what it was told might not be what the user *meant*.
+
+So debugging becomes a matter of asking:
+
+> **At which layer did the meaning change?**
+
+That’s a very different question than “what line of code is broken?”
+
+---
+
+## Designing With Control Planes in Mind
+
+Once you see systems this way, it changes how you design them.
+
+You start to think less about “features” and more about **boundaries between representations**:
+
+- Where do we validate?  
+- Where do we normalize?  
+- Where do we collapse many concepts into fewer primitives?  
+- Where do we freeze structure into bytes?
+
+The quality of a system often depends less on how powerful any single layer is, and more on how *cleanly* those layers connect.
+
+Control planes aren’t just a Kubernetes thing or a networking term.
+
+They’re a general pattern for turning human intent into machine behavior.
+
+And once you notice them, you start seeing them everywhere — stacked, nested, and translating all the way down.
