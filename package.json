@@ -9,7 +9,7 @@
     "lint": "next lint",
     "prepare": "panda codegen",
     "test": "playwright test",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "postinstall": "npx puppeteer browsers install chrome-headless-shell"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
