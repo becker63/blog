@@ -32,7 +32,6 @@ export default function remarkMermaidStatic() {
           "transparent",
           "-c",
           path.join(process.cwd(), "mermaid.config.json"),
-          "--no-sandbox",
           "--disable-setuid-sandbox",
         ],
         { stdio: "inherit" },
