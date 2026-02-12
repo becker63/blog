@@ -9,7 +9,7 @@
     "lint": "next lint",
     "prepare": "panda codegen",
     "test": "playwright test",
-    "postinstall": "puppeteer browsers install chrome"
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
