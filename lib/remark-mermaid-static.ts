@@ -32,8 +32,12 @@ export default function remarkMermaidStatic() {
           "transparent",
           "-c",
           path.join(process.cwd(), "mermaid.config.json"),
+          "--puppeteerConfig",
+          JSON.stringify({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+          }),
         ],
-        { stdio: "ignore" },
+        { stdio: "inherit" }, // <- show real errors in CI
       );
 
       const svg = fs.readFileSync(svgPath, "utf8");
