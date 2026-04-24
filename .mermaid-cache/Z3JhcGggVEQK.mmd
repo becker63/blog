@@ -1,0 +1,10 @@
+graph TD
+    T["TABLE: firewalld_policy_drop"]
+
+    CI["filter_input<br/>hook=input<br/>prio=0 + OFFSET - 1"]
+    CF["filter_forward<br/>hook=forward<br/>prio=0 + OFFSET - 1"]
+    CO["filter_output<br/>hook=output<br/>prio=0 + OFFSET - 1"]
+
+    T --> CI
+    T --> CF
+    T --> CO

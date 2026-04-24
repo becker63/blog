@@ -79,7 +79,7 @@ export const HomeDesktopLayout = () => {
               title="Resume"
               desc="My Background."
               color="#86efac"
-              href="https://docs.google.com/document/d/1PVuM1n5Q1qQNWRAvfe058KQaeYeUVvKFx681bQuDjVE/edit?usp=sharing"
+              href="/resume.html"
               icon={faPaperclip}
             />
           </AnimatedCard>

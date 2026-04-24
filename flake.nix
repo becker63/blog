@@ -25,6 +25,7 @@
             nodejs
             playwright-driver.browsers
             chromium
+	    just
           ];
 
           shellHook = ''

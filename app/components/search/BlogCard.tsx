@@ -5,59 +5,149 @@ import Image from "next/image";
 import { BlogPost } from "../../../lib/blogs";
 import { DescriptionTags, tags } from "./Badges";
 
+/* ------------------------- */
+/* Date Utilities            */
+/* ------------------------- */
+
+const formatFullDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+
+const formatRelative = (date: Date) => {
+  const diff = Date.now() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  if (days === 0) return "0 days ago";
+  if (days === 1) return "1 day ago";
+  if (days < 365) return `${days} days ago`;
+
+  const years = Math.floor(days / 365);
+  return `${years} year${years !== 1 ? "s" : ""} ago`;
+};
+
+const isNew = (date: Date) => {
+  const diff = Date.now() - date.getTime();
+  return diff < 1000 * 60 * 60 * 24 * 14;
+};
+
+/* ------------------------- */
+/* Component                 */
+/* ------------------------- */
+
 export const BlogCard = ({ blog }: { blog: BlogPost }) => {
-  const DescripTags = DescriptionTags(blog.meta.tags as tags[]);
+  const tagBadges = DescriptionTags(blog.meta.tags as tags[]);
   const hasImage = blog.meta.image !== undefined;
 
   const truncatedDesc =
-    blog.meta.description.length > 100
-      ? blog.meta.description.slice(0, 100) + "..."
+    blog.meta.description.length > 500
+      ? blog.meta.description.slice(0, 120) + "..."
       : blog.meta.description;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 0.7, y: 0 }} // 👈 animate to your glass opacity
+      animate={{ opacity: 0.75, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       className={css({
         flex: 1,
         minW: 0,
-        color: "gray.800",
         px: "5",
         py: "5",
         borderRadius: "10px",
         boxShadow: "#00000F 0 0 10px",
         bg: "#000000",
+        backdropFilter: "blur(10px)",
       })}
     >
-      <Link href={"/Blogs/" + blog.slug} className={css({ display: "block" })}>
-        <div className={css({ display: "flex", flexDirection: "column" })}>
+      <Link href={`/Blogs/${blog.slug}`} className={css({ display: "block" })}>
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "column",
+            gap: "2",
+          })}
+        >
+          {/* Title */}
           <h3
             className={css({
               fontSize: "xl",
               fontWeight: "bold",
               color: "white",
-              mb: "1",
             })}
           >
             {blog.meta.title}
           </h3>
 
-          <p className={css({ color: "gray.400", mb: "2" })}>{truncatedDesc}</p>
-
+          {/* Metadata Row */}
           <div
             className={css({
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
               gap: "2",
+              fontSize: "sm",
             })}
           >
-            <span className={css({ color: "gray.200", fontSize: "sm" })}>
-              {blog.meta.date}
+            <span
+              className={css({
+                color: "blue.300",
+                fontWeight: "medium",
+              })}
+            >
+              {formatFullDate(blog.meta.date)}
             </span>
-            <div>{DescripTags}</div>
+
+            <span
+              className={css({
+                color: "gray.500",
+                fontSize: "xs",
+              })}
+            >
+              • {formatRelative(blog.meta.date)}
+            </span>
+
+            {isNew(blog.meta.date) && (
+              <span
+                className={css({
+                  px: "2",
+                  py: "0.5",
+                  borderRadius: "full",
+                  bg: "green.500/20",
+                  color: "green.300",
+                  fontSize: "xs",
+                  fontWeight: "medium",
+                })}
+              >
+                New
+              </span>
+            )}
+          </div>
+
+          {/* Description */}
+          <p
+            className={css({
+              color: "gray.400",
+              fontSize: "sm",
+              lineHeight: "relaxed",
+            })}
+          >
+            {truncatedDesc}
+          </p>
+
+          {/* Tags */}
+          <div
+            className={css({
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1",
+              mt: "1",
+            })}
+          >
+            {tagBadges}
           </div>
         </div>
 
@@ -71,7 +161,7 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
           >
             <Image
               src={blog.meta.image!}
-              alt="blogcontent"
+              alt={blog.meta.title}
               width={200}
               height={200}
             />

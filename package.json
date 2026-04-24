@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "panda codegen",
-    "test": "playwright test",
-    "postinstall": "npx puppeteer browsers install chrome-headless-shell"
+    "test": "playwright test"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -26,7 +25,7 @@
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
-    "next-mdx-remote": "^5.0.0",
+    "next-mdx-remote": "^6.0.0",
     "prism-themes": "^1.9.0",
     "react-inlinesvg": "^4.2.0",
     "rehype-highlight": "^7.0.2",
@@ -35,6 +34,7 @@
     "rehype-raw": "^7.0.0",
     "unist": "^0.0.1",
     "unist-util-visit": "^5.1.0",
+    "vercel": "^50.22.0",
     "webpack": "^5.89.0",
     "xstate": "^5.24.0"
   },
