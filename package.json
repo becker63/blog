@@ -8,7 +8,18 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "panda codegen",
-    "test": "playwright test"
+    "test": "playwright test",
+    "vercel:login": "vercel login",
+    "vercel:link": "vercel link",
+    "vercel:pull": "vercel pull --yes",
+    "vercel:pull:preview": "vercel pull --yes --environment=preview",
+    "vercel:pull:prod": "vercel pull --yes --environment=production",
+    "vercel:build": "vercel build",
+    "vercel:build:prod": "vercel build --prod",
+    "deploy:preview": "vercel build && vercel deploy --prebuilt",
+    "deploy:prod": "vercel build --prod && vercel deploy --prebuilt --prod",
+    "deploy": "pnpm deploy:prod",
+    "clean:vercel": "rm -rf .vercel/output"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
