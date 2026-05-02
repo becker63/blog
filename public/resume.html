@@ -1,427 +1,304 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Resume</title>
-    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
-    <style>
-      /* Backbone CSS for Resume Template 1 */
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Resume</title>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <style>
+/* Backbone CSS for Resume Template 1 */
 
-      /* Basic */
+/* Basic */
 
-      #vue-smart-pages-preview {
-        background-color: white;
-        color: black;
-        text-align: left;
-        -moz-hyphens: auto;
-        -ms-hyphens: auto;
-        -webkit-hyphens: auto;
-        hyphens: auto;
-      }
+#vue-smart-pages-preview {
+  background-color: white;
+  color: black;
+  text-align: left;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
 
-      #vue-smart-pages-preview p,
-      #vue-smart-pages-preview li,
-      #vue-smart-pages-preview dl {
-        margin: 0;
-      }
+#vue-smart-pages-preview p,
+#vue-smart-pages-preview li,
+#vue-smart-pages-preview dl {
+  margin: 0;
+}
 
-      /* Headings */
+/* Headings */
 
-      #vue-smart-pages-preview h1,
-      #vue-smart-pages-preview h2,
-      #vue-smart-pages-preview h3 {
-        font-weight: bold;
-      }
+#vue-smart-pages-preview h1,
+#vue-smart-pages-preview h2,
+#vue-smart-pages-preview h3 {
+  font-weight: bold;
+}
 
-      #vue-smart-pages-preview h1 {
-        font-size: 2.5em;
-        letter-spacing: 0.1em;
-        text-align: center;
-        margin-bottom: 0.25em;
-      }
+#vue-smart-pages-preview h1 {
+  font-size: 2.5em;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 0.25em;
+}
 
-      #vue-smart-pages-preview h2,
-      #vue-smart-pages-preview h3 {
-        margin-bottom: 0.25em;
-        margin-top: 1em;
-        font-size: 1.2em;
-      }
+#vue-smart-pages-preview h2,
+#vue-smart-pages-preview h3 {
+  margin-bottom: 0.25em;
+  margin-top: 1.0em;
+  font-size: 1.2em;
+}
 
-      #vue-smart-pages-preview h1,
-      #vue-smart-pages-preview h2 {
-        border-bottom-style: solid;
-        border-bottom-width: 1px;
-        border-bottom-color: darkgrey;
-      }
+#vue-smart-pages-preview h1,
+#vue-smart-pages-preview h2 {
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: darkgrey;
+}
 
-      /* Lists */
+/* Lists */
 
-      #vue-smart-pages-preview ul,
-      #vue-smart-pages-preview ol {
-        padding-left: 1.5em;
-        margin: 0.2em 0 1em 0;
-      }
+#vue-smart-pages-preview ul,
+#vue-smart-pages-preview ol {
+  padding-left: 1.5em;
+  margin: 0.2em 0 1.0em 0;
+}
 
-      #vue-smart-pages-preview ul {
-        list-style-type: disc;
-      }
+#vue-smart-pages-preview ul {
+  list-style-type: disc;
+}
 
-      #vue-smart-pages-preview ol {
-        list-style-type: decimal;
-      }
+#vue-smart-pages-preview ol {
+  list-style-type: decimal;
+}
 
-      /* Definition Lists */
+/* Definition Lists */
 
-      #vue-smart-pages-preview dl {
-        display: flex;
-      }
+#vue-smart-pages-preview dl {
+  display: flex;
+}
 
-      #vue-smart-pages-preview dl dt,
-      #vue-smart-pages-preview dl dd:not(:last-child) {
-        flex: 1;
-      }
+#vue-smart-pages-preview dl dt,
+#vue-smart-pages-preview dl dd:not(:last-child) {
+  flex: 1;
+}
 
-      /* Tex */
+/* Tex */
 
-      #vue-smart-pages-preview :not(span.katex-display) > span.katex {
-        font-size: 1em !important;
-      }
+#vue-smart-pages-preview :not(span.katex-display) > span.katex {
+  font-size: 1em !important;
+}
 
-      /* SVG & Images */
+/* SVG & Images */
 
-      #vue-smart-pages-preview svg.iconify {
-        vertical-align: -0.2em;
-      }
+#vue-smart-pages-preview svg.iconify {
+  vertical-align: -0.2em;
+}
 
-      #vue-smart-pages-preview img {
-        max-width: 100%;
-      }
+#vue-smart-pages-preview img {
+  max-width: 100%;
+}
 
-      /* Header */
+/* Header */
 
-      #vue-smart-pages-preview .resume-header {
-        text-align: center;
-      }
+#vue-smart-pages-preview .resume-header {
+  text-align: center;
+}
 
-      #vue-smart-pages-preview .resume-header h1 {
-        text-align: center;
-        line-height: 1;
-        margin-bottom: 8px;
-      }
+#vue-smart-pages-preview .resume-header h1 {
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 8px;
+}
 
-      #vue-smart-pages-preview .resume-header-item:not(.no-separator)::after {
-        content: " | ";
-      }
+#vue-smart-pages-preview .resume-header-item:not(.no-separator)::after {
+  content: " | ";
+}
 
-      /* Citations */
+/* Citations */
 
-      #vue-smart-pages-preview ul.crossref-list {
-        padding-left: 1.2em;
-      }
+#vue-smart-pages-preview ul.crossref-list {
+  padding-left: 1.2em;
+}
 
-      #vue-smart-pages-preview li.crossref-item p {
-        margin-left: 0.5em;
-      }
+#vue-smart-pages-preview li.crossref-item p {
+  margin-left: 0.5em;
+}
 
-      #vue-smart-pages-preview li.crossref-item::marker {
-        content: attr(data-caption);
-      }
+#vue-smart-pages-preview li.crossref-item::marker {
+  content: attr(data-caption);
+}
 
-      #vue-smart-pages-preview sup.crossref-ref {
-        font-size: 100%;
-        top: 0;
-      }
+#vue-smart-pages-preview sup.crossref-ref {
+  font-size: 100%;
+  top: 0;
+}
 
-      /* Dark & print mode */
+/* Dark & print mode */
 
-      .dark #vue-smart-pages-preview {
-        background-color: #334155;
-        color: #e5e7eb;
-      }
+.dark #vue-smart-pages-preview {
+  background-color: #334155;
+  color: #e5e7eb;
+}
 
-      @media print {
-        #vue-smart-pages-preview {
-          background-color: white !important;
-          color: black !important;
-        }
+@media print {
+  #vue-smart-pages-preview {
+    background-color: white !important;
+    color: black !important;
+  }
 
-        .dark #vue-smart-pages-preview a {
-          color: black !important;
-        }
-      }
+  .dark #vue-smart-pages-preview a {
+    color: black !important;
+  }
+}
 
-      /* Dynamic Styles */
+    /* Dynamic Styles */
+    body {
+      font-family: Verdana, HKST;
+      font-size: 12px;
+      background-color: #f5f5f5;
+      color: black;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    
+    #vue-smart-pages-preview {
+      background-color: white;
+      width: 793px;
+      max-width: 100%;
+      padding: 55px 45px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+    
+    :not(.resume-header-item) > a {
+      color: #000000;
+    }
+    
+    h1, h2, h3 {
+      color: #000000;
+    }
+    
+    h1, h2 {
+      border-bottom-color: #000000;
+    }
+    
+    p, li {
+      line-height: 1.30;
+    }
+    
+    h2, h3 {
+      line-height: 1.50;
+    }
+    
+    dl {
+      line-height: 1.35;
+    }
+    
+    h2 {
+      margin-top: 5px;
+    }
+    
+    @media print {
       body {
-        font-family: Verdana, HKST;
-        font-size: 12px;
-        background-color: #f5f5f5;
-        color: black;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-      }
-
-      #vue-smart-pages-preview {
         background-color: white;
-        width: 793px;
-        max-width: 100%;
-        padding: 34px 45px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
       }
-
-      :not(.resume-header-item) > a {
-        color: #000000;
+      
+      #vue-smart-pages-preview {
+        width: 100%;
+        max-width: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 55px 45px;
       }
-
-      h1,
-      h2,
-      h3 {
-        color: #000000;
+      
+      @page {
+        size: A4;
+        margin: 0;
       }
+    }
+  
+  </style>
+</head>
+<body>
+  <main id="vue-smart-pages-preview">
+<div class="resume-header"></div><h1>Taylor Johnson</h1>
+<dl>
+<dt><span class="iconify" data-icon="charm:person"></span> <a href="https://becker63.digital" target="_blank" rel="noopener">becker63.digital</a></dt>
+<dd><span class="iconify" data-icon="tabler:brand-github"></span> <a href="https://github.com/becker63" target="_blank" rel="noopener">github.com/becker63</a></dd>
+<dd><span class="iconify" data-icon="tabler:phone"></span> <a href="tel:2202468386">(220) 246-8386</a></dd>
+</dl>
+<dl>
+<dt><span class="iconify" data-icon="ic:outline-location-on"></span> New Albany, Ohio, USA</dt>
+<dd><span class="iconify" data-icon="tabler:mail"></span> <a href="mailto:johnsontaylor6320@gmail.com">johnsontaylor6320@gmail.com</a></dd>
+</dl>
+<h2>Summary</h2>
+<p>Platform- and infrastructure-focused engineer with software engineering and security foundations. Experienced in Linux, Docker, Kubernetes, IAM/authentication systems, reproducible environments, and cross-service debugging. Strong at making opaque systems easier to inspect, reproduce, test, and operate.</p>
+<h2>Skills</h2>
+<p><strong>Languages:</strong> Python, Go, JavaScript / TypeScript, Nim, Bash<br>
+<strong>Infrastructure:</strong> Linux, Docker, Kubernetes, Crossplane, FluxCD, Nix, Buck2, CI/CD, Networking<br>
+<strong>Security &amp; Systems:</strong> IAM, OIDC, LDAP, authentication tracing, reproducible environments, security testing, platform tooling</p>
+<h2>Experience</h2>
+<dl>
+<dt><strong>Security &amp; Infrastructure Documentation Intern</strong></dt>
+<dd><strong>Ohio Supercomputer Center</strong></dd>
+<dd><strong>Oct 2024 – Nov 2025</strong></dd>
+</dl>
+<ul>
+<li>Reverse-engineered and documented a 100k+ LOC production HPC platform supporting ~2,100 academic sites</li>
+<li>Traced OpenID Connect → JWT → LDAP identity flows across Apache modules, Nginx per-user process isolation, and Lua auth hooks</li>
+<li>Built Docker-based local reproduction of production authentication stack to reason about IAM behavior without privileged access</li>
+<li>Analyzed embedded Apache and Nginx subsystems implementing layered MVC-style configuration over authentication infrastructure</li>
+<li>Designed security test scenarios identifying double URL encoding with RCE-adjacent implications</li>
+<li>Proposed reproducible dependency management using Nix / asdf to reduce CI flakiness and environment drift</li>
+</ul>
+<dl>
+<dt><strong>Systems-Oriented Frontend Engineer</strong></dt>
+<dd><strong>Tarigma Corporation (now GE Vernova)</strong></dd>
+<dd><strong>2021 – 2023</strong></dd>
+</dl>
+<ul>
+<li>Built state coordination layer for a real-time electrical grid incident response platform</li>
+<li>Synchronized multiple live relay data feeds while preserving operator trust and temporal consistency</li>
+<li>Integrated Recoil with react-mosaic to support high-density diagnostic workflows and dynamic windowed layouts</li>
+<li>Extended Chart.js fork supporting draggable temporal annotations for grid event analysis</li>
+<li>Implemented COMTRADE-based relay data pipelines used in electrical disturbance analysis</li>
+</ul>
+<dl>
+<dt><strong>Programming Instructor &amp; Technical Operator</strong></dt>
+<dd><strong>STEMTree</strong></dd>
+<dd><strong>2021 – 2023</strong></dd>
+</dl>
+<ul>
+<li>Taught Python, JavaScript, React, and core CS concepts to students ages 10–16; managed classroom network and device infrastructure</li>
+</ul>
+<h2>Projects</h2>
+<p><strong>Static Control Plane — Kubernetes / Crossplane / KCL / Nix / Buck2</strong></p>
+<ul>
+<li>Built typed Crossplane/KCL control-plane infrastructure for GitOps-based cloud provisioning, with Nix/Buck2-pinned schema generation and pytest validation of rendered resources</li>
+</ul>
+<p><strong>SearchBench — Go / Python / Pkl / Agent Evaluation</strong></p>
+<ul>
+<li>Designed a typed evaluation harness for comparing AI code-search backends, separating pure scoring/report models from adapters for configuration, filesystem bundles, model execution, and subprocess pipelines</li>
+</ul>
+<p><strong>libnftnl / netfilter Fuzzer — Nim / Nix / Linux Networking</strong></p>
+<ul>
+<li>Built a reproducible fuzzing harness for nftables userland serialization paths using Nim bindings, protobuf-based mutation, sanitizer instrumentation, and isolated runtime support</li>
+</ul>
+<h2>Professional Engagement &amp; Recognition</h2>
+<ul>
+<li>Active participant in the Central Ohio engineering and consulting community, with conversations around platform engineering, infrastructure reliability, security, and reproducible development environments</li>
+<li>Selected for US Cyber Challenge Cyber Camp, 2025; participated in multi-day cybersecurity training and CTF-style competition</li>
+<li>PicoCTF, Carnegie Mellon University — Placed 57th of 1,329 teams, 2024; SkillsUSA Cybersecurity, State Competition — Second Place</li>
+</ul>
+<h2>Education &amp; Certifications</h2>
+<p><strong>Computer Science Coursework</strong> — Ohio State University, Newark<br>
+<strong>Cybersecurity Program</strong> — Eastland–Fairfield Career &amp; Technical Schools</p>
+<p>CompTIA Security+ · CompTIA Network+ · TestOut Network Pro</p>
 
-      h1,
-      h2 {
-        border-bottom-color: #000000;
-      }
-
-      p,
-      li {
-        line-height: 1.3;
-      }
-
-      h2,
-      h3 {
-        line-height: 1.5;
-      }
-
-      dl {
-        line-height: 1.35;
-      }
-
-      h2 {
-        margin-top: 4px;
-      }
-
-      @media print {
-        body {
-          background-color: white;
-          padding: 0;
-          margin: 0;
-        }
-
-        #vue-smart-pages-preview {
-          width: 100%;
-          max-width: none;
-          box-shadow: none;
-          margin: 0;
-          padding: 34px 45px;
-        }
-
-        @page {
-          size: A4;
-          margin: 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main id="vue-smart-pages-preview">
-      <div class="resume-header"></div>
-      <h1>Taylor Johnson</h1>
-      <dl>
-        <dt>
-          <span class="iconify" data-icon="charm:person"></span>
-          <a href="https://becker63.digital" target="_blank" rel="noopener"
-            >becker63.digital</a
-          >
-        </dt>
-        <dd>
-          <span class="iconify" data-icon="tabler:brand-github"></span>
-          <a href="https://github.com/becker63" target="_blank" rel="noopener"
-            >github.com/becker63</a
-          >
-        </dd>
-        <dd>
-          <span class="iconify" data-icon="tabler:phone"></span>
-          <a href="tel:2202468386">(220) 246-8386</a>
-        </dd>
-      </dl>
-      <dl>
-        <dt>
-          <span class="iconify" data-icon="ic:outline-location-on"></span> New
-          Albany, Ohio, USA
-        </dt>
-        <dd>
-          <span class="iconify" data-icon="tabler:mail"></span>
-          <a href="mailto:johnsontaylor6320@gmail.com"
-            >johnsontaylor6320@gmail.com</a
-          >
-        </dd>
-      </dl>
-      <h2>Summary</h2>
-      <p>
-        Infrastructure-focused engineer specializing in authentication systems,
-        layered architectures, and reproducible environments. Experienced in
-        reverse-engineering production systems, tracing cross-service failure
-        modes, and shifting operational ambiguity into structured, inspectable
-        tooling.
-      </p>
-      <h2>Experience</h2>
-      <dl>
-        <dt>
-          <strong>Security &amp; Infrastructure Documentation Intern</strong>
-        </dt>
-        <dd><strong>Ohio Supercomputer Center</strong></dd>
-        <dd><strong>Oct 2024 – Nov 2025</strong></dd>
-      </dl>
-      <ul>
-        <li>
-          Reverse-engineered and documented a 100k+ LOC production HPC platform
-          supporting ~2,100 academic sites
-        </li>
-        <li>
-          Analyzed embedded Apache and Nginx subsystems implementing layered
-          MVC-style configuration over authentication infrastructure
-        </li>
-        <li>
-          Traced OpenID Connect → JWT → LDAP mappings across Apache modules,
-          Nginx (per-user process isolation), and Lua auth hooks
-        </li>
-        <li>
-          Built Docker-based local reproduction of production auth stack to
-          reason about IAM flows without privileged access
-        </li>
-        <li>
-          Designed security test scenarios identifying double URL encoding with
-          RCE-adjacent implications
-        </li>
-        <li>
-          Proposed reproducible dependency management (Nix / asdf) to mitigate
-          CI flakiness and environment drift
-        </li>
-      </ul>
-      <dl>
-        <dt><strong>Systems-Oriented Frontend Engineer</strong></dt>
-        <dd><strong>Tarigma Corporation (now GE Vernova)</strong></dd>
-        <dd><strong>2021 – 2023</strong></dd>
-      </dl>
-      <ul>
-        <li>
-          Architected state coordination layer for a real-time electrical grid
-          incident response platform
-        </li>
-        <li>
-          Synchronized multiple live relay data feeds while preserving operator
-          trust and temporal consistency
-        </li>
-        <li>
-          Integrated Recoil (global state) with react-mosaic (dynamic windowed
-          layouts) for high-density diagnostic workflows
-        </li>
-        <li>
-          Extended and maintained Chart.js fork to support draggable temporal
-          annotations for grid event analysis
-        </li>
-        <li>
-          Implemented and rendered COMTRADE-based relay data pipelines used in
-          electrical disturbance analysis
-        </li>
-      </ul>
-      <dl>
-        <dt>
-          <strong>Programming Instructor &amp; Technical Operator</strong>
-        </dt>
-        <dd><strong>STEMTree</strong></dd>
-        <dd><strong>2021 – 2023</strong></dd>
-      </dl>
-      <ul>
-        <li>
-          Taught Python, JavaScript, React, and core CS reasoning to students
-          ages 10–16
-        </li>
-        <li>
-          Managed classroom infrastructure (router configuration, Pi-hole
-          filtering, device administration)
-        </li>
-        <li>
-          Served as on-site technical operator responsible for uptime and system
-          reliability
-        </li>
-      </ul>
-      <h2>Projects</h2>
-      <p><strong>Infrastructure &amp; Reproducibility</strong></p>
-      <ul>
-        <li>
-          Built Kubernetes/Crossplane homelab modeling infrastructure as typed
-          declarative resources
-        </li>
-        <li>
-          Reproduced complex deployments locally via Docker to enable controlled
-          iteration and inspection
-        </li>
-      </ul>
-      <p><strong>Systems &amp; Security</strong></p>
-      <ul>
-        <li>
-          Designed structured fuzzing harness for libnftnl (netfilter) using
-          microVM isolation and sanitizer instrumentation
-        </li>
-        <li>
-          Focused on invariant encoding and semantic boundary exploration over
-          blind fuzzing
-        </li>
-      </ul>
-      <p><strong>Developer Tooling</strong></p>
-      <ul>
-        <li>
-          Implemented typed SDK generation and hermetic build workflows using
-          Buck2, Nix, Python, and Go
-        </li>
-        <li>
-          Emphasized early failure detection and phase-aware computation in CI
-          workflows
-        </li>
-      </ul>
-      <h2>Skills</h2>
-      <p>
-        <strong>Languages:</strong> Python, JavaScript / TypeScript, Nim, Bash
-      </p>
-      <p>
-        <strong>Systems &amp; Infrastructure:</strong> Linux, Docker,
-        Kubernetes, Crossplane, CI/CD, Networking, IAM, Security Testing
-      </p>
-      <p>
-        <strong>Strengths:</strong> Authentication tracing, layered systems
-        reasoning, reproducibility, cross-service debugging, structured
-        interface design
-      </p>
-      <h2>Education</h2>
-      <dl>
-        <dt><strong>Computer Science Coursework</strong></dt>
-        <dd><strong>Ohio State University, Newark</strong></dd>
-      </dl>
-      <dl>
-        <dt><strong>Cybersecurity Program</strong></dt>
-        <dd>
-          <strong>Eastland–Fairfield Career &amp; Technical Schools</strong>
-        </dd>
-      </dl>
-      <h2>Certifications</h2>
-      <p>
-        CompTIA Security+<br />
-        CompTIA Network+<br />
-        TestOut Network Pro
-      </p>
-      <h2>Awards</h2>
-      <p>
-        <strong>PicoCTF (Carnegie Mellon University)</strong> — Placed 57/1329
-        teams (2024)<br />
-        <strong>SkillsUSA Cybersecurity (State)</strong> — Second Place<br />
-        <strong>USCC Cyber Challenge</strong> — Summer Program Admission
-      </p>
-    </main>
-  </body>
+  </main>
+</body>
 </html>

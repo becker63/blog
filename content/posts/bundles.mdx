@@ -1,0 +1,465 @@
+---
+title: AI Evals Need Bundles, Not Just Platforms
+date: '2 May 2026'
+description: Making agent evaluation inspectable, reproducible, and portable with file-native release artifacts.
+tags: tech
+---
+
+The shape I wanted was smaller than a platform.
+
+```text
+baseline/candidate pair
+→ durable bundle
+→ next run amends the previous run
+```
+
+That is the object I kept reaching for while building SearchBench.
+
+In the last post, I argued that AI agents need release reports, not just traces.
+
+The basic claim was that agent systems are starting to look less like isolated model calls and more like software systems. They have prompts, tools, retrieval strategies, policies, runtime assumptions, model configs, scoring rules, and cost constraints. When one of those pieces changes, the important question is not only whether one run looked good. It is whether the candidate should replace the current system.
+
+That still feels right to me.
+
+But after pushing the Python version of SearchBench further, I ran into a second problem underneath it:
+
+where does that release report actually live?
+
+At first, the obvious answer was an evaluation platform. Langfuse already had datasets, traces, observations, scores, sessions, metadata, and experiment views. That was useful, and I used it heavily.
+
+The surprise was not that Langfuse had nowhere to put evaluation state.
+
+It had plenty of places for state to go.
+
+That was part of the problem.
+
+## The release object started to spread out
+
+A single localization evaluation had queryable scores, observation metadata, compact score context, score component state, predicted files, changed files, metric names, and task summaries.
+
+The code made that split explicit:
+
+```python
+# First, emit the queryable score objects.
+for component_name in LOCALIZATION_CANONICAL_COMPONENTS:
+    state = artifact.canonical_component_states[component_name]
+    score_name = f"{score_prefix}.{component_name}"
+
+    _emit_component_state_scores(
+        handle,
+        score_name=score_name,
+        state=state,
+        operation="localization_task.score",
+    )
+
+# Then attach the context that makes those scores meaningful.
+metadata = {
+    "score_summary": artifact.score_summary.model_dump(mode="json"),
+    "score_context": artifact.compact_score_context.model_dump(...),
+    "score_components": _component_state_metadata(...),
+    "predicted_files": list(predicted_files),
+    "changed_files": list(changed_files),
+    "score_metric_names": sorted(emitted_score_names),
+    "task_summary": dict(task_summary),
+}
+
+_update_observation_metadata(
+    handle,
+    metadata,
+    operation="localization_task.metadata",
+)
+```
+
+Nothing here is wrong. Scores should be queryable, and metadata should carry the context needed to interpret them.
+
+But that was the first place the release object started to spread out.
+
+The score lived in one part of the platform. The explanation of the score lived somewhere else.
+
+The split did not stop there. Once Langfuse became the hosted benchmark surface, run-level context entered the platform too: dataset identity, task selection, session grouping, and aggregate reporting.
+
+```python
+# The hosted run also needed platform-level identity.
+selection_meta = {
+    "selected_count": len(selected_tasks),
+    "offset": req.offset,
+    "limit": req.max_items,
+}
+
+run_session_id = resolve_session_id(req.session, run_id=req.dataset)
+
+# That identity propagated into the trace/session shape.
+with propagate_attributes(
+    trace_name="localization_experiment",
+    session_id=run_session_id,
+):
+    with get_langfuse_client().start_as_current_observation(
+        name="localization_experiment_dataset",
+        as_type="span",
+        metadata=serialize_observation_metadata(
+            {
+                "dataset": req.dataset,
+                "dataset_version": req.version,
+                "dataset_store": "langfuse",
+                "selection": selection_meta,
+                "projection": {"provided": bool(req.projection)},
+            }
+        ),
+    ) as dataset_span:
+        parent_trace = dataset_span
+
+        # Later, aggregates needed enough metadata to explain
+        # which hosted dataset slice they summarized.
+        _emit_experiment_dataset_aggregates(
+            dataset_span,
+            results,
+            extra_metadata={
+                "dataset": req.dataset,
+                "dataset_version": req.version,
+                "selection": selection_meta,
+            },
+        )
+```
+
+This is where the discomfort came from.
+
+The evaluation was visible, but it was not a single thing I could pick up.
+
+It was a relationship between scores, observations, traces, metadata, dataset state, session state, and application-side objects.
+
+Eventually I built an adapter object whose job was basically to hold the evaluation together long enough to emit it coherently:
+
+```python
+class EvaluationTelemetryArtifact(BaseModel):
+    # The local object that kept the evaluation coherent
+    # before it was split into platform scores and metadata.
+    score_bundle: ScoreBundle
+    score_context: ScoreContext
+    score_summary: ScoreBundle
+
+    metric_map: dict[str, float | bool]
+    canonical_component_states: dict[str, ScoreComponentTelemetryState]
+    compact_score_context: CompactScoreContext
+```
+
+Looking back, this was the sign.
+
+The Python version already wanted a bundle. It just did not have a file-native place to put one yet.
+
+## Where the evaluation starts to live
+
+This state distribution problem creates a softer kind of lock-in than an API key or a pricing page.
+
+The lock-in is not just that the data lives in someone else’s database. It is that the meaning of the evaluation starts to depend on the platform’s object model. Datasets live in one place. Traces live somewhere else. Scores attach to traces, observations, sessions, or dataset runs. Metadata carries whatever does not fit cleanly into the first-class objects. Comparison views are assembled by the platform on top.
+
+That is flexible, and it is useful while debugging.
+
+But it also means the evaluation is no longer a single thing you can pick up. It is a relationship between platform objects.
+
+Once that happens, changing the evaluation model becomes harder. You are not only changing your scorer or your dataset slice. You are changing how your system maps itself into the platform’s idea of traces, scores, runs, observations, datasets, and metadata.
+
+This matters more for agent systems than it does for simple model calls, because the unit of change is larger. A candidate system might change policy code, prompt templates, tool schemas, retrieval strategy, graph traversal behavior, model settings, runtime limits, scoring rules, and dataset slices.
+
+A trace can show what happened. A score can describe one dimension of performance. A dataset can preserve test inputs.
+
+Those are all useful objects, but none of them are quite the release object I wanted.
+
+The release object is the thing that answers a different question:
+
+> Should this candidate replace the baseline?
+
+SearchBench-Go is my attempt to keep the useful parts of that model while changing where authority lives.
+
+Langfuse can still observe the run.
+
+The bundle should own the evidence.
+
+## The tradeoff
+
+There is an obvious counterpoint here.
+
+If the release object becomes a bundle, and the evaluation model moves into files, does that make the system more static?
+
+In one sense, yes. That is part of the point.
+
+I want the release boundary to be more static than the runtime. The runtime can still call models, execute tools, talk to tracing providers, read datasets, materialize repos, and emit telemetry. That part of the system is allowed to be operational and messy.
+
+The comparison model should be different.
+
+The baseline, candidate, task slice, scoring objective, prompt bundle, runtime limits, and artifact outputs are the pieces I want to make legible. They are the pieces I want to diff. They are the pieces I want an agent, a reviewer, or my future self to understand quickly.
+
+That is why Pkl is appealing here. A later experiment can amend an earlier one, inherit the parts that stayed the same, and override the parts that changed. The result is still a file you can read, but it is not a pile of duplicated configuration.
+
+That is the trade I am choosing: make the release boundary legible, even if the runtime underneath it stays effectful.
+
+## Start with a run
+
+```pkl
+// experiments/local-ic-vs-jcodemunch/experiment.pkl
+
+amends "../../schema/SearchBenchExperiment.pkl"
+
+name = "local-ic-vs-jcodemunch-lca-dev"
+
+mode = "evaluator_only"
+
+dataset {
+  config = "py"
+  split = "dev"
+  maxItems = 5
+}
+
+systems {
+  baseline {
+    id = "jcodemunch-baseline"
+    name = "jCodeMunch baseline"
+    backend = "jcodemunch"
+  }
+
+  candidate {
+    id = "iterative-context-candidate"
+    name = "Iterative Context candidate"
+    backend = "iterative_context"
+
+    promptBundle {
+      name = "direct-structure"
+      version = "round-001"
+
+      systemPrompt = """
+      Use iterative-context to resolve the initial symbols, then follow direct
+      calls, imports, and references. Prefer the smallest context that explains
+      the likely changed files.
+      """
+    }
+
+    policy {
+      id = "candidate-policy-dev"
+      path = "policies/candidate_policy.py"
+    }
+  }
+}
+
+scoring {
+  objective = "scoring/localization-objective.pkl"
+}
+
+outputConfig {
+  reportFormat = "pretty"
+  bundleRoot = "artifacts/runs"
+
+  traces {
+    enabled = false
+  }
+}
+```
+
+This is the first shape SearchBench cares about: a **baseline/candidate pair**.
+
+In this run, the baseline is jCodeMunch and the candidate is iterative-context. The harness is not trying to answer whether either system is good in isolation. It is trying to answer whether the candidate should replace the baseline under a fixed task slice, scoring rule, and runtime envelope.
+
+That run produces a bundle.
+
+```text
+experiments/local-ic-vs-jcodemunch/artifacts/runs/example-round-001/
+  COMPLETE
+  resolved.json
+  report.json
+  report.txt
+  score.pkl
+  objective.json
+  metadata.json
+```
+
+Now start the next run.
+
+```pkl
+// experiments/optimize-ic/experiment.pkl
+
+amends "../local-ic-vs-jcodemunch/experiment.pkl"
+
+name = "optimize-ic-lca-dev"
+
+systems {
+  candidate {
+    id = "iterative-context-candidate-round-002"
+    name = "Iterative Context candidate round 002"
+    backend = "iterative_context"
+
+    promptBundle {
+      name = "graph-lookahead"
+      version = "round-002"
+
+      systemPrompt = """
+      Use iterative-context as a graph lookahead engine. Resolve likely anchors,
+      expand outward over calls, imports, and references, then prefer context
+      that reduces localization distance without wasting tokens.
+      """
+    }
+
+    policy {
+      id = "candidate-policy-round-002"
+      path = "policies/candidate_policy.py"
+    }
+  }
+}
+
+scoring {
+  objective = "scoring/localization-objective.pkl"
+}
+```
+
+This is the part that makes the interface feel different.
+
+The second experiment does not copy the first experiment. It **amends** it. The dataset stays the same. The evaluator stays the same. The output shape stays the same. The baseline stays jCodeMunch. Only the candidate changes: a new policy, a new prompt bundle, and a more explicit instruction to treat iterative-context as a graph lookahead engine.
+
+That run produces another bundle with the same shape.
+
+```text
+experiments/optimize-ic/artifacts/runs/example-round-002/
+  COMPLETE
+  resolved.json
+  report.json
+  report.txt
+  score.pkl
+  objective.json
+  metadata.json
+```
+
+There are two comparisons happening here.
+
+Inside each run, SearchBench compares a baseline against a candidate. In these examples, jCodeMunch stays as the fixed external baseline while iterative-context changes. That answers one question: does this candidate beat the control?
+
+Across runs, SearchBench also has lineage. The second bundle can be understood as a child of the first bundle. That answers a different question: did this candidate improve over the previous candidate?
+
+Those two relationships are easy to collapse together, but they are not the same. The baseline/candidate pair is the comparison inside a run. The parent/current relationship is the comparison across runs.
+
+That is why I like this shape. It lets SearchBench hold a stable external baseline while still tracking the evolution of the candidate system over time. Pkl’s `amends` makes that feel natural. Each round can inherit the previous experiment, override the parts that changed, and leave behind a new artifact for the next round.
+
+This sounds small, but it changes the shape of the system. Optimization history stops being something that only exists inside a running optimizer, a hosted dashboard, or a database row. Each step leaves behind a durable comparison artifact. The next run can point at the previous one directly, not as hidden state, but as evidence.
+
+For SearchBench, that boundary object is the bundle.
+
+## The bundle
+
+The bundle is the release object.
+
+It keeps the resolved experiment, structured report, human-readable report, score evidence, evaluated objective, and artifact hashes together in one directory.
+
+```text
+resolved.json
+report.json
+report.txt
+score.pkl
+objective.json
+metadata.json
+````
+
+The point is not that SearchBench writes a lot of files. The point is that the comparison leaves behind something durable.
+
+By the time the run is complete, “did this candidate beat the baseline?” is no longer only represented by logs, traces, or optimizer state. It exists as an artifact that can be inspected, copied, diffed, rendered, imported, and eventually visualized.
+
+That is the separation I want:
+
+```text
+platform → observes the run
+bundle   → preserves the release evidence
+```
+
+## The release rule is a file too
+
+The scoring objective is not the agent, the evaluator, the graph traversal policy, or the trace.
+
+It is the release rule.
+
+Go owns the comparison model, evidence projection, validation, and bundle writing. Pkl owns the visible scoring math over that evidence.
+
+Conceptually, the objective is just naming the values that matter:
+
+```pkl
+// scoring/localization-objective.pkl
+
+amends "../../schema/SearchBenchObjective.pkl"
+
+local currentQuality = current.localizationQuality.candidate
+local parentQuality = parent.localizationQuality.candidate
+local improvementVsParent = currentQuality - parentQuality
+
+local tokenEfficiency =
+  1.0 - min(current.usage.totalTokens, 250000) / 250000
+
+local regressionPenalty =
+  if (current.regressions.severeCount > 0) 0.0 else 1.0
+
+local finalScore =
+  ((currentQuality * 0.8) + (tokenEfficiency * 0.2)) *
+  regressionPenalty
+
+values = new {
+  intermediate("currentQuality", currentQuality)
+  intermediate("parentQuality", parentQuality)
+  intermediate("improvementVsParent", improvementVsParent)
+  intermediate("tokenEfficiency", tokenEfficiency)
+  penalty("regressionPenalty", regressionPenalty)
+  finalValue("final", finalScore)
+}
+
+final = "final"
+````
+
+The exact math is not the important part. I expect the scoring rules to change.
+
+The important part is that the meaning of “better” becomes inspectable. Current quality, parent quality, token efficiency, regressions, and the final score are named in a file instead of being hidden inside an optimizer callback or reconstructed from a dashboard.
+
+That file is not trying to replace the trace. It explains what the trace and report mean for promotion.
+
+Trace tooling is good at answering:
+
+> How did the agent behave?
+
+SearchBench is trying to make a different question concrete:
+
+> Should this candidate replace the baseline?
+
+## How this relates to traces and eval platforms
+
+I do not think this replaces the other layers of AI systems work.
+
+Agent-building posts teach us how to structure the system. Observability posts teach us how to see what happened. Eval-platform posts teach us how to score and compare runs.
+
+SearchBench bundles are about the release artifact that survives those systems.
+
+A trace helps you debug an agent run.
+
+A score helps you understand one dimension of performance.
+
+A dashboard helps you inspect trends and compare experiments.
+
+A bundle should preserve the evidence for a release decision.
+
+That is the distinction I care about. SearchBench is not trying to replace agent architecture, tracing, or hosted eval tooling. It is trying to make the comparison object durable enough that a candidate system can be understood outside the runtime that produced it.
+
+## Where this leaves platforms
+
+I do not think this means evaluation platforms are bad.
+
+The Python version of SearchBench would have been much harder to understand without Langfuse. The problem was not that the platform had too little structure. The problem was that, as the harness became more serious, the meaning of the evaluation started to depend on how I distributed state across that structure.
+
+That is the part I want to avoid in the Go version.
+
+The platform can still observe, store traces, show dashboards, and help debug. But the release object should be portable.
+
+It should be possible to run the harness locally, in CI, against hosted traces, against local tasks, or inside a future optimizer loop, and still get the same kind of artifact out the other side.
+
+A baseline/candidate pair goes in.
+
+A bundle comes out.
+
+That bundle can be read, hashed, diffed, rendered, imported by the next round, and eventually visualized.
+
+That is the larger systems shape I am trying to build toward.
+
+AI evals do not just need better traces.
+
+They need durable comparison artifacts.
+
+They need bundles.
