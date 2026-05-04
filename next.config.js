@@ -26,7 +26,7 @@ const nextConfig = {
     },
   ],
   images: {
-    domains: ["google.com"]
+    domains: ["google.com", "media.licdn.com"]
   },
   // Configure pageExtensions to include md and mdx
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],

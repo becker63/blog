@@ -8,6 +8,7 @@ import { AnimatedCard } from "../shared/AnimatedCard";
 import { seededDelay } from "../../../lib/animationDelay";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
 import { faMarkdown } from "@fortawesome/free-brands-svg-icons";
+import { ProfileIdentityPanel } from "./ProfileIdentityPanel";
 
 export const HomeDesktopLayout = () => {
   return (
@@ -29,25 +30,40 @@ export const HomeDesktopLayout = () => {
         })}
       >
         <div
+          data-testid="home-dashboard-grid"
           className={css({
-            alignSelf: "center",
-            w: "95%",
-            maxWidth: "1250px",
+            alignSelf: "stretch",
+            mx: "layout",
             display: "grid",
-            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+            gridTemplateColumns:
+              "minmax(260px, 0.95fr) minmax(0, 1.7fr) minmax(280px, 1fr)",
             gridTemplateRows:
               "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)",
             gridGap: "layout",
             gridTemplateAreas: `
-              "Svg Blog"
-              "Svg Latest-Blog"
-              "Svg Latest-Blog"
-              "Socials CV"
+              "About Svg Blog"
+              "About Svg Latest-Blog"
+              "About Svg Latest-Blog"
+              "About Socials CV"
             `,
             flex: "1",
             h: 0,
+            minH: 0,
           })}
         >
+          <AnimatedCard
+            delay={seededDelay("identity-desktop")}
+            className={css({
+              ...glassCardStyles,
+              gridArea: "About",
+              display: "flex",
+              flexDirection: "column",
+              minH: 0,
+            })}
+          >
+            <ProfileIdentityPanel />
+          </AnimatedCard>
+
           <AnimatedCard
             delay={seededDelay("bebop-desktop")}
             className={css({

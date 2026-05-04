@@ -8,6 +8,7 @@ interface HomeNavProps {
 export const HomeNav = ({ inline = false }: HomeNavProps) => {
   return (
     <nav
+      data-testid={inline ? "home-status-bar-inline" : "home-status-bar"}
       className={css({
         layerStyle: "navbar",
         // For inline mode: use relative positioning and full width

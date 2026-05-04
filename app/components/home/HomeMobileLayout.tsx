@@ -9,6 +9,7 @@ import { glassCardStyles } from "../shared/GlassCard";
 import { AnimatedCard } from "../shared/AnimatedCard";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
 import { faMarkdown } from "@fortawesome/free-brands-svg-icons";
+import { ProfileIdentityPanel } from "./ProfileIdentityPanel";
 
 export const HomeMobileLayout = () => {
   return (
@@ -67,6 +68,20 @@ export const HomeMobileLayout = () => {
           index={1}
           className={css({
             ...glassCardStyles,
+            minH: "330px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            minW: 0,
+          })}
+        >
+          <ProfileIdentityPanel />
+        </AnimatedCard>
+
+        <AnimatedCard
+          index={2}
+          className={css({
+            ...glassCardStyles,
             h: "95px",
             display: "flex",
             flexDirection: "column",
@@ -84,7 +99,7 @@ export const HomeMobileLayout = () => {
         </AnimatedCard>
 
         <AnimatedCard
-          index={2}
+          index={3}
           className={css({
             ...glassCardStyles,
             h: "95px",
@@ -104,7 +119,7 @@ export const HomeMobileLayout = () => {
         </AnimatedCard>
 
         <AnimatedCard
-          index={3}
+          index={4}
           className={css({
             ...glassCardStyles,
             h: "400px",
@@ -117,7 +132,7 @@ export const HomeMobileLayout = () => {
         </AnimatedCard>
 
         <AnimatedCard
-          index={4}
+          index={5}
           className={css({
             ...glassCardStyles,
             h: "95px",

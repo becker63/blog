@@ -48,8 +48,9 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
 
   return (
     <motion.div
+      data-testid="search-tree-child-card"
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 0.75, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       className={css({
@@ -58,8 +59,8 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
         px: "5",
         py: "5",
         borderRadius: "10px",
-        boxShadow: "#00000F 0 0 10px",
-        bg: "#000000",
+        boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
+        bg: "rgba(0, 0, 0, 0.7)",
         backdropFilter: "blur(10px)",
       })}
     >
