@@ -1,0 +1,427 @@
+# Career-Ops Profile Configuration
+# Path: config/profile.yml
+# Purpose: strategy brain for career-ops evaluations, PDFs, outreach, and application answers.
+
+candidate:
+  full_name: "Taylor Johnson"
+  email: "[redacted-email]"
+  phone: "[redacted-phone]"
+  location: "New Albany, Ohio, USA"
+  linkedin: "https://www.linkedin.com/in/taylor-johnson-805061210/"
+  portfolio_url: "https://www.becker63.digital"
+  github: "https://github.com/becker63"
+  twitter: ""
+
+resume_preferences:
+  default_substance_mode: "public-profile-aligned"
+  guidance:
+    - "Default to concise, literal, public-facing resume language rather than internal career-ops phrasing."
+    - "Lead with platform/infrastructure/security foundations unless the role strongly requires another frame."
+    - "Prefer bullets that describe inspectability, reproducibility, debugging, deployment safety, and operational clarity."
+    - "Preserve Professional Engagement & Recognition as a normal section when space allows."
+    - "Avoid over-rotating into AI/tooling language for non-AI roles when platform language is cleaner."
+  section_labels:
+    summary: "Summary"
+    competencies: "Core Competencies"
+    experience: "Experience"
+    projects: "Projects"
+    education: "Education & Certifications"
+    engagement: "Professional Engagement & Recognition"
+    skills: "Skills"
+
+target_roles:
+  # North Star roles — optimize evaluations and CV framing for these first.
+  primary:
+    - "Platform Engineer"
+    - "Infrastructure Engineer"
+    - "Developer Tooling Engineer"
+    - "Security Engineer"
+    - "AI Evaluation Engineer"
+    - "AI Platform Engineer"
+    - "Forward Deployed Engineer"
+    - "Technical Solutions Engineer"
+
+  archetypes:
+    - name: "Platform / Infrastructure Engineer"
+      level: "Early-career to mid-level; strong project scope beyond title"
+      fit: "primary"
+      track: "platform"
+      sell_when: "JD emphasizes internal platforms, infrastructure reliability, CI/CD, Linux, Docker, Kubernetes, Nix, GitOps, reproducibility, observability, deployment safety, or systems ownership."
+      emphasize:
+        - "OSC production-like local reproduction and architecture tracing"
+        - "Static Control Plane typed infrastructure modeling"
+        - "Asahi NixOS workstation as Nix/flakes/packaging proof"
+        - "SearchBench reproducible experiment/run-bundle design"
+        - "Nix, Docker, Kubernetes, Crossplane, Buck2, CI/CD"
+
+    - name: "Developer Tooling / Build Systems Engineer"
+      level: "Early-career to mid-level"
+      fit: "primary"
+      track: "devtools"
+      sell_when: "JD emphasizes developer experience, build systems, hermetic environments, tooling, type-safe interfaces, CI stability, internal platforms, or reducing engineering feedback-loop pain."
+      emphasize:
+        - "SearchBench as a typed, testable evaluation harness"
+        - "Pkl/Go configuration surface and artifact bundles"
+        - "Buck2/KCL/CloudCoil-style typed infrastructure experiments"
+        - "Static inspectability, early validation, and deterministic loops"
+
+    - name: "Security / Infrastructure Security Engineer"
+      level: "Early-career to mid-level"
+      fit: "primary"
+      track: "security"
+      sell_when: "JD emphasizes IAM, auth boundaries, application security, security testing, Linux, network policy, proxies, infrastructure security, or weird cross-layer failure modes."
+      emphasize:
+        - "OSC auth/proxy/security documentation work"
+        - "Double URL encoding investigation with RCE-adjacent implications"
+        - "libnftnl/netfilter structured fuzzer"
+        - "Security+ and Network+ certifications"
+        - "PicoCTF and SkillsUSA cybersecurity recognition"
+
+    - name: "AI Evaluation / Agent Infrastructure Engineer"
+      level: "Project-proven; emerging professional track"
+      fit: "primary"
+      track: "ai-infra"
+      sell_when: "JD emphasizes AI evals, LLMOps, agent infrastructure, observability, traces, datasets, prompt/tool changes, cost tracking, retrieval, code search, or release-quality decision making for AI systems."
+      emphasize:
+        - "SearchBench flagship project"
+        - "AI Agents Need Release Reports, Not Just Traces"
+        - "Static graph scoring, token/cost tracking, telemetry, candidate-vs-baseline comparison"
+        - "Deterministic context compiler visualization"
+        - "Release engineering framing for agent systems"
+
+    - name: "AI Developer Tools / Context Engineering Engineer"
+      level: "Project-proven; early-career to mid-level"
+      fit: "primary"
+      track: "ai-devtools"
+      sell_when: "JD emphasizes code agents, retrieval systems, structured context, graph-based code understanding, MCP/tool interfaces, IDE tooling, or LLM-assisted developer workflows."
+      emphasize:
+        - "SearchBench code localization harness"
+        - "jCodeMunch vs Iterative Context comparison framing"
+        - "Graph look-ahead, token-bounded packing, and static graph distance scoring"
+        - "React Flow deterministic context visualization"
+
+    - name: "Forward Deployed / Technical Solutions Engineer"
+      level: "Early-career to mid-level"
+      fit: "primary"
+      track: "hybrid"
+      sell_when: "JD wants someone who can understand messy customer/internal systems quickly, debug across layers, write clearly, build small tools, and translate technical ambiguity into next actions."
+      emphasize:
+        - "OSC systems translation and documentation"
+        - "Tarigma operator-facing UI and temporal coordination work"
+        - "STEMTree teaching and communication background"
+        - "OfficeMax customer-facing communication as current social-compression practice"
+        - "Technical essays as evidence of communication depth"
+
+    - name: "Frontend Systems / Visualization Engineer"
+      level: "Mid-level potential; use selectively"
+      fit: "secondary"
+      track: "frontend-systems"
+      sell_when: "JD emphasizes complex frontend state, operational dashboards, visualization, human-in-the-loop tooling, graph UI, or product surfaces for technical users."
+      emphasize:
+        - "Tarigma Recoil + react-mosaic operator workspace"
+        - "Custom Chart.js temporal annotation fork"
+        - "Deterministic context compiler visualization"
+        - "Next.js/MDX technical writing platform"
+
+    - name: "Technical Writer / Developer Education / Enablement Engineer"
+      level: "Mid-level potential; use selectively"
+      fit: "secondary"
+      track: "communication"
+      sell_when: "JD emphasizes technical documentation, internal enablement, developer education, curriculum, architecture writing, onboarding, or translating engineering complexity for practitioners."
+      emphasize:
+        - "OSC code-path-driven documentation"
+        - "Technical blog and portfolio platform"
+        - "STEMTree programming instruction"
+        - "Ability to write high-context systems material for serious technical audiences"
+
+    - name: "Pure Product Management"
+      level: "Adjacent only"
+      fit: "adjacent"
+      track: "product"
+      sell_when: "JD is highly technical, infra/devtools/AI-platform specific, and values builder/product hybrid behavior more than formal PM background."
+      emphasize:
+        - "Product-shaped thinking in SearchBench reports and context compiler visualization"
+        - "Tarigma startup/product exposure"
+        - "Technical writing as market/idea articulation"
+      avoid_when: "Role is mostly roadmap ownership, stakeholder politics, sales enablement, or non-technical SaaS feature management."
+
+narrative:
+  headline: "Infrastructure and platform engineer who makes complex systems legible, reproducible, and safer to operate"
+
+  exit_story: >-
+    My path has moved through electrical grid incident-response software, HPC infrastructure,
+    security documentation, technical teaching, Linux/networking research, typed infrastructure,
+    and AI evaluation tooling. The common thread is systems translation: I find the seams where
+    state, identity, deployment, observability, runtime behavior, or human understanding drift,
+    then build artifacts that make the system easier to reason about. I am now targeting roles
+    where that ability is the job: platform, infrastructure, security, developer tooling, AI evals,
+    and high-context technical solutions work.
+
+  short_pitch: >-
+    I build tools that move uncertainty out of people's heads and into inspectable artifacts:
+    static graphs, typed configs, reproducible environments, fuzzing harnesses, telemetry traces,
+    run bundles, and release-style reports.
+
+  positioning:
+    primary_identity: "Systems translator / phase-boundary engineer"
+    public_translation: "Platform/security/AI-infra engineer focused on legibility, reproducibility, and release-quality feedback loops"
+    avoid_public_framing:
+      - "philosophical identity language"
+      - "private institutional injury"
+      - "uncredentialed genius framing"
+      - "too much explanation of personal history"
+    preferred_public_framing:
+      - "I work well at seams between subsystems"
+      - "I make opaque systems easier to reason about"
+      - "I build artifacts that reduce ambiguity"
+      - "I shift expensive runtime discovery into earlier, inspectable structure"
+
+  superpowers:
+    - "Reverse-engineer opaque systems into clear operating models"
+    - "Shift expensive runtime uncertainty into earlier, inspectable structure"
+    - "Build reproducible local environments for systems that are hard to reason about directly"
+    - "Trace correctness and security problems across UI, infrastructure, auth, deployment, serialization, and runtime boundaries"
+    - "Design typed, testable interfaces over fragile configuration and infrastructure surfaces"
+    - "Write technical artifacts that explain complex system behavior without flattening important details"
+    - "Communicate across engineers, operators, students, customers, and non-specialists without losing the technical truth"
+
+  proof_points:
+    - name: "SearchBench"
+      url: "https://github.com/becker63/searchbench https://github.com/becker63/searchbench-go"
+      hero_metric: "Built a deterministic evaluation harness for agentic code-search systems with baseline-vs-candidate comparisons, static-graph scoring, token/cost tracking, telemetry, reproducible run bundles, and promotion-style reports."
+      track: "ai-infra"
+      use_for:
+        - "AI evaluation"
+        - "LLMOps"
+        - "developer tooling"
+        - "agent infrastructure"
+        - "platform engineering"
+        - "release engineering"
+
+    - name: "AI Agents Need Release Reports, Not Just Traces"
+      url: "https://www.becker63.digital/Blogs/ai-release-reports"
+      hero_metric: "Defined the product shape for agent-system release reports: baseline, candidate, changed artifacts, score movement, regressions, protected cases, and promotion decisions."
+      track: "ai-infra"
+      use_for:
+        - "AI observability"
+        - "agent evals"
+        - "Langfuse/LangSmith-adjacent roles"
+        - "technical writing"
+
+    - name: "Static Control Plane"
+      url: "https://github.com/becker63/designing-for-two"
+      hero_metric: "Modeled infrastructure with KCL, Crossplane, Buck2, Nix, generated schemas, and pytest validation to make deployment structure inspectable before runtime."
+      track: "platform"
+      use_for:
+        - "platform engineering"
+        - "GitOps"
+        - "typed infrastructure"
+        - "Kubernetes"
+        - "CI/CD"
+        - "reproducibility"
+
+    - name: "Asahi NixOS Workstation Platform"
+      url: ""
+      hero_metric: "Built and maintain a flake-based NixOS workstation on Apple Silicon/Asahi Linux, using overlays, wrappers, pinned dependencies, and hardware-specific configuration to make a nonstandard developer machine reproducible and inspectable."
+      track: "platform"
+      use_for:
+        - "deployment engineering"
+        - "Nix / flakes"
+        - "Linux platform ownership"
+        - "packaging"
+        - "developer environment infrastructure"
+        - "Apple Silicon / ARM Linux"
+        - "reproducibility"
+
+    - name: "libnftnl / netfilter Structured Fuzzer"
+      url: "https://github.com/becker63/nftables-structure-fuzzer"
+      hero_metric: "Built a Nim/Nix structure-aware fuzzing harness around Linux firewall userland compilation, libnftnl object construction, and Netlink serialization boundaries."
+      track: "security"
+      use_for:
+        - "security engineering"
+        - "Linux systems"
+        - "networking"
+        - "fuzzing"
+        - "low-level systems"
+
+    - name: "The Firewall Doesn't Live in the Kernel"
+      url: "https://www.becker63.digital/Blogs/the-firewall-doesnt-live-in-the-kernel"
+      hero_metric: "Traced Linux firewall semantics from human policy through nftables, libnftnl, Netlink, kernel validation, and packet-time execution; framed semantic authority as a security boundary."
+      track: "security-writing"
+      use_for:
+        - "security research"
+        - "infrastructure security"
+        - "technical communication"
+        - "systems debugging"
+
+    - name: "Deterministic Context Compiler Visualization"
+      url: "https://github.com/becker63/sat"
+      hero_metric: "Designed a React Flow demo showing token-bounded graph expansion, constraint-based context selection, and explainable refinement for code reasoning."
+      track: "ai-devtools"
+      use_for:
+        - "AI developer tools"
+        - "graph visualization"
+        - "frontend systems"
+        - "context engineering"
+
+    - name: "Technical Writing Platform"
+      url: "https://github.com/becker63/blog"
+      hero_metric: "Built a custom MDX/Next.js portfolio for systems essays with static diagrams, search/tree navigation, and layout tests."
+      track: "communication"
+      use_for:
+        - "technical writing"
+        - "developer education"
+        - "documentation systems"
+        - "frontend/platform crossover"
+
+    - name: "Ohio State Supercomputer Center systems documentation and security work"
+      url: ""
+      hero_metric: "Reverse-engineered complex HPC web-platform behavior across application code, deployment, auth/proxy layers, CI, runtime assumptions, and local reproduction."
+      track: "professional"
+      use_for:
+        - "platform engineering"
+        - "security"
+        - "documentation"
+        - "reproducibility"
+        - "infrastructure debugging"
+
+    - name: "Tarigma / GE Vernova electrical-grid incident response UI"
+      url: ""
+      hero_metric: "Owned complex frontend state coordination for operator-facing grid incident-response software, including Recoil/react-mosaic workspace state and Chart.js temporal annotation behavior."
+      track: "professional"
+      use_for:
+        - "frontend systems"
+        - "operator tooling"
+        - "visualization"
+        - "human-in-the-loop systems"
+        - "technical product work"
+
+  dealbreakers:
+    hard_no:
+      - "Roles that are mostly sales with little technical ownership"
+      - "Pure CRUD/product feature work with no systems depth"
+      - "Credential-gated environments that cannot evaluate artifact-based proof"
+      - "Unpaid take-home work that resembles production consulting"
+    strong_preferences:
+      - "High-agency teams"
+      - "Engineers close to decision-making"
+      - "Clear ownership boundaries"
+      - "Teams that value documentation, reproducibility, and careful system design"
+      - "Roles where writing and explanation are part of engineering leverage"
+
+  preferred_companies:
+    patterns:
+      - "Tier 2 infrastructure startups: post-idea, pre-ossification, still paying the cost of architectural decisions"
+      - "SaaS companies with real platform pain: CI instability, deployment safety, Kubernetes reliability, environment drift, infra cost, developer tooling"
+      - "AI infrastructure/devtools companies working on evals, observability, tracing, retrieval, code agents, or agent release quality"
+      - "Security/platform teams that care about auth boundaries, policy engines, configuration semantics, and reproducible testing"
+      - "Datacenter / compute / cloud infrastructure companies where systems, operations, and software meet"
+    examples_to_research:
+      - "Crusoe"
+      - "Modal"
+      - "Langfuse"
+      - "Oxide Computer Company"
+      - "System Initiative"
+      - "Sourcegraph / code intelligence companies"
+      - "Tailscale / networking infrastructure companies"
+      - "Buildkite / CI infrastructure companies"
+
+compensation:
+  currency: "USD"
+  # Confirm before using in application forms. These are strategy defaults, not hard commitments.
+  target_range: "$80K-120K base for full-time roles; higher for strong infra/AI-platform fit"
+  minimum: "$65K-75K depending on role quality, learning slope, benefits, and proximity to target lane"
+  location_flexibility: "Remote preferred; open to hybrid/on-site in Central Ohio for the right infrastructure, datacenter-adjacent, or high-learning role"
+
+  alternate_ranges:
+    - track: "technical_contracting"
+      target_range: "$70-90/hr"
+      minimum: "$45-60/hr depending on business context, scope, and age/credibility risk"
+      note: "Best fit for infrastructure debugging, reproducibility work, security review, internal tooling, documentation systems, and technical synthesis."
+
+    - track: "retail_holdover"
+      target_range: "Not a target lane"
+      minimum: "Use only as employment continuity context"
+      note: "OfficeMax is current holdover work and social-compression practice, not the career target."
+
+location:
+  country: "United States"
+  state: "Ohio"
+  city: "New Albany"
+  timezone: "America/New_York"
+  visa_status: "Authorized to work in the United States"
+  onsite_availability: "Open to Central Ohio hybrid/on-site; remote preferred for broader market roles"
+  relocation: "Open only for exceptional infrastructure/platform opportunities; otherwise prefer Ohio or remote"
+
+cv:
+  output_format: "html"
+  # Optional: set if using Canva-backed visual resume generation.
+  # canva_resume_design_id: ""
+
+application_strategy:
+  default_resume_emphasis:
+    - "SearchBench"
+    - "Ohio State Supercomputer Center"
+    - "Static Control Plane"
+    - "Asahi NixOS Workstation Platform"
+    - "libnftnl / netfilter Structured Fuzzer"
+    - "Tarigma / GE Vernova"
+
+  role_specific_ordering:
+    platform:
+      - "SearchBench"
+      - "OSC"
+      - "Asahi NixOS Workstation Platform"
+      - "Static Control Plane"
+      - "Tarigma"
+      - "Technical Writing Platform"
+    security:
+      - "OSC"
+      - "libnftnl / netfilter Structured Fuzzer"
+      - "The Firewall Doesn't Live in the Kernel"
+      - "Static Control Plane"
+      - "SearchBench"
+    ai_infra:
+      - "SearchBench"
+      - "AI Agents Need Release Reports, Not Just Traces"
+      - "Deterministic Context Compiler Visualization"
+      - "Technical Writing Platform"
+      - "Static Control Plane"
+    frontend_systems:
+      - "Tarigma"
+      - "Deterministic Context Compiler Visualization"
+      - "Technical Writing Platform"
+      - "SearchBench"
+    technical_solutions:
+      - "OSC"
+      - "Tarigma"
+      - "STEMTree"
+      - "SearchBench"
+      - "Technical Writing Platform"
+
+  outreach_style:
+    default: "Engineer-first, artifact-led, non-needy. Lead with a specific technical observation or question, then offer the relevant artifact. Do not start with a resume dump."
+    avoid:
+      - "Over-explaining the entire identity arc"
+      - "Asking for a job before technical resonance exists"
+      - "Performing intensity as proof"
+      - "Turning research into unpaid consulting"
+    use_when_possible:
+      - "One concrete insight from their blog/repo/product"
+      - "One relevant artifact"
+      - "One technically serious question"
+      - "A graceful exit if there is no pull"
+
+  scoring_biases:
+    prefer:
+      - "Roles with ownership over ambiguous cross-cutting systems"
+      - "Roles that reward clear writing and system modeling"
+      - "Roles where reproducibility, observability, or testing are core"
+      - "Small/mid-size technical teams where artifact quality can outweigh credentials"
+      - "AI/tooling companies with explicit eval/release/observability problems"
+    penalize:
+      - "Roles requiring a completed CS degree as a hard filter"
+      - "Roles with vague responsibilities and no clear technical owner"
+      - "Roles that are mainly support ticket handling without engineering leverage"
+      - "Roles where the only success metric is speed without correctness"
+      - "Roles that demand heavy on-site presence far outside Ohio without strong upside"

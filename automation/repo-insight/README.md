@@ -67,7 +67,7 @@ Packing-related environment knobs:
 
 Compacted ProjectCapsules are cached under `.cache/repo-insight/capsules`. Raw Repomix packs and cloned repos stay temporary and are not cached.
 
-Author and writing context is configured in `data/repo-insight-context.json`. Missing configured `../career-ops` files warn and skip. Generated `career-ops` outputs, reports, job descriptions, private tracker data, PDFs, and CV HTML/PDF outputs are not ingested.
+Author and writing context is configured in `data/repo-insight-context.json`. The approved `career-ops` writing/profile context is vendored under `data/repo-insight-context/career-ops/` so GitHub Actions can read it without a sibling checkout. Generated `career-ops` outputs, reports, job descriptions, private tracker data, PDFs, and CV HTML/PDF outputs are not ingested.
 
 ## Adding A Source Repo
 

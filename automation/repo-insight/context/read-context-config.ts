@@ -13,13 +13,12 @@ export type ContextSourceText = {
 
 const allowedExtensions = new Set([".md", ".mdx", ".yml", ".yaml", ".json", ".txt"]);
 
-const blockedPathParts = new Set(["output", "reports", "jds", "logs", "data"]);
-
 const isAllowedTextPath = (filePath: string) => allowedExtensions.has(path.extname(filePath).toLowerCase());
 
 const isBlockedContextPath = (filePath: string) => {
-  const normalized = filePath.split(path.sep);
-  if (normalized.some((part) => blockedPathParts.has(part))) return true;
+  const normalized = filePath.split(path.sep).join("/");
+  if (/career-ops\/(?:output|reports|jds|data)(?:\/|$)/.test(normalized)) return true;
+  if (/career-ops\/batch\/logs(?:\/|$)/.test(normalized)) return true;
   const lower = filePath.toLowerCase();
   return lower.endsWith(".pdf") || lower.endsWith(".html") || lower.endsWith(".htm");
 };
