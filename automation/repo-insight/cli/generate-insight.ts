@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { GitHubIssuePublisher } from "../adapters/github-issues";
 import { CursorSdkAgentBackend } from "../adapters/cursor-sdk-agent";
+import { buildAuthorProfile } from "../context/build-author-profile";
+import { buildWritingCorpus } from "../context/build-writing-corpus";
 import { dispatchPayloadSchema } from "../model/schemas";
 import { CuratorInput, DispatchPayload, InsightRunTrigger } from "../model/types";
 import { packTopRepos } from "../packing/pack-top-repos";
@@ -101,10 +103,16 @@ const main = async () => {
   reporter.capsules(capsules, cacheEvents);
 
   const currentRunId = runId();
+  const writingContext = await buildWritingCorpus();
+  const profileContext = await buildAuthorProfile();
+  reporter.writingContext(writingContext);
+  reporter.profileContext(profileContext);
   const input: CuratorInput = {
     runId: currentRunId,
     generatedAt: new Date().toISOString(),
     tasteProfile: await buildTasteProfile({ write: false }),
+    writingCorpus: writingContext.capsule,
+    authorProfile: profileContext.capsule,
     previousInsightTitles: await readPreviousInsightTitles(),
     trigger,
     capsules,

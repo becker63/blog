@@ -70,6 +70,48 @@ export const projectCapsuleSchema = z.object({
   packStats: packStatsSchema,
 });
 
+const contextSourceSchema = z.object({
+  name: z.string().min(1),
+  path: z.string().min(1),
+  enabled: z.boolean().default(true),
+});
+
+export const repoInsightContextConfigSchema = z.object({
+  externalWritingRoots: z
+    .array(
+      contextSourceSchema.extend({
+        include: z.array(z.string().min(1)).default(["*.mdx", "*.md", "README.md"]),
+      }),
+    )
+    .default([]),
+  externalProfileFiles: z.array(contextSourceSchema).default([]),
+});
+
+export const writingCorpusCapsuleSchema = z.object({
+  sourceNames: z.array(z.string().min(1)).default([]),
+  recurringThemes: z.array(z.string().min(1)).default([]),
+  strongClaims: z.array(z.string().min(1)).default([]),
+  favoriteConcepts: z.array(z.string().min(1)).default([]),
+  voiceNotes: z.array(z.string().min(1)).default([]),
+  existingPostMap: z.array(z.object({ title: z.string().min(1), path: z.string().min(1), summary: z.string().min(1) })).default([]),
+  overusedIdeasToAvoid: z.array(z.string().min(1)).default([]),
+  openThreads: z.array(z.string().min(1)).default([]),
+  representativeHooks: z.array(z.string().min(1)).default([]),
+});
+
+export const authorProfileCapsuleSchema = z.object({
+  sourceNames: z.array(z.string().min(1)).default([]),
+  publicPositioning: z.array(z.string().min(1)).default([]),
+  targetLanes: z.array(z.string().min(1)).default([]),
+  proofPoints: z.array(z.string().min(1)).default([]),
+  recurringStrengths: z.array(z.string().min(1)).default([]),
+  marketNarrative: z.array(z.string().min(1)).default([]),
+  projectsToConnect: z.array(z.string().min(1)).default([]),
+  avoidFraming: z.array(z.string().min(1)).default([]),
+  preferredFraming: z.array(z.string().min(1)).default([]),
+  storyBankHighlights: z.array(z.string().min(1)).default([]),
+});
+
 export const evidenceItemSchema = z.object({
   repo: repoFullName,
   commit: z.string().min(7),

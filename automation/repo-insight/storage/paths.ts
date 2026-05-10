@@ -6,6 +6,7 @@ export const automationDir = path.join(repoRoot, "automation");
 export const repoInsightDir = path.join(automationDir, "repo-insight");
 export const dataDir = path.join(repoRoot, "data");
 export const repoCatalogPath = path.join(dataDir, "repo-catalog.json");
+export const repoInsightContextPath = path.join(dataDir, "repo-insight-context.json");
 export const tasteProfilePath = path.join(dataDir, "taste-profile.md");
 export const insightsDir = path.join(repoRoot, "content", "insights");
 export const insightRunsDir = path.join(insightsDir, "runs");

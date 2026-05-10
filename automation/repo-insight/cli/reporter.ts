@@ -70,6 +70,22 @@ export class Reporter {
     );
   }
 
+  writingContext(context: { sourceCount: number; cacheHit: boolean }) {
+    this.log(
+      this.compact
+        ? `writing-context sources=${context.sourceCount} cacheHit=${context.cacheHit}`
+        : `\nWriting Context\n  sources: ${context.sourceCount}\n  cache hit: ${context.cacheHit}`,
+    );
+  }
+
+  profileContext(context: { sourceCount: number; cacheHit: boolean }) {
+    this.log(
+      this.compact
+        ? `profile-context sources=${context.sourceCount} cacheHit=${context.cacheHit}`
+        : `\nAuthor Profile Context\n  sources: ${context.sourceCount}\n  cache hit: ${context.cacheHit}`,
+    );
+  }
+
   decision(decision: CuratorDecision) {
     if (decision.kind === "no_insight") {
       this.log(this.compact ? `decision=no_insight reason=${decision.reason}` : `\nDecision\n  no_insight: ${decision.reason}`);

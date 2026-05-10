@@ -3,7 +3,13 @@
 ## Manual Notes
 
 <!-- repo-insight:manual-start -->
-Add hand-written taste notes here. This section is preserved by regeneration.
+Prefer seeds that expose hidden structure in technical work.
+
+Look for phase boundaries: where human intent becomes configuration, configuration becomes runtime behavior, runtime behavior becomes evidence, and evidence becomes a release or career decision.
+
+A good generated insight should feel like the start of a Becker63 essay, not a GitHub release note. It should connect concrete repo evidence to durable themes: legibility, reproducibility, semantic authority, typed interfaces, infrastructure as inspectable artifact, AI evals as release systems, and public profile legibility.
+
+Avoid generic changelog summaries. Avoid resume-flavored self-promotion. The work can connect to Taylor’s profile, but only through a real technical thesis.
 <!-- repo-insight:manual-end -->
 
 ## Recurring Themes

@@ -1,0 +1,37 @@
+{
+  "externalWritingRoots": [
+    {
+      "name": "career-ops-writing-samples",
+      "path": "../career-ops/writing-samples",
+      "include": ["*.mdx", "README.md"],
+      "enabled": true
+    }
+  ],
+  "externalProfileFiles": [
+    {
+      "name": "career-ops-profile-example",
+      "path": "../career-ops/examples/dual-track-engineer-instructor/profile.yml",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-story-bank",
+      "path": "../career-ops/interview-prep/story-bank.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-article-digest",
+      "path": "../career-ops/article-digest.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-local-profile",
+      "path": "../career-ops/config/profile.yml",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-local-profile-md",
+      "path": "../career-ops/modes/_profile.md",
+      "enabled": true
+    }
+  ]
+}

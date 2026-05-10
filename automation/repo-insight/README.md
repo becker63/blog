@@ -9,6 +9,7 @@ Run `pnpm generate-insight`. It asks GitHub for the top recently pushed repos th
 - `cli/generate-insight.ts` is the product command.
 - `adapters/github-repos.ts` asks GitHub for accessible repos sorted by recent push activity.
 - `packing/` checks out the top repos into temporary directories, packs them with Repomix, and compacts those packs into project capsules.
+- `context/` reads `data/repo-insight-context.json`, summarizes local writing plus configured `../career-ops` writing/profile sources, and caches only typed context capsules.
 - `adapters/` keeps Cursor SDK, GitHub repo discovery, and GitHub issue publishing isolated.
 - `content/insights/` stores generated draft artifacts. Nothing here is published by the existing blog post pipeline.
 - GitHub issues in this blog repo are the canonical notification and review inbox for generated insights.
@@ -65,6 +66,8 @@ Packing-related environment knobs:
 - `REPO_INSIGHT_PACK_STYLE`, default `xml`
 
 Compacted ProjectCapsules are cached under `.cache/repo-insight/capsules`. Raw Repomix packs and cloned repos stay temporary and are not cached.
+
+Author and writing context is configured in `data/repo-insight-context.json`. Missing configured `../career-ops` files warn and skip. Generated `career-ops` outputs, reports, job descriptions, private tracker data, PDFs, and CV HTML/PDF outputs are not ingested.
 
 ## Adding A Source Repo
 

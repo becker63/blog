@@ -4,12 +4,15 @@ import {
   dispatchPayloadSchema,
   evidenceItemSchema,
   forcedInsightDecisionSchema,
+  authorProfileCapsuleSchema,
   insightArtifactSchema,
   insightFrontmatterSchema,
   insightIndexSchema,
   packStatsSchema,
   projectCapsuleSchema,
+  repoInsightContextConfigSchema,
   repoCatalogSchema,
+  writingCorpusCapsuleSchema,
 } from "./schemas";
 
 export type DispatchPayload = z.infer<typeof dispatchPayloadSchema>;
@@ -23,6 +26,9 @@ export type ForcedInsightDecision = z.infer<typeof forcedInsightDecisionSchema>;
 export type InsightIndex = z.infer<typeof insightIndexSchema>;
 export type PackStats = z.infer<typeof packStatsSchema>;
 export type ProjectCapsule = z.infer<typeof projectCapsuleSchema>;
+export type RepoInsightContextConfig = z.infer<typeof repoInsightContextConfigSchema>;
+export type WritingCorpusCapsule = z.infer<typeof writingCorpusCapsuleSchema>;
+export type AuthorProfileCapsule = z.infer<typeof authorProfileCapsuleSchema>;
 
 export type InsightRunTrigger = {
   kind: "github-push" | "inferred-top-repo";
@@ -61,6 +67,8 @@ export type CuratorInput = {
   runId: string;
   generatedAt: string;
   tasteProfile: string;
+  writingCorpus: WritingCorpusCapsule;
+  authorProfile: AuthorProfileCapsule;
   previousInsightTitles: string[];
   trigger: InsightRunTrigger;
   capsules: ProjectCapsule[];
