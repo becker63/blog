@@ -2,25 +2,88 @@ import { aggregateInsights, deterministicDigestPreview } from "../aggregate/aggr
 import { collectInsightSeeds } from "../aggregate/collect-insights";
 import { GitHubDigestIssuePublisher } from "../aggregate/github-digest-issue";
 import { renderDigestIssue } from "../aggregate/render-digest-issue";
+import {
+  canRunAggregator,
+  estimateTokens,
+  readBudgetState,
+  recordAggregatorRun,
+  writeBudgetStateIfChanged,
+} from "../storage/budget-state";
 import { getArgValue, hasFlag } from "./args";
 
 const main = async () => {
   const dryRun = hasFlag("--dry-run");
   const ci = hasFlag("--ci") || process.env.CI === "true";
+  const scheduledRun = process.env.GITHUB_EVENT_NAME === "schedule";
+  const ignoreBudget = hasFlag("--ignore-budget");
+  const budgetStatus = hasFlag("--budget-status");
   const repo = getArgValue("--repo");
-  const maxSeeds = Number(getArgValue("--max-seeds") ?? "50");
+  const maxSeeds = Number(getArgValue("--max-seeds") ?? process.env.REPO_INSIGHT_AGGREGATOR_MAX_SEEDS ?? "30");
   const includeClosed = !hasFlag("--no-closed");
   const noGithub = hasFlag("--no-github");
+  const budgetState = await readBudgetState();
+  const budget = canRunAggregator(budgetState);
 
-  const seeds = await collectInsightSeeds({ repo, includeClosed, noGithub, maxSeeds });
-  if (seeds.length === 0) {
-    console.log(ci ? "aggregate seeds=0 clusters=0 issue=none" : "No repo-insight seeds found.");
+  const runsLabel = `${budget.used}/${budget.limit}`;
+
+  if (budgetStatus) {
+    console.log(`aggregate budget=${budget.ok ? "ok" : "exhausted"} runs=${runsLabel}`);
     return;
   }
 
-  const digest = dryRun ? deterministicDigestPreview(seeds) : await aggregateInsights(seeds);
+  const seeds = await collectInsightSeeds({ repo, includeClosed, noGithub, maxSeeds });
+  if (seeds.length < 2) {
+    console.log(
+      ci
+        ? `aggregate skip=too_few_seeds budget=${budget.ok ? "ok" : "exhausted"} runs=${runsLabel} seeds=${seeds.length}`
+        : `Only ${seeds.length} repo-insight seed found; skipping.`,
+    );
+    return;
+  }
+
+  const publisher = new GitHubDigestIssuePublisher({ repo, dryRun });
+  const existingDigest = await publisher.existingDigestIssue();
+  if (!dryRun && scheduledRun && !ignoreBudget && existingDigest) {
+    const ageMs = Date.now() - Date.parse(existingDigest.updatedAt);
+    if (ageMs < 20 * 60 * 60 * 1000) {
+      console.log(
+        ci
+          ? `aggregate skip=recently_updated runs=${runsLabel} seeds=${seeds.length} updatedAt=${existingDigest.updatedAt}`
+          : `Digest was updated recently (${existingDigest.updatedAt}); skipping.`,
+      );
+      return;
+    }
+  }
+
+  if (scheduledRun && !ignoreBudget && !budget.ok) {
+    console.log(ci ? `aggregate budget=exhausted runs=${runsLabel} seeds=${seeds.length}` : `Aggregator budget exhausted (${budget.used}/${budget.limit}).`);
+    return;
+  }
+
+  console.log(ci ? `aggregate budget=ok runs=${runsLabel} seeds=${seeds.length}` : `Aggregate budget ok (${budget.used}/${budget.limit}); seeds: ${seeds.length}/${maxSeeds}`);
+
+  const usage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    model: process.env.CURSOR_MODEL ?? "composer-2",
+  };
+  const onUsageEstimate = (event: { inputChars: number; outputChars: number; model: string }) => {
+    usage.inputTokens += estimateTokens(event.inputChars);
+    usage.outputTokens += estimateTokens(event.outputChars);
+    usage.model = event.model;
+  };
+
+  let digest = dryRun ? deterministicDigestPreview(seeds) : await aggregateInsights(seeds, { onUsageEstimate });
+
+  if (!dryRun) {
+    await writeBudgetStateIfChanged(recordAggregatorRun(budgetState, usage));
+  }
+
   const body = renderDigestIssue({ digest, seeds });
-  const issue = await new GitHubDigestIssuePublisher({ repo, dryRun }).publish(body);
+
+  console.log(ci ? `usage-estimate inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}` : `Usage estimate: inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`);
+
+  const issue = await publisher.publish(body);
 
   console.log(
     ci

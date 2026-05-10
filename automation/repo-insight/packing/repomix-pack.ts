@@ -5,14 +5,17 @@ import { runSubprocess } from "../adapters/subprocess";
 import { AccessibleRepo, RepoPack } from "./types";
 import { checkoutRepo } from "./checkout-repo";
 
-const DEFAULT_MAX_PACK_BYTES = 200_000;
+const DEFAULT_MAX_PACK_BYTES = 100_000;
 
 const repomixStyle = () => process.env.REPO_INSIGHT_PACK_STYLE ?? "xml";
 
-const maxPackBytesFor = (repo: AccessibleRepo) =>
+const maxPackBytesFor = (repo: AccessibleRepo, cap?: number) =>
+  Math.min(
   repo.overlay?.maxPackBytes ??
   repo.overlay?.inspect.maxTotalBytes ??
-  Number(process.env.REPO_INSIGHT_MAX_PACK_BYTES ?? DEFAULT_MAX_PACK_BYTES);
+    Number(process.env.REPO_INSIGHT_MAX_PACK_BYTES ?? DEFAULT_MAX_PACK_BYTES),
+    cap ?? Number.POSITIVE_INFINITY,
+  );
 
 const truncatePack = (text: string, maxBytes: number) => {
   const bytes = Buffer.byteLength(text);
@@ -33,7 +36,7 @@ const truncatePack = (text: string, maxBytes: number) => {
   };
 };
 
-export const packRepoWithRepomix = async (repo: AccessibleRepo): Promise<RepoPack> => {
+export const packRepoWithRepomix = async (repo: AccessibleRepo, maxPackBytesCap?: number): Promise<RepoPack> => {
   const checkout = await checkoutRepo(repo);
   const outputDir = await mkdtemp(path.join(os.tmpdir(), "repo-insight-repomix-"));
   const outputPath = path.join(outputDir, `repomix-output.${repomixStyle() === "markdown" ? "md" : "xml"}`);
@@ -55,7 +58,7 @@ export const packRepoWithRepomix = async (repo: AccessibleRepo): Promise<RepoPac
     );
 
     const rawOutput = await readFile(outputPath, "utf8");
-    const maxPackBytes = maxPackBytesFor(repo);
+    const maxPackBytes = maxPackBytesFor(repo, maxPackBytesCap);
     const packed = truncatePack(rawOutput, maxPackBytes);
 
     return {

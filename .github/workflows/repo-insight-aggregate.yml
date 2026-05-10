@@ -3,13 +3,13 @@
 name: Repo Insight Aggregate
 on:
   schedule:
-    - cron: "47 13 * * 0"
-  workflow_dispatch:
+    - cron: "47 13 * * *"
+  workflow_dispatch: {}
 permissions:
-  contents: read
+  contents: write
   issues: write
 concurrency:
-  group: repo-insight-aggregate-${{ github.run_id }}
+  group: repo-insight-aggregate
   cancel-in-progress: false
 jobs:
   aggregate:
@@ -30,4 +30,21 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_MODEL }}
+          REPO_INSIGHT_AGGREGATOR_DAILY_LIMIT: "1"
+          REPO_INSIGHT_AGGREGATOR_MAX_SEEDS: "30"
         run: nix develop --command pnpm aggregate-insights --ci
+      - name: Commit budget state if changed
+        env:
+          RI_GIT_BRANCH: ${{ github.ref_name }}
+        run: |-
+          nix develop --command bash -lc "set -eu
+          git config user.name \"github-actions[bot]\"
+          git config user.email \"github-actions[bot]@users.noreply.github.com\"
+          BRANCH=\"\$RI_GIT_BRANCH\"
+          git fetch origin \"\$BRANCH\" --prune || true
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git add data/repo-insight-budget-state.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m \"Update repo insight budget state\"
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git push || { ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true; git push; }"

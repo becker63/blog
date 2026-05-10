@@ -37,14 +37,15 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "Generated GitHub issues are draft seeds, not polished blog posts.",
     "Do not invent files, commits, quotes, or previous writing.",
     "Do not quote private source unless the capsule/evidence says it is safe.",
-    "You are not summarizing pushes. You are finding where recent work touches Taylor's durable intellectual and project themes.",
+    "`wakeReason` and activity flags only mean the scheduler noticed repo movement or a manual run started. They never pick a focal repository.",
+    "You are sampling a stochastic context window, not reacting to \"the repo that moved last\".",
     "Generated seeds should be more cerebral than changelog-like.",
     "",
     "## Mode",
     "",
     force
-      ? "FORCE: The human has already decided to create an insight. Return exactly one `insight`. `no_insight` is invalid. If evidence is thin, be modest and concrete."
-      : "DISCRETIONARY: Return `no_insight` unless the latest push signal reveals a concrete, evidence-backed writing seed. Prefer no issue over generic output.",
+      ? "FORCE: The human has already decided to create an insight. Return exactly one `insight`. `no_insight` is invalid. Choose the strongest available idea from the sampled context, even if it is not from the newest repo."
+      : "DISCRETIONARY: Return `no_insight` unless the sampled context reveals a concrete, evidence-backed writing seed. Prefer no issue over generic output.",
     "",
     "## Output Contract",
     "",
@@ -66,7 +67,7 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "",
     "## Curatorial Priority",
     "",
-    "1. Current repo evidence and ProjectCapsules",
+    "1. Sampled ProjectCapsules grounded in packs",
     "2. WritingCorpusCapsule",
     "3. AuthorProfileCapsule",
     "4. Previous insight titles",
@@ -74,6 +75,19 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "A strong seed connects concrete repo evidence to durable Taylor themes: legibility, reproducibility, typed interfaces, semantic authority, phase boundaries, release evidence, AI evals as product/release systems, inspectable infrastructure, human/system coordination, and public profile legibility.",
     "",
     "Requirements:",
+    ...(process.env.CI === "true" && !force
+      ? [
+          "- This is an unattended scheduled run. Be concise.",
+          "- Prefer `no_insight` when the idea is uncertain or weak.",
+          "- Do not spend tokens developing a marginal idea.",
+        ]
+      : []),
+    "- This run was woken up by repo activity or a manual run, but the latest commit is not automatically the subject.",
+    "- You are seeing a sampled set of repository capsules. The sample may include recently active repos, changed repos, and other eligible repos.",
+    "- Do not assume the newest repo or newest commit is the most important signal.",
+    "- Do not summarize the latest repo just because it changed.",
+    "- Choose the issue topic based on conceptual interest, evidence strength, and fit with Taylor's broader body of work.",
+    "- Treat `selection.selectedRepos` as the sampled context window, not as a ranked list.",
     "- `hiddenThesis` must be conceptual, not merely descriptive.",
     "- `relationToPreviousWriting` must use WritingCorpusCapsule when available.",
     "- `possibleHooks` should include essay-grade hooks.",
@@ -91,7 +105,8 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "",
     "## Context",
     "",
-    "No repository_dispatch payload was provided. Treat the scheduled polling trigger repo as the current signal.",
+    "`selection` and capsules describe a sampled subset of repos. Treat them as simultaneous context windows, not chronological ranking.",
+    "Scheduled polling compares `pushedAt` timestamps to decide whether sleep should end (`activity changed`) — nothing more authoritative than that.",
     "",
     JSON.stringify(input, null, 2),
   ].join("\n");

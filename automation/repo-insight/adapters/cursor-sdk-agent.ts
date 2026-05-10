@@ -8,6 +8,7 @@ export type CursorSdkAgentOptions = {
   apiKey?: string;
   model?: string;
   cwd?: string;
+  onUsageEstimate?: (event: { inputChars: number; outputChars: number; model: string; name: string }) => void;
 };
 
 export class CursorSdkAgentBackend implements AgentBackend {
@@ -25,6 +26,7 @@ export class CursorSdkAgentBackend implements AgentBackend {
         input.mode === "force"
           ? repoInsightIssueDraftJsonContract
           : `{ "kind": "no_insight", "reason": "string" }\n\nor\n\n${repoInsightIssueDraftJsonContract}`,
+      onUsageEstimate: this.options.onUsageEstimate,
     });
   }
 }

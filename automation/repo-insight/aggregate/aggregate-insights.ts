@@ -3,7 +3,12 @@ import { InsightDigest, InsightSeed } from "../model/types";
 import { runCursorJson } from "../adapters/cursor-sdk-json";
 import { buildAggregateInsightsPrompt } from "../prompting/build-aggregate-insights-prompt";
 
-export const aggregateInsights = async (seeds: InsightSeed[]): Promise<InsightDigest> => {
+export const aggregateInsights = async (
+  seeds: InsightSeed[],
+  options: {
+    onUsageEstimate?: (event: { inputChars: number; outputChars: number; model: string; name: string }) => void;
+  } = {},
+): Promise<InsightDigest> => {
   const generatedAt = new Date().toISOString();
   return runCursorJson({
     prompt: buildAggregateInsightsPrompt({ generatedAt, seeds }),
@@ -12,6 +17,7 @@ export const aggregateInsights = async (seeds: InsightSeed[]): Promise<InsightDi
     name: `repo-insight-digest-${generatedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}`,
     expectedShape:
       '{ "generatedAt": "ISO timestamp", "totalSeeds": number, "whatThisSeemsToSayAboutTheWork": string, "clusters": [{ "title": string, "thesis": string, "whatIssuesAreAbout": string, "whyPatternMatters": string, "whatIsActuallyInteresting": string, "connectionToLargerWork": string, "whatToDoNext": string, "relatedSeedIds": string[], "relatedIssueNumbers": number[], "score": object, "recommendedAction": string, "rationale": string, "possiblePostTitles": string[], "nextMoves": string[] }], "staleOrLowValueSeeds": StaleSeed[] }',
+    onUsageEstimate: options.onUsageEstimate,
   });
 };
 

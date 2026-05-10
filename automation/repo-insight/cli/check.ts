@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { repoCatalogSchema, repoInsightContextConfigSchema, repoInsightPollStateSchema } from "../model/schemas";
+import { repoCatalogSchema, repoInsightBudgetStateSchema, repoInsightContextConfigSchema, repoInsightPollStateSchema } from "../model/schemas";
 import { listFiles } from "../storage/files";
-import { dataDir, relativeToRoot, repoCatalogPath, repoInsightContextPath, repoInsightPollStatePath, repoRoot, workflowsDir } from "../storage/paths";
+import { dataDir, relativeToRoot, repoCatalogPath, repoInsightBudgetStatePath, repoInsightContextPath, repoInsightPollStatePath, repoRoot, workflowsDir } from "../storage/paths";
 
 const readJsonIfExists = async (filePath: string) => {
   try {
@@ -22,6 +22,9 @@ const validateJson = async () => {
 
   const pollState = await readJsonIfExists(repoInsightPollStatePath);
   if (pollState) repoInsightPollStateSchema.parse(pollState);
+
+  const budgetState = await readJsonIfExists(repoInsightBudgetStatePath);
+  if (budgetState) repoInsightBudgetStateSchema.parse(budgetState);
 };
 
 const validateWorkflowDefinitions = async () => {

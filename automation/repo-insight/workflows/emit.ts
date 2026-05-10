@@ -7,12 +7,14 @@ const header = [
   "",
 ].join("\n");
 
+const quoteCronScalars = (yaml: string) =>
+  yaml.replace(/^(\s*)(-\s+)?cron:\s*(.+)$/gm, (_line, indent, listMarker, value) => {
+    const trimmed = String(value).trim();
+    const marker = listMarker ?? "";
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) return `${indent}${marker}cron: ${trimmed}`;
+    const escaped = trimmed.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    return `${indent}${marker}cron: "${escaped}"`;
+  });
+
 export const renderWorkflow = (workflow: WorkflowFile) =>
-  header +
-  YAML.stringify(workflow.workflow, {
-    lineWidth: 0,
-    nullStr: "",
-    // GitHub cron expressions contain `*`; keep only that fragile scalar quoted.
-  })
-    .replace("cron: 17 * * * *", 'cron: "17 * * * *"')
-    .replace("cron: 47 13 * * 0", 'cron: "47 13 * * 0"');
+  header + quoteCronScalars(YAML.stringify(workflow.workflow, { lineWidth: 0, nullStr: "" }));

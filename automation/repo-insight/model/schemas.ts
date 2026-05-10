@@ -30,6 +30,8 @@ export const repoCatalogSchema = z.object({
       writingThemes: z.array(z.string()).default([]),
       safeToQuote: z.boolean().default(false),
       includeForks: z.boolean().optional(),
+      pinned: z.boolean().default(false),
+      selectionWeight: z.number().positive().optional(),
       ignorePatterns: z.array(z.string()).default([]),
       maxPackBytes: z.number().int().positive().optional(),
       inspect: z
@@ -60,6 +62,21 @@ export const repoInsightPollStateSchema = z.object({
       lastSeenAt: isoDateString,
     }),
   ),
+});
+
+export const repoInsightBudgetDaySchema = z.object({
+  producerScheduledRuns: z.number().int().nonnegative().default(0),
+  producerManualRuns: z.number().int().nonnegative().default(0),
+  aggregatorRuns: z.number().int().nonnegative().default(0),
+  estimatedInputTokens: z.number().int().nonnegative().default(0),
+  estimatedOutputTokens: z.number().int().nonnegative().default(0),
+  lastProducerRunAt: isoDateString.optional(),
+  lastAggregatorRunAt: isoDateString.optional(),
+});
+
+export const repoInsightBudgetStateSchema = z.object({
+  schemaVersion: z.literal(1),
+  days: z.record(z.string().regex(/^\d{4}-\d{2}-\d{2}$/), repoInsightBudgetDaySchema),
 });
 
 export const packStatsSchema = z.object({

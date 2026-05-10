@@ -122,19 +122,23 @@ export const runCursorJson = async <Schema extends z.ZodTypeAny>({
   model = process.env.CURSOR_MODEL ?? "composer-2",
   name,
   expectedShape = "Return one JSON object matching the provided Zod schema.",
+  onUsageEstimate,
 }: {
   prompt: string;
   schema: Schema;
   model?: string;
   name: string;
   expectedShape?: string;
+  onUsageEstimate?: (usage: { inputChars: number; outputChars: number; model: string; name: string }) => void;
 }): Promise<z.infer<Schema>> => {
   const apiKey = process.env.CURSOR_API_KEY;
   if (!apiKey) throw new Error("CURSOR_API_KEY is required for Cursor SDK insight generation.");
   await configureCursorSdkRuntime();
 
   try {
-    const parsed = parseModelJson(await promptCursor({ prompt, apiKey, model, name }));
+    const raw = await promptCursor({ prompt, apiKey, model, name });
+    onUsageEstimate?.({ inputChars: prompt.length, outputChars: raw.length, model, name });
+    const parsed = parseModelJson(raw);
     const validated = schema.safeParse(parsed);
     if (validated.success) return validated.data;
 
@@ -145,14 +149,14 @@ export const runCursorJson = async <Schema extends z.ZodTypeAny>({
       issues: originalIssues,
       expectedShape,
     });
-    const repairedParsed = parseModelJson(
-      await promptCursor({
+    const repairRaw = await promptCursor({
         prompt: repairPrompt,
         apiKey,
         model,
         name: `${name}-repair`,
-      }),
-    );
+      });
+    onUsageEstimate?.({ inputChars: repairPrompt.length, outputChars: repairRaw.length, model, name: `${name}-repair` });
+    const repairedParsed = parseModelJson(repairRaw);
     const repaired = schema.safeParse(repairedParsed);
     if (repaired.success) return repaired.data;
 

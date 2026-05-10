@@ -25,5 +25,6 @@ jobs:
       - run: nix develop --command pnpm automation:check-workflows
       - run: nix develop --command pnpm automation:actionlint
       - run: nix develop --command pnpm typecheck
+      - run: nix develop --command pnpm insight:test
       - run: nix develop --command pnpm insight:check
       - run: nix develop --command pnpm lint

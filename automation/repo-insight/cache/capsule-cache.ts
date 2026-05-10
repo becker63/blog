@@ -20,6 +20,7 @@ const cacheEntrySchema = z.object({
 export type CapsuleCacheEvent = {
   repo: string;
   hit: boolean;
+  skipped?: boolean;
 };
 
 const cacheDisabled = () => process.env.REPO_INSIGHT_DISABLE_CACHE === "true";

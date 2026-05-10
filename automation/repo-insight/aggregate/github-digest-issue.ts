@@ -77,6 +77,12 @@ export class GitHubDigestIssuePublisher {
     return { number: createdWithoutLabels.number, url: createdWithoutLabels.url, action: "created" };
   }
 
+  async existingDigestIssue() {
+    if (this.dryRun) return undefined;
+    this.assertConfigured();
+    return this.findExistingDigestIssue();
+  }
+
   private assertConfigured() {
     if (!this.token) throw new Error("GITHUB_TOKEN or GH_TOKEN is required to create or update the digest issue.");
   }

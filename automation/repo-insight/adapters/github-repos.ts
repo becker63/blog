@@ -40,10 +40,10 @@ const repoAllowed = (repo: AccessibleRepo) => {
   return true;
 };
 
-export const discoverTopRepos = async ({
+export const discoverAccessibleRepos = async ({
   catalog,
   token = process.env.GH_REPO_INSIGHT_TOKEN ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
-  limit = Number(process.env.REPO_INSIGHT_REPO_LIMIT ?? "5"),
+  limit = Number(process.env.REPO_INSIGHT_DISCOVERY_LIMIT ?? "100"),
 }: {
   catalog: RepoCatalog;
   token?: string;
@@ -67,3 +67,5 @@ export const discoverTopRepos = async ({
 
   return repos.slice(0, limit);
 };
+
+export const discoverTopRepos = discoverAccessibleRepos;

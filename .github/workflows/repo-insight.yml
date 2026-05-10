@@ -14,7 +14,7 @@ permissions:
   contents: write
   issues: write
 concurrency:
-  group: repo-insight-${{ github.run_id }}
+  group: repo-insight-producer
   cancel-in-progress: false
 jobs:
   generate:
@@ -42,16 +42,30 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_MODEL }}
           CURSOR_COMPACTION_MODEL: ${{ vars.CURSOR_COMPACTION_MODEL }}
+          REPO_INSIGHT_PRODUCER_DAILY_LIMIT: "4"
+          REPO_INSIGHT_SELECTED_REPO_LIMIT: "3"
+          REPO_INSIGHT_CANDIDATE_LIMIT: "25"
+          REPO_INSIGHT_MAX_PACK_BYTES: "100000"
+          REPO_INSIGHT_MAX_TOTAL_PACK_BYTES: "300000"
+          REPO_INSIGHT_MAX_NEW_COMPACTIONS_PER_RUN: "2"
         run: |-
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
             nix develop --command pnpm generate-insight:force --ci
           else
             nix develop --command pnpm generate-insight --ci
           fi
-      - name: Commit poll state if changed
+      - name: Commit repo insight state
+        env:
+          RI_GIT_BRANCH: ${{ github.ref_name }}
         run: |-
-          nix develop --command bash -lc 'git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
-          git add data/taste-profile.md data/repo-insight-poll-state.json
-          git diff --cached --quiet || git commit -m "Update repo insight state"
-          git push'
+          nix develop --command bash -lc "set -eu
+          git config user.name \"github-actions[bot]\"
+          git config user.email \"github-actions[bot]@users.noreply.github.com\"
+          BRANCH=\"\$RI_GIT_BRANCH\"
+          git fetch origin \"\$BRANCH\" --prune || true
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git add data/taste-profile.md data/repo-insight-poll-state.json data/repo-insight-budget-state.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m \"Update repo insight state\"
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git push || { ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true; git push; }"

@@ -1,7 +1,8 @@
-import { CuratorDecision, InsightRunTrigger } from "../model/types";
+import { CuratorDecision } from "../model/types";
 import { ProjectCapsule } from "../model/types";
 import { CapsuleCacheEvent } from "../cache/capsule-cache";
 import { RepoPack } from "../packing/types";
+import { RepoSelection } from "../packing/select-repos";
 import { PollStateChange } from "../storage/poll-state";
 
 export class Reporter {
@@ -11,38 +12,16 @@ export class Reporter {
     this.compact = options.ci ?? process.env.CI === "true";
   }
 
-  trigger(trigger: InsightRunTrigger) {
-    const changedCount = trigger.changedFiles?.length ?? 0;
-    const range = trigger.before && trigger.after ? `${trigger.before} -> ${trigger.after}` : "inferred from pushed_at";
-    this.log(
-      this.compact
-        ? `trigger=${trigger.kind} repo=${trigger.repo}${trigger.pushedAt ? ` pushedAt=${trigger.pushedAt}` : ""}${trigger.after ? ` sha=${trigger.after}` : ""} changedFiles=${changedCount}`
-        : [
-            "Repo Insight",
-            "",
-            "Trigger",
-            `  kind: ${trigger.kind}`,
-            `  repo: ${trigger.repo}`,
-            `  branch: ${trigger.branch ?? "unknown"}`,
-            ...(trigger.pushedAt ? [`  pushed at: ${trigger.pushedAt}`] : []),
-            `  range: ${range}`,
-            `  changed files: ${changedCount}`,
-            ...(trigger.note ? [`  note: ${trigger.note}`] : []),
-          ].join("\n"),
-    );
-  }
-
-  polling(context: { reposChecked: number; changes: PollStateChange[]; trigger?: InsightRunTrigger }) {
+  polling(context: { reposChecked: number; changes: PollStateChange[] }) {
     if (this.compact) {
       if (context.changes.length === 0) {
-        this.log(`poll=no_changes repos=${context.reposChecked}`);
+        this.log(`poll=no_changes count=${context.reposChecked}`);
         return;
       }
       this.log(`poll=repos_checked count=${context.reposChecked} changed=${context.changes.length}`);
       return;
     }
 
-    const triggerRepo = context.trigger?.repo ?? "none";
     const firstChange = context.changes[0];
     this.log(
       [
@@ -50,7 +29,6 @@ export class Reporter {
         "Polling",
         `  repos checked: ${context.reposChecked}`,
         `  changed repos: ${context.changes.length}`,
-        `  trigger: ${triggerRepo}`,
         ...(firstChange
           ? [
               `  last seen: ${firstChange.previous?.pushedAt ?? "never"}`,
@@ -61,18 +39,92 @@ export class Reporter {
     );
   }
 
+  selection(selection: RepoSelection) {
+    if (this.compact) {
+      this.log(
+        `selection mode=${selection.mode} candidates=${selection.candidateRepos.length} selected=${selection.selectedRepos.length} changed=${selection.changedRepos.length} seed=${selection.randomSeed ?? "none"}`,
+      );
+      return;
+    }
+
+    this.log(
+      [
+        "",
+        "Selection",
+        `  mode: ${selection.mode}`,
+        `  candidates: ${selection.candidateRepos.length}`,
+        `  selected: ${selection.selectedRepos.length}`,
+        `  changed repos: ${selection.changedRepos.length}`,
+        `  seed: ${selection.randomSeed ?? "none"}`,
+        "  selected repos:",
+        ...selection.selectedRepos.map((repo) => `    - ${repo.fullName} pushedAt=${repo.pushedAt}`),
+      ].join("\n"),
+    );
+  }
+
+  budget(message: {
+    kind: "producer" | "aggregator";
+    status: "ok" | "exhausted";
+    limit: number;
+    used: number;
+  }) {
+    if (this.compact) {
+      const label = message.kind === "aggregator" ? "aggregator" : "producerScheduled";
+      this.log(`budget=${message.status} ${label}=${message.used}/${message.limit}`);
+      return;
+    }
+    this.log(`\nBudget\n  kind: ${message.kind}\n  status: ${message.status}\n  used: ${message.used}\n  limit: ${message.limit}`);
+  }
+
+  producerBudgetLine(params: { scheduled: boolean; used: number; limit: number; exhausted?: boolean }) {
+    if (!this.compact) {
+      this.log(
+        params.exhausted
+          ? `\nBudget\n  exhausted: scheduled producer ${params.used}/${params.limit}`
+          : params.scheduled
+            ? `\nBudget\n  producer scheduled: ${params.used}/${params.limit}`
+            : `\nBudget\n  manual run (scheduled quota not enforced)`,
+      );
+      return;
+    }
+    if (params.exhausted) {
+      this.log(`budget=exhausted producerScheduled=${params.used}/${params.limit}`);
+      return;
+    }
+    if (params.scheduled) {
+      this.log(`budget=ok producerScheduled=${params.used}/${params.limit}`);
+      return;
+    }
+    this.log("budget=skipped mode=manual producerQuota=not_applied");
+  }
+
+  packBudget(maxRepoBytes: number, maxTotalBytes: number) {
+    this.log(
+      this.compact
+        ? `pack-budget maxRepoBytes=${maxRepoBytes} maxTotalBytes=${maxTotalBytes}`
+        : `\nPack Budget\n  max repo bytes: ${maxRepoBytes}\n  max total bytes: ${maxTotalBytes}`,
+    );
+  }
+
+  usageEstimate(usage: { inputTokens: number; outputTokens: number; model: string }) {
+    this.log(
+      this.compact
+        ? `usage-estimate inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`
+        : `\nUsage Estimate\n  input tokens: ≈${usage.inputTokens}\n  output tokens: ≈${usage.outputTokens}\n  model: ${usage.model}`,
+    );
+  }
+
   packs(packs: RepoPack[]) {
     if (this.compact) {
-      this.log(`packing=repomix repos=${packs.length}`);
-      for (const pack of packs) {
-        this.log(`pack repo=${pack.fullName} bytes=${pack.stats.byteCount} truncated=${pack.stats.truncated}`);
-      }
+      const totalBytes = packs.reduce((sum, pack) => sum + pack.stats.byteCount, 0);
+      const truncated = packs.filter((pack) => pack.stats.truncated).length;
+      this.log(`packing=repomix repos=${packs.length} totalBytes=${totalBytes} truncatedRepos=${truncated}`);
       return;
     }
     this.log(
       [
         "",
-        "Top repos packed",
+        "Selected repos packed",
         "  packing tool: repomix",
         `  compressed: true`,
         `  output style: ${packs[0]?.style ?? process.env.REPO_INSIGHT_PACK_STYLE ?? "xml"}`,
@@ -84,20 +136,33 @@ export class Reporter {
     );
   }
 
+  capsuleCacheSummary(events: CapsuleCacheEvent[]) {
+    const hits = events.filter((event) => event.hit).length;
+    const skipped = events.filter((event) => event.skipped).length;
+    const misses = events.filter((event) => !event.hit && !event.skipped).length;
+    this.log(this.compact ? `capsule-cache hits=${hits} misses=${misses} skipped=${skipped}` : `\nCapsule cache\n  hits: ${hits}\n  misses: ${misses}\n  skipped compaction: ${skipped}`);
+  }
+
+  /** One line per repo outside CI; use capsuleCacheSummary for compact runs. */
   capsuleCache(events: CapsuleCacheEvent[]) {
+    if (this.compact) {
+      this.capsuleCacheSummary(events);
+      return;
+    }
     for (const event of events) {
-      this.log(`capsule-cache repo=${event.repo} hit=${event.hit}`);
+      this.log(`capsule-cache repo=${event.repo} hit=${event.hit}${event.skipped ? " skipped=true" : ""}`);
     }
   }
 
   capsules(capsules: ProjectCapsule[], cacheEvents: CapsuleCacheEvent[] = []) {
     const model = process.env.CURSOR_COMPACTION_MODEL ?? process.env.CURSOR_MODEL ?? "composer-2";
     const hits = cacheEvents.filter((event) => event.hit).length;
-    const misses = cacheEvents.length - hits;
+    const skipped = cacheEvents.filter((event) => event.skipped).length;
+    const compactionMisses = cacheEvents.filter((event) => !event.hit && !event.skipped).length;
     this.log(
       this.compact
-        ? `capsules=${capsules.length}`
-        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}\n  cache hits: ${hits}\n  cache misses: ${misses}`,
+        ? `capsules=${capsules.length} model=${model} cacheHits=${hits} cacheMisses=${compactionMisses} skipped=${skipped}`
+        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}\n  cache hits: ${hits}\n  cache misses: ${compactionMisses}\n  compaction skipped: ${skipped}`,
     );
   }
 

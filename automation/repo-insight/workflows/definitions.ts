@@ -19,7 +19,59 @@ const setupSteps = [
 
 const nix = (command: string) => `nix develop --command ${command}`;
 
-const nixBash = (commands: string[]) => `nix develop --command bash -lc '${commands.join("\n").replace(/'/g, "'\\''")}'`;
+const nixBash = (commands: string[]) => {
+  /** Double-quote -c script so the runner sees `$VAR`; escape `$` expansion on the GH runner (`$GITHUB_*`) via backslash — inner bash must expand them. */
+  const body = commands
+    .join("\n")
+    .replace(/\\/g, "\\\\")
+    .replace(/\$/g, "\\$")
+    .replace(/"/g, '\\"');
+  return `nix develop --command bash -lc "${body}"`;
+};
+
+/** Safer bot push: staged-only commits, pull --rebase before push, one retry after conflict. Expects `RI_GIT_BRANCH` in the step env (see generated workflows). */
+const commitAndPushSteps = ({
+  gitAddPaths,
+  message,
+}: {
+  gitAddPaths: string[];
+  message: string;
+}) =>
+  nixBash([
+    `set -eu`,
+    `git config user.name "github-actions[bot]"`,
+    `git config user.email "github-actions[bot]@users.noreply.github.com"`,
+    `BRANCH="$RI_GIT_BRANCH"`,
+    `git fetch origin "$BRANCH" --prune || true`,
+    `( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true`,
+    `git add ${gitAddPaths.join(" ")}`,
+    `if git diff --cached --quiet; then exit 0; fi`,
+    `git commit -m ${JSON.stringify(message)}`,
+    `( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true`,
+    `git push || { ( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true; git push; }`,
+  ]);
+
+const commitRepoInsightStateStep = {
+  name: "Commit repo insight state",
+  env: {
+    RI_GIT_BRANCH: "${{ github.ref_name }}",
+  },
+  run: commitAndPushSteps({
+    gitAddPaths: ["data/taste-profile.md", "data/repo-insight-poll-state.json", "data/repo-insight-budget-state.json"],
+    message: "Update repo insight state",
+  }),
+};
+
+const commitAggregatorBudgetStep = {
+  name: "Commit budget state if changed",
+  env: {
+    RI_GIT_BRANCH: "${{ github.ref_name }}",
+  },
+  run: commitAndPushSteps({
+    gitAddPaths: ["data/repo-insight-budget-state.json"],
+    message: "Update repo insight budget state",
+  }),
+};
 
 export const workflowDefinitions: WorkflowFile[] = [
   {
@@ -46,6 +98,7 @@ export const workflowDefinitions: WorkflowFile[] = [
             { run: nix("pnpm automation:check-workflows") },
             { run: nix("pnpm automation:actionlint") },
             { run: nix("pnpm typecheck") },
+            { run: nix("pnpm insight:test") },
             { run: nix("pnpm insight:check") },
             { run: nix("pnpm lint") },
           ],
@@ -74,7 +127,7 @@ export const workflowDefinitions: WorkflowFile[] = [
         issues: "write",
       },
       concurrency: {
-        group: "repo-insight-${{ github.run_id }}",
+        group: "repo-insight-producer",
         "cancel-in-progress": false,
       },
       jobs: {
@@ -101,6 +154,12 @@ export const workflowDefinitions: WorkflowFile[] = [
                 CURSOR_API_KEY: "${{ secrets.CURSOR_API_KEY }}",
                 CURSOR_MODEL: "${{ vars.CURSOR_MODEL }}",
                 CURSOR_COMPACTION_MODEL: "${{ vars.CURSOR_COMPACTION_MODEL }}",
+                REPO_INSIGHT_PRODUCER_DAILY_LIMIT: "4",
+                REPO_INSIGHT_SELECTED_REPO_LIMIT: "3",
+                REPO_INSIGHT_CANDIDATE_LIMIT: "25",
+                REPO_INSIGHT_MAX_PACK_BYTES: "100000",
+                REPO_INSIGHT_MAX_TOTAL_PACK_BYTES: "300000",
+                REPO_INSIGHT_MAX_NEW_COMPACTIONS_PER_RUN: "2",
               },
               run: [
                 "if [ \"${{ github.event.inputs.force }}\" = \"true\" ]; then",
@@ -110,16 +169,7 @@ export const workflowDefinitions: WorkflowFile[] = [
                 "fi",
               ].join("\n"),
             },
-            {
-              name: "Commit poll state if changed",
-              run: nixBash([
-                "git config user.name github-actions[bot]",
-                "git config user.email github-actions[bot]@users.noreply.github.com",
-                "git add data/taste-profile.md data/repo-insight-poll-state.json",
-                "git diff --cached --quiet || git commit -m \"Update repo insight state\"",
-                "git push",
-              ]),
-            },
+            commitRepoInsightStateStep,
           ],
         },
       },
@@ -130,15 +180,15 @@ export const workflowDefinitions: WorkflowFile[] = [
     workflow: {
       name: "Repo Insight Aggregate",
       on: {
-        schedule: [{ cron: "47 13 * * 0" }],
-        workflow_dispatch: null,
+        schedule: [{ cron: "47 13 * * *" }],
+        workflow_dispatch: {},
       },
       permissions: {
-        contents: "read",
+        contents: "write",
         issues: "write",
       },
       concurrency: {
-        group: "repo-insight-aggregate-${{ github.run_id }}",
+        group: "repo-insight-aggregate",
         "cancel-in-progress": false,
       },
       jobs: {
@@ -155,9 +205,12 @@ export const workflowDefinitions: WorkflowFile[] = [
                 GITHUB_TOKEN: "${{ github.token }}",
                 CURSOR_API_KEY: "${{ secrets.CURSOR_API_KEY }}",
                 CURSOR_MODEL: "${{ vars.CURSOR_MODEL }}",
+                REPO_INSIGHT_AGGREGATOR_DAILY_LIMIT: "1",
+                REPO_INSIGHT_AGGREGATOR_MAX_SEEDS: "30",
               },
               run: nix("pnpm aggregate-insights --ci"),
             },
+            commitAggregatorBudgetStep,
           ],
         },
       },

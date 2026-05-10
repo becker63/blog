@@ -11,6 +11,7 @@ import {
   packStatsSchema,
   projectCapsuleSchema,
   repoInsightIssueDraftSchema,
+  repoInsightBudgetStateSchema,
   repoInsightContextConfigSchema,
   repoInsightPollStateSchema,
   repoCatalogSchema,
@@ -20,6 +21,7 @@ import {
 export type DispatchPayload = z.infer<typeof dispatchPayloadSchema>;
 export type RepoCatalog = z.infer<typeof repoCatalogSchema>;
 export type RepoInsightPollState = z.infer<typeof repoInsightPollStateSchema>;
+export type RepoInsightBudgetState = z.infer<typeof repoInsightBudgetStateSchema>;
 export type RepoCatalogEntry = RepoCatalog["repos"][number];
 export type EvidenceItem = z.infer<typeof evidenceItemSchema>;
 export type RepoInsightIssueDraft = z.infer<typeof repoInsightIssueDraftSchema>;
@@ -34,19 +36,17 @@ export type RepoInsightContextConfig = z.infer<typeof repoInsightContextConfigSc
 export type WritingCorpusCapsule = z.infer<typeof writingCorpusCapsuleSchema>;
 export type AuthorProfileCapsule = z.infer<typeof authorProfileCapsuleSchema>;
 
-export type InsightRunTrigger = {
-  kind: "poll";
-  repo: string;
-  branch?: string;
-  pushedAt?: string;
-  lastSeenSha?: string;
-  lastSeenAt?: string;
-  before?: string;
-  after?: string;
-  pusher?: string;
-  eventType?: string;
-  changedFiles?: string[];
-  note?: string;
+export type InsightWakeReason = "scheduled-poll" | "manual-force" | "manual-normal";
+
+export type RepoSelectionSummary = {
+  mode: "uniform" | "latest" | "pinned";
+  randomSeed?: string;
+  candidateRepoCount: number;
+  selectedRepoCount: number;
+  changedRepoCount: number;
+  selectedRepos: string[];
+  changedRepos: string[];
+  wakeReason: InsightWakeReason;
 };
 
 export type RepoEvidenceBundle = {
@@ -77,7 +77,12 @@ export type CuratorInput = {
   writingCorpus: WritingCorpusCapsule;
   authorProfile: AuthorProfileCapsule;
   previousInsightTitles: string[];
-  trigger: InsightRunTrigger;
+  activitySignal: {
+    wakeReason: InsightWakeReason;
+    changedRepos: string[];
+    note: string;
+  };
+  selection: RepoSelectionSummary;
   capsules: ProjectCapsule[];
   mode: "discretionary" | "force";
 };
