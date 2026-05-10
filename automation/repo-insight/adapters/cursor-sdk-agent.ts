@@ -1,6 +1,6 @@
 import { curatorDecisionSchema, forcedInsightDecisionSchema } from "../model/schemas";
 import { CuratorDecision, CuratorInput } from "../model/types";
-import { buildInsightPrompt, insightArtifactJsonContract } from "../prompting/build-insight-prompt";
+import { buildInsightPrompt, repoInsightIssueDraftJsonContract } from "../prompting/build-insight-prompt";
 import { AgentBackend } from "./agent";
 import { runCursorJson } from "./cursor-sdk-json";
 
@@ -23,8 +23,8 @@ export class CursorSdkAgentBackend implements AgentBackend {
       name: `repo-insight-${input.runId}`,
       expectedShape:
         input.mode === "force"
-          ? insightArtifactJsonContract
-          : `{ "kind": "no_insight", "reason": "string" }\n\nor\n\n${insightArtifactJsonContract}`,
+          ? repoInsightIssueDraftJsonContract
+          : `{ "kind": "no_insight", "reason": "string" }\n\nor\n\n${repoInsightIssueDraftJsonContract}`,
     });
   }
 }

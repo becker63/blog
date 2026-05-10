@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import { GitHubIssuePublisher } from "../adapters/github-issues";
 import { CursorSdkAgentBackend } from "../adapters/cursor-sdk-agent";
 import { discoverTopRepos } from "../adapters/github-repos";
@@ -8,10 +7,7 @@ import { CuratorInput, InsightRunTrigger } from "../model/types";
 import { AccessibleRepo } from "../packing/types";
 import { packTopRepos } from "../packing/pack-top-repos";
 import { compactPacks } from "../packing/compact-packs";
-import { writeInsightIssueMetadata } from "../render/index-json";
 import { readRepoCatalog } from "../storage/repo-catalog";
-import { writeInsightArtifact } from "../storage/insight-store";
-import { insightIndexPath } from "../storage/paths";
 import { buildUpdatedPollState, diffPollState, PollStateChange, readPollState, writePollState } from "../storage/poll-state";
 import { buildTasteProfile } from "../taste-profile";
 import { hasFlag } from "./args";
@@ -19,31 +15,16 @@ import { Reporter } from "./reporter";
 
 const runId = () => new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 
-const readPreviousInsightTitles = async () => {
-  try {
-    const raw = JSON.parse(await readFile(insightIndexPath, "utf8")) as {
-      insights?: Array<{ title?: string }>;
-    };
-    return raw.insights?.map((insight) => insight.title).filter((title): title is string => Boolean(title)) ?? [];
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw error;
-  }
-};
-
-const stripUnsafeQuotes = <T extends { artifact: { sections: { evidence: Array<{ repo: string; quote?: string }> } } }>(
+const stripUnsafeQuotes = <T extends { issue: { evidence: Array<{ repo: string; quote?: string }> } }>(
   decision: T,
   safeRepos: Set<string>,
 ) => ({
   ...decision,
-  artifact: {
-    ...decision.artifact,
-    sections: {
-      ...decision.artifact.sections,
-      evidence: decision.artifact.sections.evidence.map((item) =>
-        safeRepos.has(item.repo) ? item : { ...item, quote: undefined },
-      ),
-    },
+  issue: {
+    ...decision.issue,
+    evidence: decision.issue.evidence.map((item) =>
+      safeRepos.has(item.repo) ? item : { ...item, quote: undefined },
+    ),
   },
 });
 
@@ -103,7 +84,7 @@ const main = async () => {
     tasteProfile: await buildTasteProfile({ write: false }),
     writingCorpus: writingContext.capsule,
     authorProfile: profileContext.capsule,
-    previousInsightTitles: await readPreviousInsightTitles(),
+    previousInsightTitles: [],
     trigger,
     capsules,
     mode: force ? "force" : "discretionary",
@@ -126,21 +107,14 @@ const main = async () => {
   );
 
   await buildTasteProfile();
-  const artifactPath = await writeInsightArtifact(safeDecision.artifact);
   const issue = await new GitHubIssuePublisher().publishInsightIssue({
-    artifact: safeDecision.artifact,
-    artifactPath,
+    issue: safeDecision.issue,
   });
 
   if (!issue) throw new Error("Expected GitHub issue creation to return an issue outside dry-run mode.");
 
-  await writeInsightIssueMetadata({
-    artifactPath,
-    runId: safeDecision.artifact.frontmatter.runId,
-    issue,
-  });
   await writePollState(updatedPollState);
-  reporter.output({ artifactPath, issueUrl: issue.url });
+  reporter.output({ issueUrl: issue.url });
 };
 
 main().catch((error) => {

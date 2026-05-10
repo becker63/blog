@@ -9,10 +9,6 @@ export const repoCatalogPath = path.join(dataDir, "repo-catalog.json");
 export const repoInsightContextPath = path.join(dataDir, "repo-insight-context.json");
 export const repoInsightPollStatePath = path.join(dataDir, "repo-insight-poll-state.json");
 export const tasteProfilePath = path.join(dataDir, "taste-profile.md");
-export const insightsDir = path.join(repoRoot, "content", "insights");
-export const insightRunsDir = path.join(insightsDir, "runs");
-export const insightDigestsDir = path.join(insightsDir, "digests");
-export const insightIndexPath = path.join(insightsDir, "index.json");
 export const workflowsDir = path.join(repoRoot, ".github", "workflows");
 
 export const toPosixPath = (value: string) => value.split(path.sep).join("/");
@@ -20,11 +16,3 @@ export const toPosixPath = (value: string) => value.split(path.sep).join("/");
 export const relativeToRoot = (value: string) =>
   toPosixPath(path.relative(repoRoot, value));
 
-export const datePathParts = (date: Date) => {
-  const iso = date.toISOString();
-  return {
-    year: iso.slice(0, 4),
-    month: iso.slice(5, 7),
-    day: iso.slice(8, 10),
-  };
-};

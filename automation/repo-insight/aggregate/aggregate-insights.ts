@@ -11,7 +11,7 @@ export const aggregateInsights = async (seeds: InsightSeed[]): Promise<InsightDi
     model: process.env.CURSOR_MODEL ?? "composer-2",
     name: `repo-insight-digest-${generatedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}`,
     expectedShape:
-      '{ "generatedAt": "ISO timestamp", "totalSeeds": number, "whatThisSeemsToSayAboutTheWork": string, "clusters": InsightCluster[], "staleOrLowValueSeeds": StaleSeed[] }',
+      '{ "generatedAt": "ISO timestamp", "totalSeeds": number, "whatThisSeemsToSayAboutTheWork": string, "clusters": [{ "title": string, "thesis": string, "whatIssuesAreAbout": string, "whyPatternMatters": string, "whatIsActuallyInteresting": string, "connectionToLargerWork": string, "whatToDoNext": string, "relatedSeedIds": string[], "relatedIssueNumbers": number[], "score": object, "recommendedAction": string, "rationale": string, "possiblePostTitles": string[], "nextMoves": string[] }], "staleOrLowValueSeeds": StaleSeed[] }',
   });
 };
 
@@ -28,16 +28,18 @@ export const deterministicDigestPreview = (seeds: InsightSeed[]): InsightDigest 
             {
               title: "Dry-run preview cluster",
               thesis: "Dry-run mode does not call Cursor; this preview confirms seed collection and issue rendering.",
-              plainLanguageThesis: "The aggregator can see the available seeds, but has not interpreted them yet.",
-              philosophicalSummary:
-                "This is only a preview. It proves that the notes can be gathered into one editorial surface before asking Cursor what they seem to be circling around.",
-              whatThisSaysAboutTheWork:
-                "The dry-run does not make claims about the work. It only shows which seeds would be available for a real synthesis.",
-              essayDirection:
-                "Run without --dry-run to ask what kind of essay these seeds might become.",
+              whatIssuesAreAbout:
+                "The aggregator can see the available issues, but has not interpreted them yet.",
+              whyPatternMatters:
+                "This preview checks that issue collection works before spending a Cursor run.",
+              whatIsActuallyInteresting:
+                "The useful part is that the digest can start from issues alone.",
+              connectionToLargerWork:
+                "This supports the larger repo-insight goal: keep generated ideas in the review queue instead of local files.",
+              whatToDoNext:
+                "Run without --dry-run to ask Cursor for real clustering.",
               relatedSeedIds: seeds.slice(0, 5).map((seed) => seed.id),
               relatedIssueNumbers: seeds.map((seed) => seed.issueNumber).filter((value): value is number => Boolean(value)),
-              relatedArtifactPaths: seeds.map((seed) => seed.artifactPath).filter((value): value is string => Boolean(value)),
               score: {
                 novelty: 1,
                 evidenceStrength: 1,

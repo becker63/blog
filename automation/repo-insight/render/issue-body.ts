@@ -1,63 +1,82 @@
-import { InsightArtifact, RepoEvidenceBundle } from "../model/types";
+import { RepoEvidenceBundle, RepoInsightIssueDraft } from "../model/types";
 
 const list = (items: string[]) => items.map((item) => `- ${item}`).join("\n");
 
 export const repoInsightRunMarker = (runId: string) => `repo-insight:run-id=${runId}`;
 
-export const repoInsightArtifactMarker = (artifactPath: string) =>
-  `repo-insight:artifact-path=${artifactPath}`;
+export const repoInsightSourceReposMarker = (sourceRepos: string[]) =>
+  `repo-insight:source-repos=${sourceRepos.join(",")}`;
+
+export const repoInsightRelatedCommitsMarker = (relatedCommits: string[]) =>
+  `repo-insight:related-commits=${relatedCommits.join(",")}`;
+
+const evidenceList = (items: RepoInsightIssueDraft["evidence"]) =>
+  items
+    .map((item) => {
+      const location = `${item.repo}${item.commit ? `@${item.commit}` : ""}${item.path ? ` ${item.path}` : ""}`;
+      const quote = item.quote ? `\n  - Quote: ${item.quote}` : "";
+      return `- ${location}\n  - ${item.summary}${quote}`;
+    })
+    .join("\n");
 
 export const renderInsightIssueBody = ({
-  artifact,
-  artifactPath,
+  issue,
   evidence,
 }: {
-  artifact: InsightArtifact;
-  artifactPath: string;
+  issue: RepoInsightIssueDraft;
   evidence?: RepoEvidenceBundle;
 }) => {
-  const { frontmatter, sections } = artifact;
   const contextNote = evidence?.contextFiles.length
     ? `\n\nContext files considered: ${evidence.contextFiles.length}`
     : "";
 
   return [
-    `Generated insight artifact: \`${artifactPath}\``,
+    `# ${issue.title}`,
     contextNote,
     "",
     "## Hidden thesis",
     "",
-    sections.hiddenThesis,
+    issue.hiddenThesis,
     "",
     "## Why this was selected",
     "",
-    sections.whySelected,
+    issue.whySelected,
+    "",
+    "## What changed / what was inspected",
+    "",
+    issue.whatChanged,
+    "",
+    "## Evidence",
+    "",
+    evidenceList(issue.evidence),
+    "",
+    "## Relation to previous writing",
+    "",
+    issue.relationToPreviousWriting,
     "",
     "## Source repos",
     "",
-    list(frontmatter.sourceRepos),
+    list(issue.sourceRepos),
     "",
     "## Related commits",
     "",
-    list(frontmatter.relatedCommits),
+    list(issue.relatedCommits),
     "",
     "## Possible blog hooks",
     "",
-    list(sections.possibleHooks),
+    list(issue.possibleHooks),
     "",
     "## Follow-up questions",
     "",
-    list(sections.followUpQuestions),
+    list(issue.followUpQuestions),
     "",
     "## Review actions",
     "",
-    "- [ ] Read the generated insight artifact",
-    "- [ ] Promote into `content/posts`",
-    "- [ ] Merge with an existing draft",
-    "- [ ] Close as not useful",
+    issue.reviewActions.map((action) => `- [ ] ${action}`).join("\n"),
     "",
-    `<!-- ${repoInsightRunMarker(frontmatter.runId)} -->`,
-    `<!-- ${repoInsightArtifactMarker(artifactPath)} -->`,
+    `<!-- ${repoInsightRunMarker(issue.runId)} -->`,
+    `<!-- ${repoInsightSourceReposMarker(issue.sourceRepos)} -->`,
+    `<!-- ${repoInsightRelatedCommitsMarker(issue.relatedCommits)} -->`,
     "",
   ].join("\n");
 };

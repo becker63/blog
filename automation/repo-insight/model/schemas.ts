@@ -128,43 +128,38 @@ export const authorProfileCapsuleSchema = z.object({
 
 export const evidenceItemSchema = z.object({
   repo: repoFullName,
-  commit: z.string().min(7),
+  commit: z.string().min(7).optional(),
   path: z.string().min(1).optional(),
   quote: z.string().min(1).optional(),
-  note: z.string().min(1),
+  summary: z.string().min(1),
 });
 
-export const insightFrontmatterSchema = z.object({
+export const repoInsightIssueDraftSchema = z.object({
   title: z.string().min(8),
-  date: isoDateString,
   sourceRepos: z.array(repoFullName).min(1),
   relatedCommits: z.array(z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}$/i)).min(1),
-  tags: z.array(z.string().min(1)).min(1),
-  generated: z.literal(true),
-  published: z.literal(false),
-  promoted: z.literal(false),
+  hiddenThesis: z.string().min(20),
+  whySelected: z.string().min(40),
+  whatChanged: z.string().min(40),
+  evidence: z.array(evidenceItemSchema).min(1),
+  possibleHooks: z.array(z.string().min(10)).min(1),
+  relationToPreviousWriting: z.string().min(20),
+  followUpQuestions: z.array(z.string().min(10)).min(1),
+  reviewActions: z.array(z.string().min(5)).default([
+    "Promote into a real post",
+    "Merge with another generated issue",
+    "Leave open and watch for more evidence",
+    "Close as not useful",
+  ]),
   runId: z.string().min(8),
+  generatedAt: isoDateString,
   confidence: z.enum(["low", "medium", "high"]),
-});
-
-export const insightArtifactSchema = z.object({
-  frontmatter: insightFrontmatterSchema,
-  sections: z.object({
-    whySelected: z.string().min(40),
-    inspected: z.string().min(40),
-    hiddenThesis: z.string().min(20),
-    evidence: z.array(evidenceItemSchema).min(2),
-    possibleHooks: z.array(z.string().min(10)).min(1),
-    relationToPreviousWriting: z.string().min(20),
-    followUpQuestions: z.array(z.string().min(10)).min(1),
-  }),
 });
 
 export const insightSeedSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
-  source: z.enum(["artifact", "issue"]),
-  artifactPath: z.string().min(1).optional(),
+  source: z.literal("issue"),
   issueNumber: z.number().int().positive().optional(),
   issueUrl: z.string().url().optional(),
   createdAt: isoDateString.optional(),
@@ -185,13 +180,13 @@ const scoreSchema = z.number().int().min(1).max(5);
 export const insightClusterSchema = z.object({
   title: z.string().min(1),
   thesis: z.string().min(1),
-  plainLanguageThesis: z.string().min(1),
-  philosophicalSummary: z.string().min(1),
-  whatThisSaysAboutTheWork: z.string().min(1),
-  essayDirection: z.string().min(1),
+  whatIssuesAreAbout: z.string().min(1),
+  whyPatternMatters: z.string().min(1),
+  whatIsActuallyInteresting: z.string().min(1),
+  connectionToLargerWork: z.string().min(1),
+  whatToDoNext: z.string().min(1),
   relatedSeedIds: z.array(z.string().min(1)).default([]),
   relatedIssueNumbers: z.array(z.number().int().positive()).default([]),
-  relatedArtifactPaths: z.array(z.string().min(1)).default([]),
   score: z.object({
     novelty: scoreSchema,
     evidenceStrength: scoreSchema,
@@ -228,38 +223,11 @@ export const curatorDecisionSchema = z.discriminatedUnion("kind", [
   }),
   z.object({
     kind: z.literal("insight"),
-    artifact: insightArtifactSchema,
+    issue: repoInsightIssueDraftSchema,
   }),
 ]);
 
 export const forcedInsightDecisionSchema = z.object({
   kind: z.literal("insight"),
-  artifact: insightArtifactSchema,
-});
-
-export const insightIndexSchema = z.object({
-  schemaVersion: z.literal(1),
-  generatedAt: isoDateString,
-  insights: z.array(
-    z.object({
-      slug: z.string().min(1),
-      path: z.string().min(1),
-      title: z.string().min(1),
-      date: isoDateString,
-      sourceRepos: z.array(repoFullName),
-      relatedCommits: z.array(z.string()),
-      tags: z.array(z.string()),
-      generated: z.literal(true),
-      published: z.literal(false),
-      promoted: z.literal(false),
-      runId: z.string().min(1),
-      confidence: z.enum(["low", "medium", "high"]),
-      issue: z
-        .object({
-          number: z.number().int().positive(),
-          url: z.string().url(),
-        })
-        .optional(),
-    }),
-  ),
+  issue: repoInsightIssueDraftSchema,
 });

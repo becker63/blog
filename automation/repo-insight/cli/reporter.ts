@@ -124,17 +124,17 @@ export class Reporter {
     }
     this.log(
       this.compact
-        ? `decision=insight title="${decision.artifact.frontmatter.title}"`
-        : `\nDecision\n  model: ${process.env.CURSOR_MODEL ?? "composer-2"}\n  insight: ${decision.artifact.frontmatter.title}\n  confidence: ${decision.artifact.frontmatter.confidence}`,
+        ? `decision=insight title="${decision.issue.title}"`
+        : `\nDecision\n  model: ${process.env.CURSOR_MODEL ?? "composer-2"}\n  insight: ${decision.issue.title}\n  confidence: ${decision.issue.confidence}`,
     );
   }
 
-  output(output: { artifactPath?: string; issueUrl?: string }) {
+  output(output: { issueUrl?: string }) {
     if (this.compact) {
-      this.log(`artifact=${output.artifactPath ?? "none"} issue=${output.issueUrl ?? "none"}`);
+      this.log(`issue=${output.issueUrl ?? "none"}`);
       return;
     }
-    this.log(["", "Output", `  artifact: ${output.artifactPath ?? "none"}`, `  issue: ${output.issueUrl ?? "none"}`].join("\n"));
+    this.log(["", "Output", `  issue: ${output.issueUrl ?? "none"}`].join("\n"));
   }
 
   private log(message: string) {

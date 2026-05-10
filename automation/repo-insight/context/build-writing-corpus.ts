@@ -99,7 +99,7 @@ const buildCapsule = (sources: ContextSourceText[]): WritingCorpusCapsule => {
     .slice(0, 12);
 
   const recurringThemes = uniq([
-    "legibility and inspectable artifacts",
+    "legibility and inspectable systems",
     "reproducibility as a property of technical work",
     "semantic authority across system boundaries",
     "typed interfaces and static intent",
@@ -115,9 +115,9 @@ const buildCapsule = (sources: ContextSourceText[]): WritingCorpusCapsule => {
     sourceNames: sources.map((source) => source.name),
     recurringThemes,
     strongClaims: [
-      "Prefer claims grounded in concrete system behavior, reproducible artifacts, and implementation tradeoffs.",
+      "Prefer claims grounded in concrete system behavior, reproducible evidence, and implementation tradeoffs.",
       "A strong generated seed should reveal a hidden structure in technical work rather than summarize activity.",
-      "AI evals and release artifacts matter when they turn traces into decisions.",
+      "AI evals and release evidence matter when they turn traces into decisions.",
       "Infrastructure writing is strongest when it shows where authority and evidence move between phases.",
     ],
     favoriteConcepts: uniq([
@@ -125,7 +125,7 @@ const buildCapsule = (sources: ContextSourceText[]): WritingCorpusCapsule => {
       "eval bundles",
       "baseline/candidate comparisons",
       "promotion decisions",
-      "inspectable artifacts",
+      "inspectable systems",
       "static intent vs dynamic runtime",
       "semantic authority",
       "control planes",
@@ -146,12 +146,12 @@ const buildCapsule = (sources: ContextSourceText[]): WritingCorpusCapsule => {
     ],
     openThreads: [
       "how human intent becomes configuration, runtime behavior, evidence, and release decisions",
-      "how eval artifacts become trustworthy enough for promotion decisions",
+      "how eval evidence becomes trustworthy enough for promotion decisions",
       "how semantic authority moves between declarative interfaces and executable systems",
     ],
     representativeHooks: [
       "What looks like plumbing is often a boundary where intent becomes evidence.",
-      "The artifact is the interface between a system and the people deciding whether to trust it.",
+      "The issue is the interface between a system and the people deciding whether to trust it.",
       "The interesting part is not that a tool changed, but that it made a hidden decision boundary inspectable.",
     ],
   });

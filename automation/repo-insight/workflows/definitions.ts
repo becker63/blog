@@ -46,7 +46,7 @@ export const workflowDefinitions: WorkflowFile[] = [
             { run: nix("pnpm automation:check-workflows") },
             { run: nix("pnpm automation:actionlint") },
             { run: nix("pnpm typecheck") },
-            { run: nix("pnpm insight:validate") },
+            { run: nix("pnpm insight:check") },
             { run: nix("pnpm lint") },
           ],
         },
@@ -62,7 +62,7 @@ export const workflowDefinitions: WorkflowFile[] = [
         workflow_dispatch: {
           inputs: {
             force: {
-              description: "Force one insight artifact and issue",
+              description: "Force one insight issue",
               required: false,
               default: "false",
             },
@@ -111,12 +111,12 @@ export const workflowDefinitions: WorkflowFile[] = [
               ].join("\n"),
             },
             {
-              name: "Commit generated artifacts if any",
+              name: "Commit poll state if changed",
               run: nixBash([
                 "git config user.name github-actions[bot]",
                 "git config user.email github-actions[bot]@users.noreply.github.com",
-                "git add data/taste-profile.md data/repo-insight-poll-state.json content/insights",
-                "git diff --cached --quiet || git commit -m \"Generate repo insight artifacts\"",
+                "git add data/taste-profile.md data/repo-insight-poll-state.json",
+                "git diff --cached --quiet || git commit -m \"Update repo insight state\"",
                 "git push",
               ]),
             },

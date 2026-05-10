@@ -1,8 +1,8 @@
 # Repo Insight Automation
 
-This subsystem turns recent repository activity into one direct writing-curation run.
+This subsystem turns recent repository activity into GitHub issues for writing curation.
 
-Run `pnpm generate-insight`. It asks GitHub for the top recently pushed repos the token can access, skips the expensive path when scheduled polling sees no new activity, packs changed runs with Repomix compression, compacts those packs with Cursor, and asks Cursor whether there is anything worth turning into an insight. If yes, it writes one insight artifact and opens one blog repo issue. If no, it writes no artifact.
+Repo Insight has one durable output: GitHub issues. The repository does not accumulate generated draft bundles; issues are the review queue, lifecycle, comment thread, label surface, and aggregation input.
 
 ## Architecture
 
@@ -11,8 +11,7 @@ Run `pnpm generate-insight`. It asks GitHub for the top recently pushed repos th
 - `packing/` checks out the top repos into temporary directories, packs them with Repomix, and compacts those packs into project capsules.
 - `context/` reads `data/repo-insight-context.json`, summarizes local writing plus configured `../career-ops` writing/profile sources, and caches only typed context capsules.
 - `adapters/` keeps Cursor SDK, GitHub repo discovery, and GitHub issue publishing isolated.
-- `content/insights/` stores generated draft artifacts. Nothing here is published by the existing blog post pipeline.
-- GitHub issues in this blog repo are the canonical notification and review inbox for generated insights.
+- GitHub issues in this blog repo are the canonical store and review inbox for generated insights.
 - `workflows/definitions.ts` is the source of truth for generated GitHub Actions YAML.
 
 ## Commands
@@ -22,8 +21,7 @@ Run `pnpm generate-insight`. It asks GitHub for the top recently pushed repos th
 - `pnpm aggregate-insights`
 - `pnpm aggregate-insights:dry-run`
 - `pnpm insight:taste-profile`
-- `pnpm insight:index`
-- `pnpm insight:validate`
+- `pnpm insight:check`
 - `pnpm automation:generate-workflows`
 - `pnpm automation:check-workflows`
 - `pnpm automation:actionlint`
@@ -33,7 +31,7 @@ Repomix is provided by the Nix dev shell and is invoked with `--compress`; pack 
 
 `pnpm generate-insight` does not require a payload. Repo Insight uses scheduled polling from the blog repo, not source repo webhooks. No per-repo workflow installation is required.
 
-Poll state is stored in `data/repo-insight-poll-state.json`. Normal scheduled runs skip Repomix and Cursor when no selected repos have a new `pushedAt` value. Cursor output is schema-validated. Near-miss JSON gets one schema repair attempt, and force mode requires one artifact with `artifact.frontmatter` and `artifact.sections`. `pnpm generate-insight:force` ignores poll state and requires one artifact and one issue. `no_insight` is invalid in force mode.
+Poll state is stored in `data/repo-insight-poll-state.json`. Normal scheduled runs skip Repomix and Cursor when no selected repos have a new `pushedAt` value. Cursor output is schema-validated. Near-miss JSON gets one schema repair attempt. Force mode requires one issue draft and one created or reused GitHub issue. `no_insight` is invalid in force mode.
 
 ## Secrets
 
@@ -74,17 +72,17 @@ Author and writing context is configured in `data/repo-insight-context.json`. Th
 
 1. Ensure `GH_REPO_INSIGHT_TOKEN` can read the repo.
 2. Optionally add a catalog overlay for repo-specific settings.
-3. Set `safeToQuote: true` only when short source excerpts are allowed in prompts/artifacts.
+3. Set `safeToQuote: true` only when short source excerpts are allowed in prompts and issue bodies.
 
 ## Generated Insights
 
-Generated MDX lands under `content/insights/runs/` and is indexed by `content/insights/index.json`. After writing an artifact, the generator opens or reuses a blog repo issue labeled `repo-insight`, `blog-candidate`, and `generated`.
+The producer uses scheduled polling to find recent repo activity, packs selected repos, asks Cursor whether there is an insight, and creates or reuses a blog repo issue labeled `repo-insight`, `blog-candidate`, and `generated`. If no insight is worth keeping, it updates poll state and exits without writing a draft.
 
-To promote an insight, manually turn it into a polished post under `content/posts/` and intentionally update the profile navigation assignment in `lib/profileNavigation.ts`.
+To promote an insight, manually turn the issue into a polished post under `content/posts/` and intentionally update the profile navigation assignment in `lib/profileNavigation.ts`. A later promotion assistant could draft posts from issues, but issues remain the generated store.
 
 ## Aggregating Insights
 
-`pnpm aggregate-insights` is a second-order editor. It reads generated insight artifacts, fetches blog repo issues labeled `repo-insight`, clusters recurring conceptual themes with Cursor, and creates or updates one rolling issue titled `Repo Insight Digest — Current Themes`.
+`pnpm aggregate-insights` is a second-order editor. It reads existing blog repo issues labeled `repo-insight`, clusters recurring conceptual themes with Cursor, and creates or updates one rolling issue titled `Repo Insight Digest — Current Themes`.
 
 The rolling digest issue is identified by `<!-- repo-insight:digest=current-themes -->` and labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. The aggregator excludes that digest issue from future input so it does not summarize itself. Use `pnpm aggregate-insights:dry-run` to verify seed collection and issue rendering without updating GitHub.
 

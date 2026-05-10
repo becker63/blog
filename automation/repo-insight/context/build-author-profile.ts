@@ -39,8 +39,8 @@ const buildCapsule = (sources: Array<{ name: string; path: string; text: string 
       "Infrastructure/platform engineer",
       "Systems translator / phase-boundary engineer",
       "Makes opaque systems legible, reproducible, and safer to operate",
-      "Moves uncertainty out of people's heads into inspectable artifacts",
-      ...(includesAny(text, ["instructor", "teaching"]) ? ["Engineer-instructor who turns systems understanding into teachable artifacts"] : []),
+      "Moves uncertainty out of people's heads into inspectable evidence",
+      ...(includesAny(text, ["instructor", "teaching"]) ? ["Engineer-instructor who turns systems understanding into teachable material"] : []),
     ]),
     targetLanes: [
       "platform",
@@ -60,13 +60,13 @@ const buildCapsule = (sources: Array<{ name: string; path: string; text: string 
       "Technical writing platform as communication proof point",
     ],
     recurringStrengths: [
-      "translating opaque runtime behavior into inspectable artifacts",
+      "translating opaque runtime behavior into inspectable evidence",
       "building typed/testable interfaces around ambiguous operational work",
       "connecting implementation details to release, promotion, or trust decisions",
       "finding phase boundaries where semantic authority moves between people, config, runtime, and evidence",
     ],
     marketNarrative: [
-      "Taylor is strongest where infrastructure, developer tooling, security, and AI evaluation need legible operating artifacts.",
+      "Taylor is strongest where infrastructure, developer tooling, security, and AI evaluation need legible operating evidence.",
       "The public profile should read as evidence of systems judgment, not generic career branding.",
     ],
     projectsToConnect: [
@@ -89,7 +89,7 @@ const buildCapsule = (sources: Array<{ name: string; path: string; text: string 
       "reproducibility",
       "semantic boundaries",
       "typed/testable interfaces",
-      "artifact quality",
+      "evidence quality",
       "phase-boundary engineering",
     ],
     storyBankHighlights: [

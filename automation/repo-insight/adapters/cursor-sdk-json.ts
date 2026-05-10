@@ -45,11 +45,11 @@ export const summarizeCursorJsonShape = (value: unknown) => {
     };
   }
 
-  const artifact = value.artifact;
+  const issue = value.issue;
   return {
     topLevelType: "object",
     topLevelKeys: Object.keys(value),
-    artifactKeys: isRecord(artifact) ? Object.keys(artifact) : undefined,
+    issueKeys: isRecord(issue) ? Object.keys(issue) : undefined,
   };
 };
 
@@ -79,11 +79,11 @@ const buildRepairPrompt = ({
     "The previous response was invalid for the required schema.",
     "Fix only the JSON shape. Preserve the same semantic content.",
     "Return JSON only. Do not add markdown fences. Do not add prose.",
-    "The required top-level shape is `kind` plus `artifact` when `kind` is `insight`.",
-    "For insight outputs, `artifact.frontmatter` and `artifact.sections` are required.",
-    "Do not put `frontmatter` beside `artifact`.",
-    "Do not put `sections` beside `artifact`.",
-    "Do not flatten `artifact`.",
+    "The required top-level shape is `kind` plus `issue` when `kind` is `insight`.",
+    "For insight outputs, the `issue` object must match the expected GitHub issue draft shape.",
+    "Do not include frontmatter.",
+    "Do not include MDX sections.",
+    "Do not flatten `issue`.",
     "",
     "## Expected Shape",
     expectedShape,

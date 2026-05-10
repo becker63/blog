@@ -26,7 +26,7 @@ process.once("exit", () => {
 
 export const checkoutRepo = async (
   repo: AccessibleRepo,
-  token = process.env.GH_REPO_INSIGHT_TOKEN,
+  token = process.env.GH_REPO_INSIGHT_TOKEN ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
 ): Promise<RepoCheckout> => {
   if (repo.overlay?.localPath) {
     return {
@@ -36,12 +36,12 @@ export const checkoutRepo = async (
     };
   }
 
-  if (!token) throw new Error("GH_REPO_INSIGHT_TOKEN is required to clone repositories for Repomix.");
+  if (!token) throw new Error("GH_REPO_INSIGHT_TOKEN, GH_TOKEN, or GITHUB_TOKEN is required to clone repositories for Repomix.");
 
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "repo-insight-"));
   tempRoots.add(tempRoot);
   const askpassPath = path.join(tempRoot, "git-askpass.sh");
-  await writeFile(askpassPath, "#!/bin/sh\nprintf '%s\\n' \"$GH_REPO_INSIGHT_TOKEN\"\n", {
+  await writeFile(askpassPath, "#!/bin/sh\nprintf '%s\\n' \"$REPO_INSIGHT_GIT_TOKEN\"\n", {
     mode: 0o700,
   });
 
@@ -55,7 +55,7 @@ export const checkoutRepo = async (
       "",
       {
         env: {
-          GH_REPO_INSIGHT_TOKEN: token,
+          REPO_INSIGHT_GIT_TOKEN: token,
           GIT_ASKPASS: askpassPath,
           GIT_TERMINAL_PROMPT: "0",
         },

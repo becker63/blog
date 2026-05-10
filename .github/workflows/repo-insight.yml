@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: Force one insight artifact and issue
+        description: Force one insight issue
         required: false
         default: "false"
 permissions:
@@ -48,10 +48,10 @@ jobs:
           else
             nix develop --command pnpm generate-insight --ci
           fi
-      - name: Commit generated artifacts if any
+      - name: Commit poll state if changed
         run: |-
           nix develop --command bash -lc 'git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add data/taste-profile.md data/repo-insight-poll-state.json content/insights
-          git diff --cached --quiet || git commit -m "Generate repo insight artifacts"
+          git add data/taste-profile.md data/repo-insight-poll-state.json
+          git diff --cached --quiet || git commit -m "Update repo insight state"
           git push'

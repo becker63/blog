@@ -42,7 +42,7 @@ const repoAllowed = (repo: AccessibleRepo) => {
 
 export const discoverTopRepos = async ({
   catalog,
-  token = process.env.GH_REPO_INSIGHT_TOKEN,
+  token = process.env.GH_REPO_INSIGHT_TOKEN ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
   limit = Number(process.env.REPO_INSIGHT_REPO_LIMIT ?? "5"),
 }: {
   catalog: RepoCatalog;
@@ -50,7 +50,7 @@ export const discoverTopRepos = async ({
   limit?: number;
 }): Promise<AccessibleRepo[]> => {
   if (!token) {
-    throw new Error("GH_REPO_INSIGHT_TOKEN is required to discover recently pushed repositories.");
+    throw new Error("GH_REPO_INSIGHT_TOKEN, GH_TOKEN, or GITHUB_TOKEN is required to discover recently pushed repositories.");
   }
 
   const response = await fetch(

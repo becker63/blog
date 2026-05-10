@@ -1,9 +1,6 @@
-import { InsightArtifact, RepoEvidenceBundle } from "../model/types";
-import {
-  renderInsightIssueBody,
-  repoInsightArtifactMarker,
-  repoInsightRunMarker,
-} from "../render/issue-body";
+import { execFileSync } from "node:child_process";
+import { RepoEvidenceBundle, RepoInsightIssueDraft } from "../model/types";
+import { renderInsightIssueBody, repoInsightRelatedCommitsMarker, repoInsightRunMarker, repoInsightSourceReposMarker } from "../render/issue-body";
 
 export type InsightIssuePublisherOptions = {
   token?: string;
@@ -26,9 +23,19 @@ type GitHubIssueResponse = {
 
 const defaultRepo = () => {
   const repository = process.env.GITHUB_REPOSITORY;
-  if (!repository) return {};
+  if (!repository) return repoFromGitRemote();
   const [owner, repo] = repository.split("/");
   return { owner, repo };
+};
+
+const repoFromGitRemote = () => {
+  try {
+    const remote = execFileSync("git", ["remote", "get-url", "origin"], { encoding: "utf8" }).trim();
+    const match = remote.match(/github\.com[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
+    return match ? { owner: match[1], repo: match[2] } : {};
+  } catch {
+    return {};
+  }
 };
 
 const truncateTitle = (title: string, maxLength = 120) =>
@@ -58,24 +65,23 @@ export class GitHubIssuePublisher {
   }
 
   async publishInsightIssue(input: {
-    artifact: InsightArtifact;
-    artifactPath: string;
+    issue: RepoInsightIssueDraft;
     evidence?: RepoEvidenceBundle;
   }): Promise<CreatedIssue | undefined> {
     if (this.dryRun) return undefined;
     this.assertConfigured();
 
-    const existing = await this.findExistingIssue(input.artifact, input.artifactPath);
+    const existing = await this.findExistingIssue(input.issue);
     if (existing) return existing;
 
     const labels = [
       "repo-insight",
       "blog-candidate",
       "generated",
-      ...input.artifact.frontmatter.sourceRepos.map(sourceLabel).filter((label): label is string => Boolean(label)),
+      ...input.issue.sourceRepos.map(sourceLabel).filter((label): label is string => Boolean(label)),
     ];
     const usableLabels = await this.ensureLabels(labels);
-    const title = truncateTitle(`Repo insight: ${input.artifact.frontmatter.title}`);
+    const title = truncateTitle(`Repo insight: ${input.issue.title}`);
     const body = renderInsightIssueBody(input);
 
     const issue = await this.createIssue({ title, body, labels: usableLabels });
@@ -105,10 +111,11 @@ export class GitHubIssuePublisher {
     return `https://api.github.com/repos/${this.owner}/${this.repo}${path}`;
   }
 
-  private async findExistingIssue(artifact: InsightArtifact, artifactPath: string): Promise<CreatedIssue | undefined> {
-    const runMarker = repoInsightRunMarker(artifact.frontmatter.runId);
-    const artifactMarker = repoInsightArtifactMarker(artifactPath);
-    const response = await fetch(this.apiUrl("/issues?state=open&per_page=100"), {
+  private async findExistingIssue(issueDraft: RepoInsightIssueDraft): Promise<CreatedIssue | undefined> {
+    const runMarker = repoInsightRunMarker(issueDraft.runId);
+    const sourceReposMarker = repoInsightSourceReposMarker(issueDraft.sourceRepos);
+    const relatedCommitsMarker = repoInsightRelatedCommitsMarker(issueDraft.relatedCommits);
+    const response = await fetch(this.apiUrl(`/issues?state=all&labels=${encodeURIComponent("repo-insight")}&per_page=100`), {
       headers: this.headers(),
     });
 
@@ -119,7 +126,7 @@ export class GitHubIssuePublisher {
     const issues = (await response.json()) as GitHubIssueResponse[];
     const existing = issues.find((issue) => {
       const body = issue.body ?? "";
-      return body.includes(runMarker) || body.includes(artifactMarker);
+      return body.includes(runMarker) || (body.includes(sourceReposMarker) && body.includes(relatedCommitsMarker));
     });
 
     return existing ? { number: existing.number, url: existing.html_url } : undefined;
