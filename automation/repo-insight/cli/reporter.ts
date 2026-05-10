@@ -202,6 +202,14 @@ export class Reporter {
     this.log(["", "Output", `  issue: ${output.issueUrl ?? "none"}`].join("\n"));
   }
 
+  aggregateContext(context: { writingSources: number; profileSources: number }) {
+    this.log(
+      this.compact
+        ? `aggregate context writingSources=${context.writingSources} profileSources=${context.profileSources}`
+        : `\nAggregate context\n  writing sources: ${context.writingSources}\n  profile sources: ${context.profileSources}`,
+    );
+  }
+
   private log(message: string) {
     console.log(message);
   }

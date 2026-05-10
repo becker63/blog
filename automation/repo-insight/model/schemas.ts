@@ -194,6 +194,8 @@ export const insightSeedSchema = z.object({
 
 const scoreSchema = z.number().int().min(1).max(5);
 
+export const editorialClusterActionSchema = z.enum(["promote", "merge", "watch", "close", "ignore"]);
+
 export const insightClusterSchema = z.object({
   title: z.string().min(1),
   thesis: z.string().min(1),
@@ -211,7 +213,11 @@ export const insightClusterSchema = z.object({
     writingPotential: scoreSchema,
     promotionReadiness: scoreSchema,
   }),
-  recommendedAction: z.enum(["promote", "merge", "watch", "close"]),
+  editorialDecision: editorialClusterActionSchema,
+  whyThisIsOrIsNotInteresting: z.string().min(1),
+  whatWouldMakeItStronger: z.string().min(1),
+  profileConnection: z.string().min(1),
+  duplicateOfIssueNumbers: z.array(z.number().int().positive()).optional(),
   rationale: z.string().min(1),
   possiblePostTitles: z.array(z.string().min(1)).default([]),
   nextMoves: z.array(z.string().min(1)).default([]),
@@ -221,7 +227,9 @@ export const insightDigestSchema = z.object({
   generatedAt: isoDateString,
   totalSeeds: z.number().int().nonnegative(),
   whatThisSeemsToSayAboutTheWork: z.string().min(1),
-  clusters: z.array(insightClusterSchema).default([]),
+  /** Concrete batch-level actions near the top of the rendered digest (merge, close, wait, etc.). */
+  editorialDecisions: z.array(z.string().min(1)).min(1),
+  clusters: z.array(insightClusterSchema).min(1),
   staleOrLowValueSeeds: z
     .array(
       z.object({
@@ -232,6 +240,25 @@ export const insightDigestSchema = z.object({
     )
     .default([]),
 });
+
+export const suggestedAggregatorIssueActionSchema = z.object({
+  issueNumber: z.number().int().positive(),
+  action: editorialClusterActionSchema,
+  note: z.string().optional(),
+});
+
+export const aggregateDecisionSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("digest"),
+    digest: insightDigestSchema,
+  }),
+  z.object({
+    kind: z.literal("no_digest_update"),
+    reason: z.string().min(10),
+    weakPatterns: z.array(z.string().min(1)).default([]),
+    suggestedIssueActions: z.array(suggestedAggregatorIssueActionSchema).optional(),
+  }),
+]);
 
 export const curatorDecisionSchema = z.discriminatedUnion("kind", [
   z.object({

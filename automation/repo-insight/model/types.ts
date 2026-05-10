@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  aggregateDecisionSchema,
   curatorDecisionSchema,
   dispatchPayloadSchema,
   evidenceItemSchema,
@@ -15,6 +16,7 @@ import {
   repoInsightContextConfigSchema,
   repoInsightPollStateSchema,
   repoCatalogSchema,
+  suggestedAggregatorIssueActionSchema,
   writingCorpusCapsuleSchema,
 } from "./schemas";
 
@@ -28,6 +30,8 @@ export type RepoInsightIssueDraft = z.infer<typeof repoInsightIssueDraftSchema>;
 export type InsightSeed = z.infer<typeof insightSeedSchema>;
 export type InsightCluster = z.infer<typeof insightClusterSchema>;
 export type InsightDigest = z.infer<typeof insightDigestSchema>;
+export type AggregateDecision = z.infer<typeof aggregateDecisionSchema>;
+export type SuggestedAggregatorIssueAction = z.infer<typeof suggestedAggregatorIssueActionSchema>;
 export type CuratorDecision = z.infer<typeof curatorDecisionSchema>;
 export type ForcedInsightDecision = z.infer<typeof forcedInsightDecisionSchema>;
 export type PackStats = z.infer<typeof packStatsSchema>;

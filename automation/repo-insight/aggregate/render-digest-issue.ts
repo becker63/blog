@@ -15,6 +15,16 @@ const relatedSeeds = (digestSeedIds: string[], seedsById: Map<string, InsightSee
     .map((seed) => `- ${seedLabel(seed)}`)
     .join("\n") || "- none";
 
+const duplicateBlock = (duplicateOfIssueNumbers?: number[]) =>
+  duplicateOfIssueNumbers?.length
+    ? [
+        "**Duplicate / merge group hints**",
+        "",
+        `- Issues #: ${duplicateOfIssueNumbers.join(", ")}`,
+        "",
+      ].join("\n")
+    : "";
+
 const scoreRows = (score: InsightDigest["clusters"][number]["score"]) =>
   [
     "| Dimension | Score |",
@@ -28,20 +38,25 @@ const scoreRows = (score: InsightDigest["clusters"][number]["score"]) =>
 
 export const renderDigestIssue = ({ digest, seeds }: { digest: InsightDigest; seeds: InsightSeed[] }) => {
   const seedsById = new Map(seeds.map((seed) => [seed.id, seed]));
-  const promotions = digest.clusters.filter((cluster) => cluster.recommendedAction === "promote").length;
-  const watchlist = digest.clusters.filter((cluster) => cluster.recommendedAction === "watch").length;
+  const promotes = digest.clusters.filter((cluster) => cluster.editorialDecision === "promote").length;
+  const watchlist = digest.clusters.filter((cluster) => cluster.editorialDecision === "watch").length;
+  const mergeOrClose =
+    digest.clusters.filter((c) => c.editorialDecision === "merge" || c.editorialDecision === "close").length;
 
   return [
     `# ${digestIssueTitle}`,
     "",
     `Generated: ${digest.generatedAt}`,
     "",
+    "## Editorial decisions",
+    "",
+    list(digest.editorialDecisions),
+    "",
     "## Summary",
     "",
     `- Total seeds inspected: ${digest.totalSeeds}`,
-    `- Strong clusters: ${digest.clusters.length}`,
-    `- Recommended promotions: ${promotions}`,
-    `- Watchlist: ${watchlist}`,
+    `- Strong clusters rendered: ${digest.clusters.length}`,
+    `- Editorial promote: ${promotes} • watch: ${watchlist} • merge/close: ${mergeOrClose}`,
     "",
     "## What this seems to say about the work",
     "",
@@ -71,13 +86,27 @@ export const renderDigestIssue = ({ digest, seeds }: { digest: InsightDigest; se
           "",
           cluster.connectionToLargerWork,
           "",
+          "**Profile connection**",
+          "",
+          cluster.profileConnection,
+          "",
           "**What to do next**",
           "",
           cluster.whatToDoNext,
           "",
+          "**Interesting or not — why**",
+          "",
+          cluster.whyThisIsOrIsNotInteresting,
+          "",
+          "**What would make it stronger**",
+          "",
+          cluster.whatWouldMakeItStronger,
+          "",
           "**Related issues**",
           "",
           relatedSeeds(cluster.relatedSeedIds, seedsById),
+          "",
+          duplicateBlock(cluster.duplicateOfIssueNumbers),
           "",
           "**Scores**",
           "",
@@ -95,7 +124,7 @@ export const renderDigestIssue = ({ digest, seeds }: { digest: InsightDigest; se
           "",
           list(cluster.nextMoves),
           "",
-          `**Recommended action:** ${cluster.recommendedAction}`,
+          `**Cluster editorial decision:** ${cluster.editorialDecision}`,
           "",
         ])
       : ["No clusters found yet.", ""]),
@@ -109,10 +138,9 @@ export const renderDigestIssue = ({ digest, seeds }: { digest: InsightDigest; se
     "",
     "## Review actions",
     "",
-    "- [ ] Promote top cluster into a draft",
-    "- [ ] Merge related generated issues",
-    "- [ ] Close stale generated issues",
-    "- [ ] Leave digest open for next aggregation pass",
+    "- [ ] Execute editorial decisions above",
+    "- [ ] Merge or close duplicates or weak variants called out above",
+    "- [ ] Leave digest open for the next aggregation pass",
     "",
     digestIssueMarker,
     "",

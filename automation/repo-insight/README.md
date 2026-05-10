@@ -102,9 +102,15 @@ To promote an insight, manually turn the issue into a polished post under `conte
 
 ## Aggregating Insights
 
-`pnpm aggregate-insights` is a second-order editor. It reads existing blog repo issues labeled `repo-insight`, clusters recurring conceptual themes with Cursor, and **updates one rolling issue** titled `Repo Insight Digest — Current Themes` (create once, then edits the same issue in place).
+`pnpm aggregate-insights` clusters insight issues **with** the same durable context as the producer: **taste profile** (`buildTasteProfile({ write: false })`), **writing corpus capsule**, and **author profile capsule** (not raw source trees). Seeds alone are insufficient for editorial judgment against Taylor’s corpus.
 
-The rolling digest issue is identified by `<!-- repo-insight:digest=current-themes -->` and labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. The aggregator excludes that digest issue from future input so it does not summarize itself. Scheduled aggregation skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago. Use `pnpm aggregate-insights:dry-run` to verify seed collection and issue rendering without updating GitHub or consuming aggregator budget.
+The aggregator first asks Cursor for an **`AggregateDecision`**: **`kind: "digest"`** (publish a digest) or **`kind: "no_digest_update"`** (skip updating the rolling issue when the batch is weak, duplicative, or too self‑referential). **Scheduled CI** honors `no_digest_update` and leaves the rolling digest untouched; **`--dry-run`** prints the outcome without publishing and **does not write budget state** (even though a local dry-run **with `CURSOR_API_KEY`** runs the editorial model).
+
+`pnpm aggregate-insights:dry-run` **without** `CURSOR_API_KEY` skips the model and exits with **`no_digest_update`** explaining that the key was unset --- use that for cheap seed/GitHub sanity checks only; set `CURSOR_API_KEY` locally to preview the editorial gate without publishing.
+
+The rolling digest issue is **`Repo Insight Digest — Current Themes`**, keyed by `<!-- repo-insight:digest=current-themes -->`, labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. Structured output includes **`editorialDecisions`** (batch-level merges/closes/waits near the top) and per-cluster **editorial judgments** (`editorialDecision`, `whyThisIsOrIsNotInteresting`, `profileConnection`, etc.).
+
+Scheduled aggregation still skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago.
 
 ## Workflows
 
