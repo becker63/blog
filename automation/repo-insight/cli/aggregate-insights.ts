@@ -1,10 +1,14 @@
-import { aggregateInsights, deterministicDryRunWithoutCursorDecision } from "../aggregate/aggregate-insights";
+import { appendFile } from "node:fs/promises";
+import {
+  aggregateInsights,
+  deterministicDigestPreviewWithoutCursor,
+} from "../aggregate/aggregate-insights";
 import { collectInsightSeeds } from "../aggregate/collect-insights";
 import { GitHubDigestIssuePublisher } from "../aggregate/github-digest-issue";
 import { renderDigestIssue } from "../aggregate/render-digest-issue";
 import { buildAuthorProfile } from "../context/build-author-profile";
 import { buildWritingCorpus } from "../context/build-writing-corpus";
-import { AggregateDecision } from "../model/types";
+import { InsightDigest } from "../model/types";
 import {
   canRunAggregator,
   estimateTokens,
@@ -16,43 +20,11 @@ import { buildTasteProfile } from "../taste-profile";
 import { getArgValue, hasFlag } from "./args";
 import { Reporter } from "./reporter";
 
-const formatWeakPatterns = (patterns: string[]) =>
-  patterns.length === 0 ? "(none listed)" : patterns.map((p) => `  - ${p}`).join("\n");
-
-const logAggregateDecision = (ci: boolean, seeds: number, decision: AggregateDecision) => {
-  if (decision.kind === "no_digest_update") {
-    if (ci) {
-      const weak = decision.weakPatterns.length ? decision.weakPatterns.join("|") : "none";
-      console.log(`aggregate digestWouldUpdate=no seeds=${seeds} weakPatterns=${weak}`);
-      console.log(`aggregate no_digest reason=${decision.reason.replace(/\s+/g, " ").slice(0, 400)}`);
-      if (decision.suggestedIssueActions?.length) {
-        console.log(
-          `aggregate suggestedActions=${decision.suggestedIssueActions
-            .map((a) => `#${a.issueNumber}:${a.action}`)
-            .join(",")}`,
-        );
-      }
-    } else {
-      console.log(`Seeds collected: ${seeds}`);
-      console.log("Editorial gate: digest would NOT update.");
-      console.log(`Reason: ${decision.reason}`);
-      console.log("Weak / rejected patterns:");
-      console.log(formatWeakPatterns(decision.weakPatterns));
-      if (decision.suggestedIssueActions?.length) {
-        console.log("Suggested issue actions:");
-        for (const a of decision.suggestedIssueActions) {
-          console.log(`  - #${a.issueNumber}: ${a.action}${a.note ? ` — ${a.note}` : ""}`);
-        }
-      }
-    }
-    return;
-  }
-
-  if (ci) {
-    console.log(`aggregate digestWouldUpdate=yes seeds=${seeds} clusters=${decision.digest.clusters.length}`);
-  } else {
-    console.log(`Editorial gate: digest WOULD update (${decision.digest.clusters.length} clusters).`);
-  }
+/** In GitHub Actions, surfaces outcome on the job summary tab (does nothing locally). */
+const appendGithubStepSummary = async (markdown: string) => {
+  const path = process.env.GITHUB_STEP_SUMMARY;
+  if (!path) return;
+  await appendFile(path, `\n${markdown}\n`, "utf8");
 };
 
 const main = async () => {
@@ -131,41 +103,51 @@ const main = async () => {
 
   const skipModel = dryRun && !process.env.CURSOR_API_KEY;
 
-  const decision: AggregateDecision = skipModel
-    ? deterministicDryRunWithoutCursorDecision(seeds)
+  const digest: InsightDigest = skipModel
+    ? deterministicDigestPreviewWithoutCursor(seeds)
     : await aggregateInsights(seeds, ctx, { onUsageEstimate });
 
   if (!dryRun) {
     await writeBudgetStateIfChanged(recordAggregatorRun(budgetState, usage));
   }
 
-  logAggregateDecision(ci, seeds.length, decision);
+  const body = renderDigestIssue({ digest, seeds });
 
   if (!skipModel) {
     console.log(ci ? `usage-estimate inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}` : `Usage estimate: inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`);
+  } else if (!ci) {
+    console.log("(Set CURSOR_API_KEY to run the full editorial digest model.)");
   }
 
-  if (decision.kind === "no_digest_update") {
-    if (skipModel && !ci) {
-      console.log(`(Set CURSOR_API_KEY to run the editorial model locally; ${seeds.length} seeds ready.)`);
-    }
-    return;
-  }
-
-  const body = renderDigestIssue({ digest: decision.digest, seeds });
   const issue = await publisher.publish(body);
 
-  console.log(
-    ci
-      ? `aggregate seeds=${seeds.length} clusters=${decision.digest.clusters.length} issue=${issue.url}`
-      : [
-          "Repo Insight Digest",
-          `  seeds: ${seeds.length}`,
-          `  clusters: ${decision.digest.clusters.length}`,
-          `  issue: ${issue.url}`,
-          `  action: ${issue.action}`,
-        ].join("\n"),
-  );
+  if (ci && !dryRun) {
+    await appendGithubStepSummary(
+      [
+        "## Repo Insight Aggregate — digest updated",
+        "",
+        `- **Issue:** ${issue.url}`,
+        `- **Action:** ${issue.action}`,
+        `- **Clusters:** ${digest.clusters.length}`,
+        `- **Seeds:** ${seeds.length}`,
+        skipModel ? "- **Note:** model skipped (dry-run without CURSOR_API_KEY); body is placeholder." : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+  }
+
+  if (ci) {
+    console.log(
+      `aggregate digestIssue=${issue.action === "dry-run" ? "dry-run" : "updated"} seeds=${seeds.length} clusters=${digest.clusters.length} issue=${issue.url}`,
+    );
+  } else {
+    console.log(
+      ["Repo Insight Digest", `  seeds: ${seeds.length}`, `  clusters: ${digest.clusters.length}`, `  issue: ${issue.url}`, `  action: ${issue.action}`].join(
+        "\n",
+      ),
+    );
+  }
 };
 
 main().catch((error) => {

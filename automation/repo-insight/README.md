@@ -102,15 +102,15 @@ To promote an insight, manually turn the issue into a polished post under `conte
 
 ## Aggregating Insights
 
-`pnpm aggregate-insights` clusters insight issues **with** the same durable context as the producer: **taste profile** (`buildTasteProfile({ write: false })`), **writing corpus capsule**, and **author profile capsule** (not raw source trees). Seeds alone are insufficient for editorial judgment against Taylor’s corpus.
+`pnpm aggregate-insights` clusters insight issues **with** the same durable context as the producer: **taste profile** (`buildTasteProfile({ write: false })`), **writing corpus capsule**, and **author profile capsule** (not raw source trees).
 
-The aggregator first asks Cursor for an **`AggregateDecision`**: **`kind: "digest"`** (publish a digest) or **`kind: "no_digest_update"`** (skip updating the rolling issue when the batch is weak, duplicative, or too self‑referential). **Scheduled CI** honors `no_digest_update` and leaves the rolling digest untouched; **`--dry-run`** prints the outcome without publishing and **does not write budget state** (even though a local dry-run **with `CURSOR_API_KEY`** runs the editorial model).
+**Every successful run writes the rolling digest issue** (`Repo Insight Digest — Current Themes`, marker `<!-- repo-insight:digest=current-themes -->`). The model always returns an **InsightDigest** (JSON). When a batch is weak or duplicative, that judgment lives *inside* the digest (summary + clusters + `editorialDecisions`) — the issue is still updated so there is always a fresh editorial record.
 
-`pnpm aggregate-insights:dry-run` **without** `CURSOR_API_KEY` skips the model and exits with **`no_digest_update`** explaining that the key was unset --- use that for cheap seed/GitHub sanity checks only; set `CURSOR_API_KEY` locally to preview the editorial gate without publishing.
+**`--dry-run`** does not write budget state and uses a placeholder digest body unless **`CURSOR_API_KEY`** is set; with the key set, dry-run runs the real model but still does not publish (GitHub shows `dry-run`). **`--dry-run` without `CURSOR_API_KEY`** skips the model and publishes only a stub if you also omit tokens (typically you still need `GITHUB_TOKEN` / `GH_TOKEN` to list issues).
 
-The rolling digest issue is **`Repo Insight Digest — Current Themes`**, keyed by `<!-- repo-insight:digest=current-themes -->`, labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. Structured output includes **`editorialDecisions`** (batch-level merges/closes/waits near the top) and per-cluster **editorial judgments** (`editorialDecision`, `whyThisIsOrIsNotInteresting`, `profileConnection`, etc.).
+The digest body includes **`editorialDecisions`** (batch-level actions near the top) and per-cluster fields such as **`editorialDecision`**, **`whyThisIsOrIsNotInteresting`**, and **`profileConnection`**.
 
-Scheduled aggregation still skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago.
+Scheduled aggregation skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago (rate limit). Successful CI runs append a short summary to **`GITHUB_STEP_SUMMARY`** when available.
 
 ## Workflows
 

@@ -241,25 +241,6 @@ export const insightDigestSchema = z.object({
     .default([]),
 });
 
-export const suggestedAggregatorIssueActionSchema = z.object({
-  issueNumber: z.number().int().positive(),
-  action: editorialClusterActionSchema,
-  note: z.string().optional(),
-});
-
-export const aggregateDecisionSchema = z.discriminatedUnion("kind", [
-  z.object({
-    kind: z.literal("digest"),
-    digest: insightDigestSchema,
-  }),
-  z.object({
-    kind: z.literal("no_digest_update"),
-    reason: z.string().min(10),
-    weakPatterns: z.array(z.string().min(1)).default([]),
-    suggestedIssueActions: z.array(suggestedAggregatorIssueActionSchema).optional(),
-  }),
-]);
-
 export const curatorDecisionSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("no_insight"),
