@@ -522,7 +522,20 @@ export const readBudgetState = async (): Promise<RepoInsightBudgetState> => {
 };
 
 export const writeBudgetState = async (state: RepoInsightBudgetState) => {
-  await writeFile(repoInsightBudgetStatePath, `${JSON.stringify(repoInsightBudgetStateSchema.parse(state), null, 2)}\n`, "utf8");
+  const text = `${JSON.stringify(repoInsightBudgetStateSchema.parse(state), null, 2)}\n`;
+  await writeFile(repoInsightBudgetStatePath, text, "utf8");
+};
+
+/** Avoid touching the file/git when nothing changed. */
+export const writeBudgetStateIfChanged = async (nextState: RepoInsightBudgetState) => {
+  const canonical = `${JSON.stringify(repoInsightBudgetStateSchema.parse(nextState), null, 2)}\n`;
+  try {
+    const previous = await readFile(repoInsightBudgetStatePath, "utf8");
+    if (previous === canonical) return;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  await writeFile(repoInsightBudgetStatePath, canonical, "utf8");
 };
 
 export const getTodayBudget = (state: RepoInsightBudgetState, date = new Date()) => {
@@ -643,13 +656,13 @@ export const recordAggregatorRun = (
 name: Repo Insight Aggregate
 on:
   schedule:
-    - cron: 47 13 * * *
-  workflow_dispatch:
+    - cron: "47 13 * * *"
+  workflow_dispatch: {}
 permissions:
   contents: write
   issues: write
 concurrency:
-  group: repo-insight-aggregate-${{ github.run_id }}
+  group: repo-insight-aggregate
   cancel-in-progress: false
 jobs:
   aggregate:
@@ -674,12 +687,20 @@ jobs:
           REPO_INSIGHT_AGGREGATOR_MAX_SEEDS: "30"
         run: nix develop --command pnpm aggregate-insights --ci
       - name: Commit budget state if changed
+        env:
+          RI_GIT_BRANCH: ${{ github.ref_name }}
         run: |-
-          nix develop --command bash -lc 'git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
+          nix develop --command bash -lc "set -eu
+          git config user.name \"github-actions[bot]\"
+          git config user.email \"github-actions[bot]@users.noreply.github.com\"
+          BRANCH=\"\$RI_GIT_BRANCH\"
+          git fetch origin \"\$BRANCH\" --prune || true
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
           git add data/repo-insight-budget-state.json
-          git diff --cached --quiet || git commit -m "Update repo insight budget state"
-          git push'
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m \"Update repo insight budget state\"
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git push || { ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true; git push; }"
 </file>
 
 <file path=".mermaid-cache/Z3JhcGggVEQK.mmd">
@@ -2189,7 +2210,7 @@ import {
   estimateTokens,
   readBudgetState,
   recordAggregatorRun,
-  writeBudgetState,
+  writeBudgetStateIfChanged,
 } from "../storage/budget-state";
 import { getArgValue, hasFlag } from "./args";
 
@@ -2206,14 +2227,20 @@ const main = async () => {
   const budgetState = await readBudgetState();
   const budget = canRunAggregator(budgetState);
 
+  const runsLabel = `${budget.used}/${budget.limit}`;
+
   if (budgetStatus) {
-    console.log(`aggregate budget=${budget.ok ? "ok" : "exhausted"} used=${budget.used} limit=${budget.limit}`);
+    console.log(`aggregate budget=${budget.ok ? "ok" : "exhausted"} runs=${runsLabel}`);
     return;
   }
 
   const seeds = await collectInsightSeeds({ repo, includeClosed, noGithub, maxSeeds });
   if (seeds.length < 2) {
-    console.log(ci ? `aggregate skip=too_few_seeds seeds=${seeds.length}` : `Only ${seeds.length} repo-insight seed found; skipping.`);
+    console.log(
+      ci
+        ? `aggregate skip=too_few_seeds budget=${budget.ok ? "ok" : "exhausted"} runs=${runsLabel} seeds=${seeds.length}`
+        : `Only ${seeds.length} repo-insight seed found; skipping.`,
+    );
     return;
   }
 
@@ -2222,17 +2249,21 @@ const main = async () => {
   if (!dryRun && scheduledRun && !ignoreBudget && existingDigest) {
     const ageMs = Date.now() - Date.parse(existingDigest.updatedAt);
     if (ageMs < 20 * 60 * 60 * 1000) {
-      console.log(ci ? `aggregate skip=recently_updated updatedAt=${existingDigest.updatedAt}` : `Digest was updated recently (${existingDigest.updatedAt}); skipping.`);
+      console.log(
+        ci
+          ? `aggregate skip=recently_updated runs=${runsLabel} seeds=${seeds.length} updatedAt=${existingDigest.updatedAt}`
+          : `Digest was updated recently (${existingDigest.updatedAt}); skipping.`,
+      );
       return;
     }
   }
 
   if (scheduledRun && !ignoreBudget && !budget.ok) {
-    console.log(ci ? `aggregate budget=exhausted limit=${budget.limit}` : `Aggregator budget exhausted (${budget.used}/${budget.limit}).`);
+    console.log(ci ? `aggregate budget=exhausted runs=${runsLabel} seeds=${seeds.length}` : `Aggregator budget exhausted (${budget.used}/${budget.limit}).`);
     return;
   }
 
-  console.log(ci ? `aggregate budget=ok seeds=${seeds.length} maxSeeds=${maxSeeds}` : `Aggregate budget ok (${budget.used}/${budget.limit}); seeds: ${seeds.length}/${maxSeeds}`);
+  console.log(ci ? `aggregate budget=ok runs=${runsLabel} seeds=${seeds.length}` : `Aggregate budget ok (${budget.used}/${budget.limit}); seeds: ${seeds.length}/${maxSeeds}`);
 
   const usage = {
     inputTokens: 0,
@@ -2245,17 +2276,17 @@ const main = async () => {
     usage.model = event.model;
   };
 
-  const digest = dryRun ? deterministicDigestPreview(seeds) : await aggregateInsights(seeds, { onUsageEstimate });
+  let digest = dryRun ? deterministicDigestPreview(seeds) : await aggregateInsights(seeds, { onUsageEstimate });
+
+  if (!dryRun) {
+    await writeBudgetStateIfChanged(recordAggregatorRun(budgetState, usage));
+  }
+
   const body = renderDigestIssue({ digest, seeds });
-  if (!dryRun) {
-    await writeBudgetState(recordAggregatorRun(budgetState, usage));
-  }
+
+  console.log(ci ? `usage-estimate inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}` : `Usage estimate: inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`);
+
   const issue = await publisher.publish(body);
-  if (!dryRun) {
-    console.log(ci
-      ? `usage-estimate inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`
-      : `Usage estimate: inputTokens≈${usage.inputTokens} outputTokens≈${usage.outputTokens} model=${usage.model}`);
-  }
 
   console.log(
     ci
@@ -13110,22 +13141,20 @@ export const buildAggregateInsightsPrompt = (input: { generatedAt: string; seeds
     "Keep the depth, but write plainly. Explain the idea before naming it.",
     "",
     "Tone:",
-    "- Sound like a thoughtful editor and a smart technical friend.",
-    "- Use short sentences.",
-    "- Use direct verbs.",
-    "- Prefer plain explanations over abstract labels.",
-    "- Use technical terms only when they help.",
-    "- Prefer `this means...` over decorative phrasing.",
-    "- Slightly more content is fine, but do not make the writing denser.",
+    "- Sound like a thoughtful editor talking to Taylor after skim-reading the backlog — not writing an academic essay.",
+    "- Explain each idea plainly before borrowing any label for it.",
+    "- Short sentences. Fewer commas. Stop stacking abstractions inside one clause.",
+    "- Keep philosophical depth by tying claims to cited issues/seeds rather than lyrical generalities.",
+    "- Technical jargon only where it earns its keep.",
+    "- Prefer grounded lines like `this reads as…`, `these issues keep circling…`, over decorative phrasing.",
+    "- Slightly more content is okay as long as the density drops (more white-space thinking, fewer metaphor stacks).",
     ...(process.env.CI === "true"
       ? [
-          "- This is an unattended scheduled digest run. Keep the digest useful but not long.",
-          "- Do not expand weak clusters just to fill space.",
+          "- Unattended cron run: tighten length, refuse to fluff weak clusters.",
         ]
       : []),
     "",
-    "Hard rule: if a sentence sounds like it belongs in a literary theory paper, rewrite it.",
-    "Do not try to sound philosophical. Explain the philosophy clearly.",
+    "If a paragraph sounds ornate or thesis-adjacent, rewrite it until a tired reader can follow it.",
     "",
     "Avoid:",
     "- academic essay voice",
@@ -13147,10 +13176,9 @@ export const buildAggregateInsightsPrompt = (input: { generatedAt: string; seeds
     "- withholding as a philosophical stance",
     "",
     "Use this style instead:",
-    "- These issues are mostly about the same question: when is generated writing ready to become public?",
-    "- The system is separating two steps: generating an idea and deciding it is worth publishing.",
-    "- The empty index is useful because it shows that nothing has been promoted yet. That absence is intentional.",
-    "- The pattern is consistent: Taylor keeps building tools that slow down publication until there is enough evidence to trust the result.",
+    "- Multiple issues converge on whether automated ideas are publication-ready versus review-ready.",
+    "- The tooling keeps distinguishing draft churn from accountable release claims.",
+    "- GitHub seeds stay open because they are hypotheses, not finished essays.",
     "",
     "Cluster seeds by underlying theme, not by repo name.",
     "",
@@ -13338,15 +13366,17 @@ const header = [
   "",
 ].join("\n");
 
+const quoteCronScalars = (yaml: string) =>
+  yaml.replace(/^(\s*)(-\s+)?cron:\s*(.+)$/gm, (_line, indent, listMarker, value) => {
+    const trimmed = String(value).trim();
+    const marker = listMarker ?? "";
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) return `${indent}${marker}cron: ${trimmed}`;
+    const escaped = trimmed.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    return `${indent}${marker}cron: "${escaped}"`;
+  });
+
 export const renderWorkflow = (workflow: WorkflowFile) =>
-  header +
-  YAML.stringify(workflow.workflow, {
-    lineWidth: 0,
-    nullStr: "",
-    // GitHub cron expressions contain `*`; keep only that fragile scalar quoted.
-  })
-    .replace("cron: 17 * * * *", 'cron: "17 * * * *"')
-    .replace("cron: 47 13 * * 0", 'cron: "47 13 * * 0"');
+  header + quoteCronScalars(YAML.stringify(workflow.workflow, { lineWidth: 0, nullStr: "" }));
 </file>
 
 <file path="automation/repo-insight/taste-profile.ts">
@@ -17536,7 +17566,7 @@ permissions:
   contents: write
   issues: write
 concurrency:
-  group: repo-insight-${{ github.run_id }}
+  group: repo-insight-producer
   cancel-in-progress: false
 jobs:
   generate:
@@ -17576,13 +17606,21 @@ jobs:
           else
             nix develop --command pnpm generate-insight --ci
           fi
-      - name: Commit poll state if changed
+      - name: Commit repo insight state
+        env:
+          RI_GIT_BRANCH: ${{ github.ref_name }}
         run: |-
-          nix develop --command bash -lc 'git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
+          nix develop --command bash -lc "set -eu
+          git config user.name \"github-actions[bot]\"
+          git config user.email \"github-actions[bot]@users.noreply.github.com\"
+          BRANCH=\"\$RI_GIT_BRANCH\"
+          git fetch origin \"\$BRANCH\" --prune || true
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
           git add data/taste-profile.md data/repo-insight-poll-state.json data/repo-insight-budget-state.json
-          git diff --cached --quiet || git commit -m "Update repo insight state"
-          git push'
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m \"Update repo insight state\"
+          ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true
+          git push || { ( git pull --rebase origin \"\$BRANCH\" || git pull --rebase ) || true; git push; }"
 </file>
 
 <file path=".mermaid-cache/cXVhZHJhbnRD.mmd">
@@ -17647,7 +17685,7 @@ import {
   readBudgetState,
   recordProducerManualRun,
   recordProducerScheduledRun,
-  writeBudgetState,
+  writeBudgetStateIfChanged,
 } from "../storage/budget-state";
 import { buildUpdatedPollState, diffPollState, readPollState, writePollState } from "../storage/poll-state";
 import { buildTasteProfile } from "../taste-profile";
@@ -17676,13 +17714,13 @@ const main = async () => {
   const scheduledRun = process.env.GITHUB_EVENT_NAME === "schedule";
   const wakeReason: InsightWakeReason = force ? "manual-force" : scheduledRun ? "scheduled-poll" : "manual-normal";
   const reporter = new Reporter({ ci: hasFlag("--ci") });
-  const budgetState = await readBudgetState();
-  const producerBudget = canRunProducerScheduled(budgetState);
+
+  let budgetState = await readBudgetState();
+  let producerBudget = canRunProducerScheduled(budgetState);
 
   if (budgetStatus) {
-    reporter.budget({
-      kind: "producer",
-      status: producerBudget.ok ? "ok" : "exhausted",
+    reporter.producerBudgetLine({
+      scheduled: scheduledRun && !ignoreBudget,
       used: producerBudget.used,
       limit: producerBudget.limit,
     });
@@ -17700,33 +17738,20 @@ const main = async () => {
   }
 
   if (scheduledRun && !ignoreBudget && !producerBudget.ok) {
-    reporter.budget({
-      kind: "producer",
-      status: "exhausted",
+    reporter.producerBudgetLine({
+      scheduled: true,
       used: producerBudget.used,
       limit: producerBudget.limit,
+      exhausted: true,
     });
     return;
   }
 
-  reporter.budget({
-    kind: "producer",
-    status: producerBudget.ok || ignoreBudget || !scheduledRun ? "ok" : "exhausted",
+  reporter.producerBudgetLine({
+    scheduled: scheduledRun && !ignoreBudget,
     used: producerBudget.used,
     limit: producerBudget.limit,
   });
-
-  const selection = selectReposForPacking({ repos, changes: pollChanges });
-  if (selection.selectedRepos.length === 0) {
-    throw new Error("No repositories were selected for repo insight generation.");
-  }
-  reporter.selection(selection);
-
-  const maxRepoBytes = Number(process.env.REPO_INSIGHT_MAX_PACK_BYTES ?? "100000");
-  const maxTotalBytes = Number(process.env.REPO_INSIGHT_MAX_TOTAL_PACK_BYTES ?? "300000");
-  reporter.packBudget(maxRepoBytes, maxTotalBytes);
-  const packs = await packTopRepos({ catalog, repos: selection.selectedRepos, maxTotalBytes });
-  reporter.packs(packs);
 
   const usage = {
     inputTokens: 0,
@@ -17738,83 +17763,107 @@ const main = async () => {
     usage.outputTokens += estimateTokens(event.outputChars);
     usage.model = event.model;
   };
-  const maxNewCompactions =
-    scheduledRun && !force && !ignoreBudget
-      ? Number(process.env.REPO_INSIGHT_MAX_NEW_COMPACTIONS_PER_RUN ?? "2")
-      : undefined;
 
-  const { capsules, cacheEvents } = await compactPacks(packs, { maxNewCompactions, onUsageEstimate });
-  reporter.capsuleCache(cacheEvents);
-  reporter.capsules(capsules, cacheEvents);
+  let curatorAttempted = false;
+  let curatorFinished = false;
+  let budgetRecorded = false;
+  const finalizeProducerBudgetOnce = async () => {
+    if (budgetRecorded) return;
+    /** Count scheduled/manual runs toward quota only after the curator agent call is attempted (compaction-only paths do not increment runs). */
+    if (!curatorAttempted) return;
 
-  const currentRunId = runId();
-  const writingContext = await buildWritingCorpus();
-  const profileContext = await buildAuthorProfile();
-  reporter.writingContext(writingContext);
-  reporter.profileContext(profileContext);
-  const input: CuratorInput = {
-    runId: currentRunId,
-    generatedAt: new Date().toISOString(),
-    tasteProfile: await buildTasteProfile({ write: false }),
-    writingCorpus: writingContext.capsule,
-    authorProfile: profileContext.capsule,
-    previousInsightTitles: [],
-    activitySignal: {
-      wakeReason,
-      changedRepos: selection.changedRepos.map((repo) => repo.fullName),
-      note:
-        "The wake reason only explains why this scheduled run happened. It is not a claim that the newest repo or newest commit is the most important signal.",
-    },
-    selection: {
-      mode: selection.mode,
-      randomSeed: selection.randomSeed,
-      candidateRepoCount: selection.candidateRepos.length,
-      selectedRepoCount: selection.selectedRepos.length,
-      changedRepoCount: selection.changedRepos.length,
-      selectedRepos: selection.selectedRepos.map((repo) => repo.fullName),
-      changedRepos: selection.changedRepos.map((repo) => repo.fullName),
-      wakeReason,
-    },
-    capsules,
-    mode: force ? "force" : "discretionary",
+    budgetState = scheduledRun && !ignoreBudget ? recordProducerScheduledRun(budgetState, usage) : recordProducerManualRun(budgetState, usage);
+    await writeBudgetStateIfChanged(budgetState);
+    budgetRecorded = true;
   };
 
-  const decision = await new CursorSdkAgentBackend({ onUsageEstimate }).generateInsight(input);
-  reporter.usageEstimate(usage);
-  reporter.decision(decision);
-  const updatedPollState = buildUpdatedPollState(repos, previousPollState);
+  try {
+    const selection = selectReposForPacking({ repos, changes: pollChanges });
+    if (selection.selectedRepos.length === 0) {
+      throw new Error("No repositories were selected for repo insight generation.");
+    }
+    reporter.selection(selection);
 
-  if (decision.kind === "no_insight") {
-    if (force) throw new Error("generate-insight:force received no_insight, which is invalid in force mode.");
-    await writeBudgetState(
-      scheduledRun && !ignoreBudget
-        ? recordProducerScheduledRun(budgetState, usage)
-        : recordProducerManualRun(budgetState, usage),
+    const maxRepoBytes = Number(process.env.REPO_INSIGHT_MAX_PACK_BYTES ?? "100000");
+    const maxTotalBytes = Number(process.env.REPO_INSIGHT_MAX_TOTAL_PACK_BYTES ?? "300000");
+    reporter.packBudget(maxRepoBytes, maxTotalBytes);
+
+    const packs = await packTopRepos({ catalog, repos: selection.selectedRepos, maxTotalBytes });
+    reporter.packs(packs);
+
+    const maxNewCompactions =
+      scheduledRun && !force && !ignoreBudget ? Number(process.env.REPO_INSIGHT_MAX_NEW_COMPACTIONS_PER_RUN ?? "2") : undefined;
+
+    const { capsules, cacheEvents } = await compactPacks(packs, { maxNewCompactions, onUsageEstimate });
+    reporter.capsuleCacheSummary(cacheEvents);
+    reporter.capsules(capsules, cacheEvents);
+
+    const currentRunId = runId();
+    const writingContext = await buildWritingCorpus();
+    const profileContext = await buildAuthorProfile();
+    reporter.writingContext(writingContext);
+    reporter.profileContext(profileContext);
+    const input: CuratorInput = {
+      runId: currentRunId,
+      generatedAt: new Date().toISOString(),
+      tasteProfile: await buildTasteProfile({ write: false }),
+      writingCorpus: writingContext.capsule,
+      authorProfile: profileContext.capsule,
+      previousInsightTitles: [],
+      activitySignal: {
+        wakeReason,
+        changedRepos: selection.changedRepos.map((repo) => repo.fullName),
+        note:
+          "Scheduled activity only answers whether repos changed vs poll state — it does not designate a focal repo. Candidate and selected repos are a sampled context window; no repo or commit ordering implies importance.",
+      },
+      selection: {
+        mode: selection.mode,
+        randomSeed: selection.randomSeed,
+        candidateRepoCount: selection.candidateRepos.length,
+        selectedRepoCount: selection.selectedRepos.length,
+        changedRepoCount: selection.changedRepos.length,
+        selectedRepos: selection.selectedRepos.map((repo) => repo.fullName),
+        changedRepos: selection.changedRepos.map((repo) => repo.fullName),
+        wakeReason,
+      },
+      capsules,
+      mode: force ? "force" : "discretionary",
+    };
+
+    curatorAttempted = true;
+    const decision = await new CursorSdkAgentBackend({ onUsageEstimate }).generateInsight(input);
+    curatorFinished = true;
+    reporter.usageEstimate(usage);
+    reporter.decision(decision);
+    await finalizeProducerBudgetOnce();
+
+    const updatedPollState = buildUpdatedPollState(repos, previousPollState);
+
+    if (decision.kind === "no_insight") {
+      if (force) throw new Error("generate-insight:force received no_insight, which is invalid in force mode.");
+      await writePollState(updatedPollState);
+      reporter.output({});
+      return;
+    }
+
+    const safeDecision = stripUnsafeQuotes(
+      decision,
+      new Set(packs.filter((pack) => pack.safeToQuote).map((pack) => pack.fullName)),
     );
+
+    await buildTasteProfile();
+    const issue = await new GitHubIssuePublisher().publishInsightIssue({
+      issue: safeDecision.issue,
+    });
+
+    if (!issue) throw new Error("Expected GitHub issue creation to return an issue outside dry-run mode.");
+
     await writePollState(updatedPollState);
-    reporter.output({});
-    return;
+    reporter.output({ issueUrl: issue.url });
+  } catch (error) {
+    await finalizeProducerBudgetOnce();
+    throw error;
   }
-
-  const safeDecision = stripUnsafeQuotes(
-    decision,
-    new Set(packs.filter((pack) => pack.safeToQuote).map((pack) => pack.fullName)),
-  );
-
-  await buildTasteProfile();
-  const issue = await new GitHubIssuePublisher().publishInsightIssue({
-    issue: safeDecision.issue,
-  });
-
-  if (!issue) throw new Error("Expected GitHub issue creation to return an issue outside dry-run mode.");
-
-  await writeBudgetState(
-    scheduledRun && !ignoreBudget
-      ? recordProducerScheduledRun(budgetState, usage)
-      : recordProducerManualRun(budgetState, usage),
-  );
-  await writePollState(updatedPollState);
-  reporter.output({ issueUrl: issue.url });
 };
 
 main().catch((error) => {
@@ -17870,9 +17919,6 @@ export class Reporter {
       this.log(
         `selection mode=${selection.mode} candidates=${selection.candidateRepos.length} selected=${selection.selectedRepos.length} changed=${selection.changedRepos.length} seed=${selection.randomSeed ?? "none"}`,
       );
-      for (const repo of selection.selectedRepos) {
-        this.log(`selected-repo repo=${repo.fullName} pushedAt=${repo.pushedAt}`);
-      }
       return;
     }
 
@@ -17891,12 +17937,40 @@ export class Reporter {
     );
   }
 
-  budget(message: { kind: "producer" | "aggregator"; status: "ok" | "exhausted"; limit: number; used: number }) {
+  budget(message: {
+    kind: "producer" | "aggregator";
+    status: "ok" | "exhausted";
+    limit: number;
+    used: number;
+  }) {
     if (this.compact) {
-      this.log(`budget=${message.status} kind=${message.kind} used=${message.used} limit=${message.limit}`);
+      const label = message.kind === "aggregator" ? "aggregator" : "producerScheduled";
+      this.log(`budget=${message.status} ${label}=${message.used}/${message.limit}`);
       return;
     }
     this.log(`\nBudget\n  kind: ${message.kind}\n  status: ${message.status}\n  used: ${message.used}\n  limit: ${message.limit}`);
+  }
+
+  producerBudgetLine(params: { scheduled: boolean; used: number; limit: number; exhausted?: boolean }) {
+    if (!this.compact) {
+      this.log(
+        params.exhausted
+          ? `\nBudget\n  exhausted: scheduled producer ${params.used}/${params.limit}`
+          : params.scheduled
+            ? `\nBudget\n  producer scheduled: ${params.used}/${params.limit}`
+            : `\nBudget\n  manual run (scheduled quota not enforced)`,
+      );
+      return;
+    }
+    if (params.exhausted) {
+      this.log(`budget=exhausted producerScheduled=${params.used}/${params.limit}`);
+      return;
+    }
+    if (params.scheduled) {
+      this.log(`budget=ok producerScheduled=${params.used}/${params.limit}`);
+      return;
+    }
+    this.log("budget=skipped mode=manual producerQuota=not_applied");
   }
 
   packBudget(maxRepoBytes: number, maxTotalBytes: number) {
@@ -17917,10 +17991,9 @@ export class Reporter {
 
   packs(packs: RepoPack[]) {
     if (this.compact) {
-      this.log(`packing=repomix repos=${packs.length}`);
-      for (const pack of packs) {
-        this.log(`pack repo=${pack.fullName} bytes=${pack.stats.byteCount} truncated=${pack.stats.truncated}`);
-      }
+      const totalBytes = packs.reduce((sum, pack) => sum + pack.stats.byteCount, 0);
+      const truncated = packs.filter((pack) => pack.stats.truncated).length;
+      this.log(`packing=repomix repos=${packs.length} totalBytes=${totalBytes} truncatedRepos=${truncated}`);
       return;
     }
     this.log(
@@ -17938,7 +18011,19 @@ export class Reporter {
     );
   }
 
+  capsuleCacheSummary(events: CapsuleCacheEvent[]) {
+    const hits = events.filter((event) => event.hit).length;
+    const skipped = events.filter((event) => event.skipped).length;
+    const misses = events.filter((event) => !event.hit && !event.skipped).length;
+    this.log(this.compact ? `capsule-cache hits=${hits} misses=${misses} skipped=${skipped}` : `\nCapsule cache\n  hits: ${hits}\n  misses: ${misses}\n  skipped compaction: ${skipped}`);
+  }
+
+  /** One line per repo outside CI; use capsuleCacheSummary for compact runs. */
   capsuleCache(events: CapsuleCacheEvent[]) {
+    if (this.compact) {
+      this.capsuleCacheSummary(events);
+      return;
+    }
     for (const event of events) {
       this.log(`capsule-cache repo=${event.repo} hit=${event.hit}${event.skipped ? " skipped=true" : ""}`);
     }
@@ -17947,11 +18032,12 @@ export class Reporter {
   capsules(capsules: ProjectCapsule[], cacheEvents: CapsuleCacheEvent[] = []) {
     const model = process.env.CURSOR_COMPACTION_MODEL ?? process.env.CURSOR_MODEL ?? "composer-2";
     const hits = cacheEvents.filter((event) => event.hit).length;
-    const misses = cacheEvents.length - hits;
+    const skipped = cacheEvents.filter((event) => event.skipped).length;
+    const compactionMisses = cacheEvents.filter((event) => !event.hit && !event.skipped).length;
     this.log(
       this.compact
-        ? `capsules=${capsules.length}`
-        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}\n  cache hits: ${hits}\n  cache misses: ${misses}`,
+        ? `capsules=${capsules.length} model=${model} cacheHits=${hits} cacheMisses=${compactionMisses} skipped=${skipped}`
+        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}\n  cache hits: ${hits}\n  cache misses: ${compactionMisses}\n  compaction skipped: ${skipped}`,
     );
   }
 
@@ -18037,7 +18123,8 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "Generated GitHub issues are draft seeds, not polished blog posts.",
     "Do not invent files, commits, quotes, or previous writing.",
     "Do not quote private source unless the capsule/evidence says it is safe.",
-    "You are not summarizing pushes. You are finding where recent work touches Taylor's durable intellectual and project themes.",
+    "`wakeReason` and activity flags only mean the scheduler noticed repo movement or a manual run started. They never pick a focal repository.",
+    "You are sampling a stochastic context window, not reacting to \"the repo that moved last\".",
     "Generated seeds should be more cerebral than changelog-like.",
     "",
     "## Mode",
@@ -18066,7 +18153,7 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "",
     "## Curatorial Priority",
     "",
-    "1. Current repo evidence and ProjectCapsules",
+    "1. Sampled ProjectCapsules grounded in packs",
     "2. WritingCorpusCapsule",
     "3. AuthorProfileCapsule",
     "4. Previous insight titles",
@@ -18104,7 +18191,8 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "",
     "## Context",
     "",
-    "No repository_dispatch payload was provided. Scheduled polling is only a wake-up signal, not a claim about which repo matters most.",
+    "`selection` and capsules describe a sampled subset of repos. Treat them as simultaneous context windows, not chronological ranking.",
+    "Scheduled polling compares `pushedAt` timestamps to decide whether sleep should end (`activity changed`) — nothing more authoritative than that.",
     "",
     JSON.stringify(input, null, 2),
   ].join("\n");
@@ -18133,7 +18221,59 @@ const setupSteps = [
 
 const nix = (command: string) => `nix develop --command ${command}`;
 
-const nixBash = (commands: string[]) => `nix develop --command bash -lc '${commands.join("\n").replace(/'/g, "'\\''")}'`;
+const nixBash = (commands: string[]) => {
+  /** Double-quote -c script so the runner sees `$VAR`; escape `$` expansion on the GH runner (`$GITHUB_*`) via backslash — inner bash must expand them. */
+  const body = commands
+    .join("\n")
+    .replace(/\\/g, "\\\\")
+    .replace(/\$/g, "\\$")
+    .replace(/"/g, '\\"');
+  return `nix develop --command bash -lc "${body}"`;
+};
+
+/** Safer bot push: staged-only commits, pull --rebase before push, one retry after conflict. Expects `RI_GIT_BRANCH` in the step env (see generated workflows). */
+const commitAndPushSteps = ({
+  gitAddPaths,
+  message,
+}: {
+  gitAddPaths: string[];
+  message: string;
+}) =>
+  nixBash([
+    `set -eu`,
+    `git config user.name "github-actions[bot]"`,
+    `git config user.email "github-actions[bot]@users.noreply.github.com"`,
+    `BRANCH="$RI_GIT_BRANCH"`,
+    `git fetch origin "$BRANCH" --prune || true`,
+    `( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true`,
+    `git add ${gitAddPaths.join(" ")}`,
+    `if git diff --cached --quiet; then exit 0; fi`,
+    `git commit -m ${JSON.stringify(message)}`,
+    `( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true`,
+    `git push || { ( git pull --rebase origin "$BRANCH" || git pull --rebase ) || true; git push; }`,
+  ]);
+
+const commitRepoInsightStateStep = {
+  name: "Commit repo insight state",
+  env: {
+    RI_GIT_BRANCH: "${{ github.ref_name }}",
+  },
+  run: commitAndPushSteps({
+    gitAddPaths: ["data/taste-profile.md", "data/repo-insight-poll-state.json", "data/repo-insight-budget-state.json"],
+    message: "Update repo insight state",
+  }),
+};
+
+const commitAggregatorBudgetStep = {
+  name: "Commit budget state if changed",
+  env: {
+    RI_GIT_BRANCH: "${{ github.ref_name }}",
+  },
+  run: commitAndPushSteps({
+    gitAddPaths: ["data/repo-insight-budget-state.json"],
+    message: "Update repo insight budget state",
+  }),
+};
 
 export const workflowDefinitions: WorkflowFile[] = [
   {
@@ -18189,7 +18329,7 @@ export const workflowDefinitions: WorkflowFile[] = [
         issues: "write",
       },
       concurrency: {
-        group: "repo-insight-${{ github.run_id }}",
+        group: "repo-insight-producer",
         "cancel-in-progress": false,
       },
       jobs: {
@@ -18231,16 +18371,7 @@ export const workflowDefinitions: WorkflowFile[] = [
                 "fi",
               ].join("\n"),
             },
-            {
-              name: "Commit poll state if changed",
-              run: nixBash([
-                "git config user.name github-actions[bot]",
-                "git config user.email github-actions[bot]@users.noreply.github.com",
-                "git add data/taste-profile.md data/repo-insight-poll-state.json data/repo-insight-budget-state.json",
-                "git diff --cached --quiet || git commit -m \"Update repo insight state\"",
-                "git push",
-              ]),
-            },
+            commitRepoInsightStateStep,
           ],
         },
       },
@@ -18252,14 +18383,14 @@ export const workflowDefinitions: WorkflowFile[] = [
       name: "Repo Insight Aggregate",
       on: {
         schedule: [{ cron: "47 13 * * *" }],
-        workflow_dispatch: null,
+        workflow_dispatch: {},
       },
       permissions: {
         contents: "write",
         issues: "write",
       },
       concurrency: {
-        group: "repo-insight-aggregate-${{ github.run_id }}",
+        group: "repo-insight-aggregate",
         "cancel-in-progress": false,
       },
       jobs: {
@@ -18281,16 +18412,7 @@ export const workflowDefinitions: WorkflowFile[] = [
               },
               run: nix("pnpm aggregate-insights --ci"),
             },
-            {
-              name: "Commit budget state if changed",
-              run: nixBash([
-                "git config user.name github-actions[bot]",
-                "git config user.email github-actions[bot]@users.noreply.github.com",
-                "git add data/repo-insight-budget-state.json",
-                "git diff --cached --quiet || git commit -m \"Update repo insight budget state\"",
-                "git push",
-              ]),
-            },
+            commitAggregatorBudgetStep,
           ],
         },
       },
@@ -18457,15 +18579,15 @@ To promote an insight, manually turn the issue into a polished post under `conte
 
 ## Aggregating Insights
 
-`pnpm aggregate-insights` is a second-order editor. It reads existing blog repo issues labeled `repo-insight`, clusters recurring conceptual themes with Cursor, and creates or updates one rolling issue titled `Repo Insight Digest — Current Themes`.
+`pnpm aggregate-insights` is a second-order editor. It reads existing blog repo issues labeled `repo-insight`, clusters recurring conceptual themes with Cursor, and **updates one rolling issue** titled `Repo Insight Digest — Current Themes` (create once, then edits the same issue in place).
 
-The rolling digest issue is identified by `<!-- repo-insight:digest=current-themes -->` and labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. The aggregator excludes that digest issue from future input so it does not summarize itself. Scheduled aggregation skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago. Use `pnpm aggregate-insights:dry-run` to verify seed collection and issue rendering without updating GitHub.
+The rolling digest issue is identified by `<!-- repo-insight:digest=current-themes -->` and labeled `repo-insight`, `repo-insight-digest`, `generated`, and `editorial`. The aggregator excludes that digest issue from future input so it does not summarize itself. Scheduled aggregation skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago. Use `pnpm aggregate-insights:dry-run` to verify seed collection and issue rendering without updating GitHub or consuming aggregator budget.
 
 ## Workflows
 
 Run `pnpm automation:generate-workflows` after changing `automation/repo-insight/workflows/definitions.ts`. The generated YAML is committed so workflow behavior is reviewable, while `pnpm automation:check-workflows` prevents drift.
 
-`repo-insight.yml` runs on the blog repo schedule (`17 * * * *`) and can also be started manually with `workflow_dispatch`. The cron wakeup polls GitHub using `GH_REPO_INSIGHT_TOKEN`, compares accessible repos against `data/repo-insight-poll-state.json`, and skips expensive model calls when nothing changed. Manual force runs ignore that no-change gate and daily scheduled limit, but still print pack and token estimates unless `--ignore-budget` is used explicitly.
+`repo-insight.yml` runs hourly on schedule (`17 * * * *`) and can also be started manually (`workflow_dispatch` with optional `force=true`). Cron only polls GitHub for `pushedAt` changes (wake signal). Scheduled runs bail out before Cursor when nothing changed. Manual force skips that gate and bypasses producer **scheduled quota** (runs count as manual in budget state); use `--ignore-budget` locally only when you deliberately want runs without budget bookkeeping.
 </file>
 
 <file path="lib/remark-mermaid-static.ts">

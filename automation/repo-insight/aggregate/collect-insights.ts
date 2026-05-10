@@ -2,6 +2,25 @@ import { insightSeedSchema } from "../model/schemas";
 import { InsightSeed } from "../model/types";
 import { digestIssueMarker, GitHubRepoInsightIssue, listRepoInsightIssues } from "./github-digest-issue";
 
+/** Matches persisted issue markers and schemas (see repoFullName). */
+const REPO_FULL_NAME = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+
+/**
+ * Normalize curator / human typo variants (spaces, quotes, full GitHub URLs) into owner/repo slugs.
+ * Returns undefined when nothing valid remains.
+ */
+export const normalizeRepoFullName = (raw: string): string | undefined => {
+  let t = raw.trim().replace(/^["'`]+|["'`]+$/g, "");
+  const fromUrl = t.match(/^https?:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?(?:\/|$|\?|#)/i);
+  if (fromUrl) t = `${fromUrl[1]}/${fromUrl[2]}`;
+  else {
+    t = t.replace(/\s*\/\s*/, "/").replace(/\s/g, "");
+  }
+  return REPO_FULL_NAME.test(t) ? t : undefined;
+};
+
+const uniqueStrings = (values: string[]) => [...new Set(values)];
+
 const stripMarkdown = (value: string) =>
   value
     .replace(/<!--[\s\S]*?-->/g, "")
@@ -27,15 +46,22 @@ const optionalSection = (body: string, heading: string) => {
   return value || undefined;
 };
 
-const sourceReposFromBody = (body: string | undefined) =>
-  body?.match(/repo-insight:source-repos=([^>]+)/)?.[1]
+const sourceReposFromBody = (body: string | undefined) => {
+  const fromMarker = body
+    ?.match(/repo-insight:source-repos=([^>]+)/)?.[1]
     ?.split(",")
-    .map((repo) => repo.trim())
-    .filter(Boolean) ??
-  section(body ?? "", "Source repos")
-    ?.split(/\r?\n/)
-    .map((line) => line.replace(/^\s*[-*]\s+/, "").trim())
-    .filter((line) => /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(line)) ?? [];
+    .map((repo) => normalizeRepoFullName(repo))
+    .filter((repo): repo is string => Boolean(repo));
+  if (fromMarker?.length) return uniqueStrings(fromMarker);
+
+  const fromSection =
+    section(body ?? "", "Source repos")
+      ?.split(/\r?\n/)
+      .map((line) => line.replace(/^\s*[-*]\s+/, "").trim())
+      .map((line) => normalizeRepoFullName(line))
+      .filter((line): line is string => Boolean(line)) ?? [];
+  return uniqueStrings(fromSection);
+};
 
 const relatedCommitsFromBody = (body: string | undefined) =>
   body?.match(/repo-insight:related-commits=([^>]+)/)?.[1]
