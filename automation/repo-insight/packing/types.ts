@@ -22,6 +22,7 @@ export type RepoPack = {
   tool: "repomix";
   style: string;
   compressed: boolean;
+  maxPackBytes: number;
   stats: PackStats;
   packedText: string;
 };

@@ -1,5 +1,6 @@
 import { CuratorDecision, InsightRunTrigger } from "../model/types";
 import { ProjectCapsule } from "../model/types";
+import { CapsuleCacheEvent } from "../cache/capsule-cache";
 import { RepoPack } from "../packing/types";
 
 export class Reporter {
@@ -52,12 +53,20 @@ export class Reporter {
     );
   }
 
-  capsules(capsules: ProjectCapsule[]) {
+  capsuleCache(events: CapsuleCacheEvent[]) {
+    for (const event of events) {
+      this.log(`capsule-cache repo=${event.repo} hit=${event.hit}`);
+    }
+  }
+
+  capsules(capsules: ProjectCapsule[], cacheEvents: CapsuleCacheEvent[] = []) {
     const model = process.env.CURSOR_COMPACTION_MODEL ?? process.env.CURSOR_MODEL ?? "composer-2";
+    const hits = cacheEvents.filter((event) => event.hit).length;
+    const misses = cacheEvents.length - hits;
     this.log(
       this.compact
         ? `capsules=${capsules.length}`
-        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}`,
+        : `\nCompaction\n  capsules generated: ${capsules.length}\n  model: ${model}\n  cache hits: ${hits}\n  cache misses: ${misses}`,
     );
   }
 

@@ -1,5 +1,40 @@
 import { CuratorInput } from "../model/types";
 
+export const insightArtifactJsonContract = `{
+  "kind": "insight",
+  "artifact": {
+    "frontmatter": {
+      "title": "string",
+      "date": "ISO date string",
+      "sourceRepos": ["owner/repo"],
+      "relatedCommits": ["owner/repo@gitsha"],
+      "tags": ["string"],
+      "generated": true,
+      "published": false,
+      "promoted": false,
+      "runId": "<runId>",
+      "confidence": "low|medium|high"
+    },
+    "sections": {
+      "whySelected": "string",
+      "inspected": "string",
+      "hiddenThesis": "string",
+      "evidence": [
+        {
+          "repo": "owner/repo",
+          "commit": "gitsha",
+          "path": "optional path string",
+          "note": "string",
+          "quote": "optional string only when safeToQuote allows it"
+        }
+      ],
+      "possibleHooks": ["string"],
+      "relationToPreviousWriting": "string",
+      "followUpQuestions": ["string"]
+    }
+  }
+}`;
+
 export const buildInsightPrompt = (input: CuratorInput) => {
   const force = input.mode === "force";
 
@@ -19,10 +54,19 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "## Output Contract",
     "",
     force
-      ? 'Return JSON only: `{ "kind": "insight", "artifact": InsightArtifact }`.'
-      : 'Return JSON only: either `{ "kind": "no_insight", "reason": string }` or `{ "kind": "insight", "artifact": InsightArtifact }`.',
-    "The artifact must include frontmatter with title, date, sourceRepos, relatedCommits, tags, generated true, published false, promoted false, runId, and confidence.",
-    "The artifact body sections must be: whySelected, inspected, hiddenThesis, evidence, possibleHooks, relationToPreviousWriting, followUpQuestions.",
+      ? "Return exactly one JSON object with this shape:"
+      : 'Return JSON only: either `{ "kind": "no_insight", "reason": "string" }` or one insight object with this exact shape:',
+    insightArtifactJsonContract,
+    "",
+    "Very important:",
+    "- Do not put `frontmatter` beside `artifact`.",
+    "- Do not put `sections` beside `artifact`.",
+    "- Do not flatten `artifact`.",
+    "- `artifact.frontmatter` is required.",
+    "- `artifact.sections` is required.",
+    "- In force mode, `no_insight` is invalid.",
+    "- Return JSON only, no markdown fences, no prose.",
+    "- For discretionary mode, `no_insight` is allowed, but if `kind` is `insight`, the artifact must use the exact same nested shape.",
     "",
     "## Context",
     "",

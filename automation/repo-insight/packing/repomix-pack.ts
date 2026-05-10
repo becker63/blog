@@ -67,6 +67,7 @@ export const packRepoWithRepomix = async (repo: AccessibleRepo): Promise<RepoPac
       tool: "repomix",
       style: repomixStyle(),
       compressed: true,
+      maxPackBytes,
       stats: {
         byteCount: packed.byteCount,
         truncated: packed.truncated,

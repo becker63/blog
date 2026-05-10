@@ -6,6 +6,14 @@ export type WorkflowFile = {
 const setupSteps = [
   { uses: "actions/checkout@v4" },
   { uses: "DeterminateSystems/nix-installer-action@main" },
+  {
+    uses: "cachix/cachix-action@v15",
+    if: "${{ env.CACHIX_AUTH_TOKEN != '' }}",
+    with: {
+      name: "${{ vars.CACHIX_CACHE_NAME || 'becker63' }}",
+      authToken: "${{ env.CACHIX_AUTH_TOKEN }}",
+    },
+  },
   { run: "nix develop --command pnpm install --frozen-lockfile" },
 ];
 
@@ -30,6 +38,9 @@ export const workflowDefinitions: WorkflowFile[] = [
       jobs: {
         check: {
           "runs-on": "ubuntu-latest",
+          env: {
+            CACHIX_AUTH_TOKEN: "${{ secrets.CACHIX_AUTH_TOKEN }}",
+          },
           steps: [
             ...setupSteps,
             { run: nix("pnpm automation:check-workflows") },
@@ -71,8 +82,19 @@ export const workflowDefinitions: WorkflowFile[] = [
       jobs: {
         generate: {
           "runs-on": "ubuntu-latest",
+          env: {
+            CACHIX_AUTH_TOKEN: "${{ secrets.CACHIX_AUTH_TOKEN }}",
+          },
           steps: [
             ...setupSteps,
+            {
+              uses: "actions/cache@v4",
+              with: {
+                path: ".cache/repo-insight",
+                key: "repo-insight-capsules-${{ runner.os }}-${{ hashFiles('automation/repo-insight/**/*.ts', 'package.json', 'pnpm-lock.yaml', 'flake.lock') }}",
+                "restore-keys": "repo-insight-capsules-${{ runner.os }}-",
+              },
+            },
             {
               name: "Generate insight",
               env: {

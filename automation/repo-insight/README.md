@@ -28,9 +28,9 @@ Run `pnpm generate-insight`. It asks GitHub for the top recently pushed repos th
 Use `nix develop` for the reproducible tool environment. Package scripts remain the command surface.
 Repomix is provided by the Nix dev shell and is invoked with `--compress`; pack files stay in OS temp directories and are not committed.
 
-`pnpm generate-insight` does not require a payload. If `REPO_INSIGHT_PAYLOAD`, `--payload`, or `--payload-file` is provided, it is used only as optional trigger metadata. Without it, the run is inferred from the most recently pushed selected repo.
+`pnpm generate-insight` does not require a payload. A `repository_dispatch` payload may be used as optional trigger metadata, but manual CLI runs infer the trigger from the top recently pushed repo.
 
-`pnpm generate-insight:force` uses the same packing and compaction path, but requires one artifact and one issue. It also does not require a payload. `no_insight` is invalid in force mode.
+Cursor output is schema-validated. Near-miss JSON gets one schema repair attempt, and force mode requires one artifact with `artifact.frontmatter` and `artifact.sections`. `pnpm generate-insight:force` uses the same packing and compaction path, but requires one artifact and one issue. It also does not require a payload. `no_insight` is invalid in force mode.
 
 ## Secrets
 
@@ -63,6 +63,8 @@ Packing-related environment knobs:
 - `REPO_INSIGHT_REPO_LIMIT`, default `5`
 - `REPO_INSIGHT_MAX_PACK_BYTES`, default `200000`
 - `REPO_INSIGHT_PACK_STYLE`, default `xml`
+
+Compacted ProjectCapsules are cached under `.cache/repo-insight/capsules`. Raw Repomix packs and cloned repos stay temporary and are not cached.
 
 ## Adding A Source Repo
 

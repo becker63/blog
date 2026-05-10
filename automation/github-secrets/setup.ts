@@ -14,22 +14,26 @@ const getFlagValue = (name: string) => {
 const hasFlag = (name: string) => process.argv.includes(name);
 
 const execGh = (args: string[], stdinValue?: string) =>
-  new Promise<void>((resolve, reject) => {
+  new Promise<string>((resolve, reject) => {
     const child = spawn("gh", args, {
       stdio: ["pipe", "pipe", "pipe"],
     });
 
+    let stdout = "";
     let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
     child.stderr.on("data", (chunk) => {
       stderr += String(chunk);
     });
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) {
-        resolve();
+        resolve(stdout);
         return;
       }
-      reject(new Error(`gh ${args.slice(0, 2).join(" ")} failed: ${stderr.trim()}`));
+      reject(new Error(`gh ${args.slice(0, 2).join(" ")} failed: ${stderr.trim() || `exit code ${code}`}`));
     });
     child.stdin.end(stdinValue ?? "");
   });
@@ -51,15 +55,23 @@ const readPipedAnswers = async () => {
 
 const nextPipedAnswer = (answers: string[]) => answers.shift()?.trim() ?? "";
 
-const promptLine = async (rl: readline.Interface | undefined, answers: string[], label: string, defaultValue?: string) => {
+const promptLine = async (
+  rl: readline.Interface | undefined,
+  answers: string[],
+  label: string,
+  defaultValue?: string,
+  options: { useDefaultOnBlank?: boolean } = {},
+) => {
+  const useDefaultOnBlank = options.useDefaultOnBlank ?? true;
   const suffix = defaultValue ? ` (${defaultValue})` : "";
   if (!input.isTTY) {
     console.log(`${label}${suffix}: `);
-    return nextPipedAnswer(answers) || defaultValue || "";
+    const value = nextPipedAnswer(answers);
+    return value || (useDefaultOnBlank ? defaultValue || "" : "");
   }
   if (!rl) throw new Error("Interactive prompt unavailable.");
   const value = (await rl.question(`${label}${suffix}: `)).trim();
-  return value || defaultValue || "";
+  return value || (useDefaultOnBlank ? defaultValue || "" : "");
 };
 
 const promptSecret = async (rl: readline.Interface | undefined, answers: string[], label: string) => {
@@ -93,6 +105,45 @@ const validateRepo = (repo: string, label: string) => {
   if (!repoPattern.test(repo)) throw new Error(`${label} must use owner/repo format: ${repo}`);
 };
 
+const parseNameListJson = (raw: string) => {
+  const parsed = JSON.parse(raw) as unknown;
+  if (!Array.isArray(parsed)) throw new Error("Expected a JSON array.");
+  return new Set(
+    parsed
+      .map((item) => (typeof item === "object" && item !== null && "name" in item ? String(item.name) : ""))
+      .filter(Boolean),
+  );
+};
+
+const parseNameListPlain = (raw: string) =>
+  new Set(
+    raw
+      .split(/\r?\n/)
+      .map((line) => line.trim().split(/\s+/)[0])
+      .filter((name) => name && name.toUpperCase() !== "NAME"),
+  );
+
+const listRepoNames = async (repo: string, kind: "secret" | "variable") => {
+  try {
+    return parseNameListJson(await execGh([kind, "list", "--repo", repo, "--json", "name"]));
+  } catch (jsonError) {
+    try {
+      return parseNameListPlain(await execGh([kind, "list", "--repo", repo]));
+    } catch (plainError) {
+      throw new Error(
+        `Unable to list GitHub Actions ${kind}s for ${repo}. Check gh auth and repository permissions. ${
+          plainError instanceof Error ? plainError.message : String(plainError)
+        }`,
+        { cause: jsonError },
+      );
+    }
+  }
+};
+
+const listRepoSecrets = (repo: string) => listRepoNames(repo, "secret");
+
+const listRepoVariables = (repo: string) => listRepoNames(repo, "variable");
+
 const setSecret = async (repo: string, name: string, value: string, dryRun: boolean) => {
   if (dryRun) {
     console.log(`Would set secret ${name} for ${repo}`);
@@ -111,8 +162,98 @@ const setVariable = async (repo: string, name: string, value: string, dryRun: bo
   console.log(`Set variable ${name}`);
 };
 
+type PromptContext = {
+  rl: readline.Interface | undefined;
+  answers: string[];
+};
+
+type EnsureResult = {
+  configured: boolean;
+  changed: boolean;
+};
+
+const ensureSecret = async ({
+  repo,
+  name,
+  label = name,
+  explanation,
+  required = false,
+  existingSecrets,
+  dryRun,
+  overwrite,
+  prompt,
+  skipMessage,
+}: {
+  repo: string;
+  name: string;
+  label?: string;
+  explanation?: string;
+  required?: boolean;
+  existingSecrets: Set<string>;
+  dryRun: boolean;
+  overwrite: boolean;
+  prompt: PromptContext;
+  skipMessage?: string;
+}): Promise<EnsureResult> => {
+  if (!overwrite && existingSecrets.has(name)) {
+    console.log(`Secret ${name} already set for ${repo}; skipping`);
+    return { configured: true, changed: false };
+  }
+
+  if (explanation) console.log(explanation);
+  const value = await promptSecret(prompt.rl, prompt.answers, label);
+  if (!value) {
+    if (required) throw new Error(`${name} cannot be blank.`);
+    console.log(skipMessage ?? `Optional ${name} not provided; skipping`);
+    return { configured: false, changed: false };
+  }
+
+  await setSecret(repo, name, value, dryRun);
+  return { configured: true, changed: true };
+};
+
+const ensureVariable = async ({
+  repo,
+  name,
+  label = name,
+  defaultValue,
+  required = false,
+  existingVariables,
+  dryRun,
+  overwrite,
+  prompt,
+}: {
+  repo: string;
+  name: string;
+  label?: string;
+  defaultValue?: string;
+  required?: boolean;
+  existingVariables: Set<string>;
+  dryRun: boolean;
+  overwrite: boolean;
+  prompt: PromptContext;
+}): Promise<EnsureResult> => {
+  if (!overwrite && existingVariables.has(name)) {
+    console.log(`Variable ${name} already set for ${repo}; skipping`);
+    return { configured: true, changed: false };
+  }
+
+  const value = await promptLine(prompt.rl, prompt.answers, label, defaultValue, {
+    useDefaultOnBlank: !overwrite && Boolean(defaultValue),
+  });
+  if (!value) {
+    if (required) throw new Error(`${name} cannot be blank.`);
+    console.log(`Optional ${name} not provided; skipping`);
+    return { configured: false, changed: false };
+  }
+
+  await setVariable(repo, name, value, dryRun);
+  return { configured: true, changed: true };
+};
+
 const main = async () => {
   const dryRun = hasFlag("--dry-run");
+  const overwrite = hasFlag("--overwrite") || hasFlag("--force");
   console.log("Checking gh auth...");
   await checkGhAuth();
 
@@ -122,17 +263,83 @@ const main = async () => {
     const defaultBlogRepo = process.env.GITHUB_REPOSITORY;
     const blogRepo = getFlagValue("--blog-repo") ?? (await promptLine(rl, pipedAnswers, "Blog repo", defaultBlogRepo));
     validateRepo(blogRepo, "Blog repo");
+    console.log(`Blog repo: ${blogRepo}`);
+    if (overwrite) console.log("Overwrite mode enabled; existing values may be replaced when non-empty values are provided.");
 
-    console.log("CURSOR_API_KEY is the Cursor SDK key used by the blog workflow.");
-    const cursorApiKey = await promptSecret(rl, pipedAnswers, "CURSOR_API_KEY");
-    if (!cursorApiKey) throw new Error("CURSOR_API_KEY cannot be blank.");
+    console.log("Reading existing blog repo secrets/variables...");
+    const blogSecrets = await listRepoSecrets(blogRepo);
+    const blogVariables = await listRepoVariables(blogRepo);
+    const prompt = { rl, answers: pipedAnswers };
 
-    console.log("GH_REPO_INSIGHT_TOKEN should be a fine-grained read-only PAT for source repos (Contents: read, Metadata: read).");
-    const repoInsightToken = await promptSecret(rl, pipedAnswers, "GH_REPO_INSIGHT_TOKEN");
-    if (!repoInsightToken) throw new Error("GH_REPO_INSIGHT_TOKEN cannot be blank.");
+    await ensureSecret({
+      repo: blogRepo,
+      name: "CURSOR_API_KEY",
+      explanation: "CURSOR_API_KEY is the Cursor SDK key used by the blog workflow.",
+      required: true,
+      existingSecrets: blogSecrets,
+      dryRun,
+      overwrite,
+      prompt,
+    });
 
-    const cursorModel = await promptLine(rl, pipedAnswers, "Optional CURSOR_MODEL, blank to skip", "composer-2");
-    const compactionModel = await promptLine(rl, pipedAnswers, "Optional CURSOR_COMPACTION_MODEL, blank to skip", "composer-2");
+    await ensureSecret({
+      repo: blogRepo,
+      name: "GH_REPO_INSIGHT_TOKEN",
+      explanation: "GH_REPO_INSIGHT_TOKEN should be a fine-grained read-only PAT for source repos (Contents: read, Metadata: read).",
+      required: true,
+      existingSecrets: blogSecrets,
+      dryRun,
+      overwrite,
+      prompt,
+      skipMessage: "Optional CACHIX_AUTH_TOKEN not provided; skipping Cachix setup.",
+    });
+
+    await ensureVariable({
+      repo: blogRepo,
+      name: "CURSOR_MODEL",
+      label: "Optional CURSOR_MODEL, blank to skip",
+      defaultValue: "composer-2",
+      existingVariables: blogVariables,
+      dryRun,
+      overwrite,
+      prompt,
+    });
+
+    await ensureVariable({
+      repo: blogRepo,
+      name: "CURSOR_COMPACTION_MODEL",
+      label: "Optional CURSOR_COMPACTION_MODEL, blank to skip",
+      defaultValue: "composer-2",
+      existingVariables: blogVariables,
+      dryRun,
+      overwrite,
+      prompt,
+    });
+
+    const cachix = await ensureSecret({
+      repo: blogRepo,
+      name: "CACHIX_AUTH_TOKEN",
+      label: "Optional CACHIX_AUTH_TOKEN",
+      explanation:
+        "CACHIX_AUTH_TOKEN is optional. Leave blank to skip Nix binary cache. If provided, GitHub Actions will use Cachix instead of Magic Nix Cache / FlakeHub. This is only for GitHub Actions speed, not repo-insight product logic.",
+      existingSecrets: blogSecrets,
+      dryRun,
+      overwrite,
+      prompt,
+    });
+    if (cachix.configured) {
+      await ensureVariable({
+        repo: blogRepo,
+        name: "CACHIX_CACHE_NAME",
+        label: "Optional CACHIX_CACHE_NAME",
+        defaultValue: "becker63",
+        existingVariables: blogVariables,
+        dryRun,
+        overwrite,
+        prompt,
+      });
+    }
+
     const sourceRepoInput =
       getFlagValue("--source-repos") ??
       (await promptLine(rl, pipedAnswers, "Source repos for BLOG_REPO_DISPATCH_TOKEN, comma-separated, blank to skip"));
@@ -143,24 +350,28 @@ const main = async () => {
       .filter(Boolean);
     for (const repo of sourceRepos) validateRepo(repo, "Source repo");
 
-    const dispatchToken = sourceRepos.length
-      ? await promptSecret(rl, pipedAnswers, "BLOG_REPO_DISPATCH_TOKEN")
-      : "";
-    if (sourceRepos.length && !dispatchToken) {
-      throw new Error("BLOG_REPO_DISPATCH_TOKEN cannot be blank when source repos are provided.");
-    }
-
-    console.log(`Setting blog repo secrets for ${blogRepo}`);
-    await setSecret(blogRepo, "CURSOR_API_KEY", cursorApiKey, dryRun);
-    await setSecret(blogRepo, "GH_REPO_INSIGHT_TOKEN", repoInsightToken, dryRun);
-    if (cursorModel) await setVariable(blogRepo, "CURSOR_MODEL", cursorModel, dryRun);
-    if (compactionModel) await setVariable(blogRepo, "CURSOR_COMPACTION_MODEL", compactionModel, dryRun);
-
     if (sourceRepos.length > 0) {
-      console.log("Setting source repo dispatch secrets");
+      console.log("Reading existing source repo dispatch secrets...");
+      const reposNeedingDispatchToken: string[] = [];
       for (const repo of sourceRepos) {
-        await setSecret(repo, "BLOG_REPO_DISPATCH_TOKEN", dispatchToken, dryRun);
-        console.log(`Configured BLOG_REPO_DISPATCH_TOKEN for ${repo}`);
+        const sourceSecrets = await listRepoSecrets(repo);
+        if (!overwrite && sourceSecrets.has("BLOG_REPO_DISPATCH_TOKEN")) {
+          console.log(`Secret BLOG_REPO_DISPATCH_TOKEN already set for ${repo}; skipping`);
+        } else {
+          reposNeedingDispatchToken.push(repo);
+        }
+      }
+
+      if (reposNeedingDispatchToken.length > 0) {
+        const dispatchToken = await promptSecret(rl, pipedAnswers, "BLOG_REPO_DISPATCH_TOKEN");
+        if (!dispatchToken) {
+          throw new Error("BLOG_REPO_DISPATCH_TOKEN cannot be blank when selected source repos need it.");
+        }
+        console.log("Setting source repo dispatch secrets");
+        for (const repo of reposNeedingDispatchToken) {
+          await setSecret(repo, "BLOG_REPO_DISPATCH_TOKEN", dispatchToken, dryRun);
+          console.log(`Configured BLOG_REPO_DISPATCH_TOKEN for ${repo}`);
+        }
       }
     }
 

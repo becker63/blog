@@ -96,8 +96,9 @@ const main = async () => {
   reporter.trigger(trigger);
   reporter.packs(packs);
 
-  const capsules = await compactPacks(packs);
-  reporter.capsules(capsules);
+  const { capsules, cacheEvents } = await compactPacks(packs);
+  reporter.capsuleCache(cacheEvents);
+  reporter.capsules(capsules, cacheEvents);
 
   const currentRunId = runId();
   const input: CuratorInput = {
