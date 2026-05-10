@@ -26,6 +26,7 @@
             pnpm
             git
             gh
+            ripgrep
             jq
             curl
             actionlint

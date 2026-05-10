@@ -6,7 +6,6 @@ export type WorkflowFile = {
 const setupSteps = [
   { uses: "actions/checkout@v4" },
   { uses: "DeterminateSystems/nix-installer-action@main" },
-  { uses: "DeterminateSystems/magic-nix-cache-action@main" },
   { run: "nix develop --command pnpm install --frozen-lockfile" },
 ];
 

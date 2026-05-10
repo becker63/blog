@@ -240,7 +240,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix develop --command pnpm install --frozen-lockfile
       - run: nix develop --command pnpm automation:check-workflows
       - run: nix develop --command pnpm automation:actionlint
@@ -275,7 +274,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix develop --command pnpm install --frozen-lockfile
       - name: Generate insight
         env:
@@ -298,6 +296,1022 @@ jobs:
           git add data/taste-profile.md content/insights
           git diff --cached --quiet || git commit -m "Generate repo insight artifacts"
           git push'
+</file>
+
+<file path=".mermaid-cache/Z3JhcGggVEQK.mmd">
+graph TD
+    T["TABLE: firewalld_policy_drop"]
+
+    CI["filter_input<br/>hook=input<br/>prio=0 + OFFSET - 1"]
+    CF["filter_forward<br/>hook=forward<br/>prio=0 + OFFSET - 1"]
+    CO["filter_output<br/>hook=output<br/>prio=0 + OFFSET - 1"]
+
+    T --> CI
+    T --> CF
+    T --> CO
+</file>
+
+<file path=".mermaid-cache/Z3JhcGggVEQK.svg">
+<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 791.047px; background-color: transparent;" viewBox="0 0 791.046875 246" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Inter,system-ui,sans-serif;font-size:16px;fill:#ccc;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#a44141;}#my-svg .error-text{fill:#ddd;stroke:#ddd;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#94a3b8;stroke:#94a3b8;}#my-svg .marker.cross{stroke:#94a3b8;}#my-svg svg{font-family:Inter,system-ui,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:Inter,system-ui,sans-serif;color:#ccc;}#my-svg .cluster-label text{fill:#ffffff;}#my-svg .cluster-label span{color:#ffffff;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#ccc;color:#ccc;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#0b0f19;stroke:#3b82f6;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#94a3b8!important;stroke-width:0;stroke:#94a3b8;}#my-svg .arrowheadPath{fill:lightgrey;}#my-svg .edgePath .path{stroke:#94a3b8;stroke-width:2.0px;}#my-svg .flowchart-link{stroke:#94a3b8;fill:none;}#my-svg .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#my-svg .edgeLabel p{background-color:hsl(0, 0%, 34.4117647059%);}#my-svg .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#my-svg .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#my-svg .cluster rect{fill:#0b1220;stroke:#334155;stroke-width:1px;}#my-svg .cluster text{fill:#ffffff;}#my-svg .cluster span{color:#ffffff;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,system-ui,sans-serif;font-size:12px;background:#1e293b;border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:hsl(0, 0%, 34.4117647059%);padding:2px;}#my-svg .icon-shape rect,#my-svg .image-shape rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M265.523,77.253L241.354,82.877C217.185,88.502,168.846,99.751,144.677,108.875C120.508,118,120.508,125,120.508,128.5L120.508,132" id="L_T_CI_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CI_0" data-points="W3sieCI6MjY1LjUyMzQzNzUsInkiOjc3LjI1MjgyNjU0Mzk0NjM3fSx7IngiOjEyMC41MDc4MTI1LCJ5IjoxMTF9LHsieCI6MTIwLjUwNzgxMjUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M395.523,86L395.523,90.167C395.523,94.333,395.523,102.667,395.523,110.333C395.523,118,395.523,125,395.523,128.5L395.523,132" id="L_T_CF_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CF_0" data-points="W3sieCI6Mzk1LjUyMzQzNzUsInkiOjg2fSx7IngiOjM5NS41MjM0Mzc1LCJ5IjoxMTF9LHsieCI6Mzk1LjUyMzQzNzUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M525.523,77.253L549.693,82.877C573.862,88.502,622.201,99.751,646.37,108.875C670.539,118,670.539,125,670.539,128.5L670.539,132" id="L_T_CO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CO_0" data-points="W3sieCI6NTI1LjUyMzQzNzUsInkiOjc3LjI1MjgyNjU0Mzk0NjM3fSx7IngiOjY3MC41MzkwNjI1LCJ5IjoxMTF9LHsieCI6NjcwLjUzOTA2MjUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_T_CI_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_CF_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_CO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-T-0" transform="translate(395.5234375, 47)"><rect class="basic label-container" style="" x="-130" y="-39" width="260" height="78"/><g class="label" style="" transform="translate(-100, -24)"><rect/><foreignObject width="200" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>TABLE: firewalld_policy_drop</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CI-1" transform="translate(120.5078125, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_input<br />hook=input<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CF-2" transform="translate(395.5234375, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_forward<br />hook=forward<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CO-3" transform="translate(670.5390625, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_output<br />hook=output<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g></g></g></g></svg>
+</file>
+
+<file path="app/Blogs/[slug]/loading.tsx">
+import { Loading } from "../../components/shared/Loading";
+
+export default function loading() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <Loading fontsize={100} />
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/blog/BlogNavbarWrapper.tsx">
+"use client";
+
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
+import { useScrollFadeAnimation } from "../../../hooks";
+
+interface BlogNavbarWrapperProps {
+    children: ReactNode;
+}
+
+/**
+ * Client-side wrapper that makes the navbar fade away on scroll
+ * for the blog slug pages.
+ */
+export const BlogNavbarWrapper = ({ children }: BlogNavbarWrapperProps) => {
+    const { opacity, y } = useScrollFadeAnimation();
+
+    return (
+        <motion.div
+            style={{
+                opacity,
+                y,
+            }}
+        >
+            {children}
+        </motion.div>
+    );
+};
+</file>
+
+<file path="app/components/home/BebopContainer.tsx">
+import { css } from "../../../styled-system/css";
+import { Bebop } from "./Bebop";
+
+/**
+ * Container component for the Bebop SVG on desktop layout.
+ * Centers the SVG and adds the "see ya space cowboy" tagline.
+ */
+export const BebopContainer = () => {
+    return (
+        <div
+            className={css({
+                lg: { w: "100%" },
+                alignItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignContent: "center",
+                justifyContent: "center",
+                h: "100%",
+                overflow: "hidden",
+            })}
+        >
+            <div className={css({
+                position: "relative",
+                w: "100%",
+                h: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                minHeight: 0,
+                alignItems: "center",
+                justifyContent: "center"
+            })}>
+                <Bebop />
+            </div>
+            <p className={css({ pr: "16", textAlign: "right" })}>
+                see ya space cowboy...
+            </p>
+        </div>
+    );
+};
+</file>
+
+<file path="app/components/home/ProfileIdentityPanel.tsx">
+import { css } from "../../../styled-system/css";
+import { PROFILE_PANEL_COPY } from "../../../lib/profileNavigation";
+import { ProfileWorkWithMe } from "./ProfileWorkWithMe";
+
+export const ProfileIdentityPanel = () => {
+  return (
+    <div
+      className={css({
+        display: "flex",
+        flexDirection: "column",
+        gap: "5",
+        h: "100%",
+        minH: 0,
+        overflowY: "auto",
+        px: { base: "5", lg: "6" },
+        py: { base: "5", lg: "6" },
+        scrollbarWidth: "thin",
+        scrollbarColor: "#444 transparent",
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "#333",
+          borderRadius: "9999px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          background: "#555",
+        },
+      })}
+    >
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          gap: "4",
+          alignItems: "flex-start",
+        })}
+      >
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "column",
+            gap: "3",
+          })}
+        >
+          <div
+            className={css({
+              display: "flex",
+              flexDirection: "column",
+              gap: "1",
+            })}
+          >
+            <h2
+              className={css({
+                fontSize: { base: "2xl", lg: "2xl" },
+                lineHeight: "1.1",
+                fontWeight: "bold",
+                color: "white",
+              })}
+            >
+              {PROFILE_PANEL_COPY.name}
+            </h2>
+          </div>
+
+          <p
+            className={css({
+              color: "gray.100",
+              fontSize: { base: "md", lg: "lg" },
+              lineHeight: "1.6",
+              maxW: "62ch",
+            })}
+          >
+            {PROFILE_PANEL_COPY.identity}
+          </p>
+        </div>
+      </div>
+
+      <p
+        className={css({
+          color: "gray.300",
+          fontSize: "sm",
+          lineHeight: "1.8",
+          maxW: "64ch",
+        })}
+      >
+        {PROFILE_PANEL_COPY.summary}
+      </p>
+
+      <ProfileWorkWithMe />
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/home/ProfileWorkWithMe.tsx">
+import { css } from "../../../styled-system/css";
+import { PROFILE_WORK_WITH_ME_COPY } from "../../../lib/profileNavigation";
+
+export const ProfileWorkWithMe = () => {
+  return (
+    <section
+      aria-labelledby="profile-work-with-me-title"
+      className={css({
+        display: "flex",
+        flexDirection: "column",
+        gap: "3",
+        pt: "4",
+        borderTopWidth: "1px",
+        borderTopStyle: "solid",
+        borderTopColor: "white/10",
+      })}
+    >
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          gap: "2",
+        })}
+      >
+        <h3
+          id="profile-work-with-me-title"
+          className={css({
+            fontSize: "sm",
+            fontWeight: "semibold",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "white/80",
+          })}
+        >
+          {PROFILE_WORK_WITH_ME_COPY.title}
+        </h3>
+
+        <p
+          className={css({
+            color: "gray.200",
+            fontSize: "sm",
+            lineHeight: "1.7",
+          })}
+        >
+          {PROFILE_WORK_WITH_ME_COPY.intro}
+        </p>
+
+        <p
+          className={css({
+            color: "gray.400",
+            fontSize: "xs",
+            lineHeight: "1.6",
+          })}
+        >
+          {PROFILE_WORK_WITH_ME_COPY.pricing}
+        </p>
+      </div>
+
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          borderTopWidth: "1px",
+          borderTopStyle: "solid",
+          borderTopColor: "white/10",
+        })}
+      >
+        {PROFILE_WORK_WITH_ME_COPY.offerings.map((offering, index) => (
+          <div
+            key={offering.title}
+            className={css({
+              display: "grid",
+              gridTemplateColumns: "auto minmax(0, 1fr)",
+              columnGap: "3",
+              alignItems: "start",
+              py: "3",
+              borderBottomWidth: "1px",
+              borderBottomStyle: "solid",
+              borderBottomColor: "white/10",
+            })}
+          >
+            <span
+              aria-hidden="true"
+              className={css({
+                fontFamily: "mono",
+                fontSize: "xs",
+                letterSpacing: "0.12em",
+                color: "white/45",
+                pt: "0.5",
+              })}
+            >
+              {String(index + 1).padStart(2, "0")}
+            </span>
+
+            <article
+              className={css({
+                display: "flex",
+                flexDirection: "column",
+                gap: "1",
+                minW: 0,
+              })}
+            >
+              <h4
+                className={css({
+                  color: "white",
+                  fontSize: "sm",
+                  fontWeight: "medium",
+                  lineHeight: "1.4",
+                })}
+              >
+                {offering.title}
+              </h4>
+
+              <p
+                className={css({
+                  color: "gray.400",
+                  fontSize: "xs",
+                  lineHeight: "1.6",
+                })}
+              >
+                {offering.description}
+              </p>
+            </article>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+</file>
+
+<file path="app/components/home/Socials.tsx">
+import { css } from "../../../styled-system/css";
+import { Route } from "../shared/Route";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faGithub,
+    faInstagram,
+    faLinkedin,
+} from "@fortawesome/free-brands-svg-icons";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+
+/**
+ * Social media links component with dividers.
+ * Displays GitHub, LinkedIn, Email, and Instagram icons.
+ */
+export const Socials = () => (
+    <div
+        className={css({
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            height: "80%",
+        })}
+    >
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://github.com/becker63"} size={30}>
+                <FontAwesomeIcon
+                    icon={faGithub}
+                    size="2xl"
+                    className={css({ _hover: { color: "#575757" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://www.linkedin.com/in/taylor-johnson-805061210/"} size={30}>
+                <FontAwesomeIcon
+                    icon={faLinkedin}
+                    size="2xl"
+                    className={css({ _hover: { color: "#ff63a4" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"mailto:johnsontaylor6320@gmail.com"} size={30}>
+                <FontAwesomeIcon
+                    icon={faEnvelope}
+                    size="2xl"
+                    className={css({ _hover: { color: "#06c1ff" } })}
+                />
+            </Route>
+        </div>
+        <div
+            className={css({
+                w: "1px",
+                bg: "white",
+                float: "left",
+                h: "80%",
+                alignSelf: "center",
+            })}
+        />
+        <div
+            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
+        >
+            <Route href={"https://www.instagram.com/taylorjohnson63200"} size={30}>
+                <FontAwesomeIcon
+                    icon={faInstagram}
+                    size="2xl"
+                    className={css({ _hover: { color: "#7301ff" } })}
+                />
+            </Route>
+        </div>
+    </div>
+);
+</file>
+
+<file path="app/components/search/index.ts">
+/**
+ * Search-related components
+ */
+
+export { DescriptionTags } from "./Badges";
+export type { tags } from "./Badges";
+
+export { SearchWrapper } from "./SearchWrapper";
+</file>
+
+<file path="app/components/search/ProfileCategoryCard.tsx">
+import { css } from "../../../styled-system/css";
+import { SearchTreeParent } from "../../../lib/profileNavigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faChevronRight,
+  faDiagramProject,
+  faShield,
+} from "@fortawesome/free-solid-svg-icons";
+
+const glyphIconMap = {
+  shield: faShield,
+  nodes: faDiagramProject,
+} as const;
+
+export const ProfileCategoryCard = ({
+  category,
+  isExpanded,
+  onToggle,
+}: {
+  category: SearchTreeParent;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) => {
+  const icon = category.glyph ? glyphIconMap[category.glyph] : null;
+  const collapseIcon = isExpanded ? faChevronDown : faChevronRight;
+
+  return (
+    <div
+      data-testid="search-tree-parent-card"
+      className={css({
+        flex: 1,
+        minW: 0,
+        px: "5",
+        py: "4",
+        borderRadius: "10px",
+        boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
+        bg: "rgba(0, 0, 0, 0.7)",
+        backdropFilter: "blur(10px)",
+      })}
+    >
+      <div
+        className={css({
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "3",
+        })}
+      >
+        <div
+          className={css({
+            minW: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.5",
+            flex: 1,
+          })}
+        >
+          <div
+            className={css({
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "3",
+              minW: 0,
+            })}
+          >
+            {icon ? (
+              <span
+                className={css({
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mt: "0.5",
+                  color: "gray.300",
+                  fontSize: "sm",
+                  flexShrink: 0,
+                })}
+              >
+                <FontAwesomeIcon icon={icon} />
+              </span>
+            ) : null}
+
+            <h2
+              className={css({
+                color: "white",
+                fontSize: "lg",
+                lineHeight: "1.2",
+                fontWeight: "bold",
+              })}
+            >
+              {category.title}
+            </h2>
+          </div>
+
+          <p
+            className={css({
+              color: "gray.400",
+              fontSize: "sm",
+              lineHeight: "relaxed",
+              maxW: "68ch",
+            })}
+          >
+            {category.description}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          aria-expanded={isExpanded}
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${category.title}`}
+          onClick={onToggle}
+          className={css({
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            w: "8",
+            h: "8",
+            borderRadius: "999px",
+            color: "gray.300",
+            _hover: {
+              bg: "white/8",
+              color: "white",
+            },
+          })}
+        >
+          <FontAwesomeIcon icon={collapseIcon} />
+        </button>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/search/ProfileSearchTree.tsx">
+"use client";
+
+import { useState } from "react";
+import { css } from "../../../styled-system/css";
+import {
+  ProfileCategoryId,
+  SearchTreeChild,
+  SearchTreeParent,
+} from "../../../lib/profileNavigation";
+import { BlogCard } from "./BlogCard";
+import { ProfileCategoryCard } from "./ProfileCategoryCard";
+import {
+  TREE_CHILD_BRANCH_GAP,
+  TREE_CHILD_CONTENT_MAX_WIDTH,
+  TREE_CHILD_ROW_MAX_WIDTH,
+  TREE_CHILD_ROW_OFFSET,
+  TREE_PARENT_ROW_OFFSET,
+  TREE_PARENT_CONTENT_MAX_WIDTH,
+  TREE_PARENT_ROW_MAX_WIDTH,
+  TreeBranch,
+  TreeIndent,
+} from "./TreeLines";
+
+const SearchChildNode = ({
+  child,
+  rootContinues,
+  isFirst,
+  isLast,
+}: {
+  child: SearchTreeChild;
+  rootContinues: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+}) => {
+  return (
+    <div
+      data-testid="search-tree-child-row"
+      className={css({
+        display: "flex",
+        justifyContent: "center",
+        w: "full",
+      })}
+    >
+      <div
+        className={css({
+          w: "full",
+          maxW: TREE_CHILD_ROW_MAX_WIDTH,
+        })}
+      >
+        <div
+          data-testid="search-tree-child-content"
+          className={css({
+            display: "flex",
+            flexDirection: "row",
+          })}
+          style={{
+            width: `calc(100% - ${TREE_PARENT_ROW_OFFSET})`,
+            maxWidth: TREE_CHILD_CONTENT_MAX_WIDTH,
+            marginLeft: TREE_PARENT_ROW_OFFSET,
+          }}
+        >
+          <TreeIndent continues={rootContinues} />
+          <div
+            aria-hidden="true"
+            className={css({
+              flexShrink: 0,
+            })}
+            style={{ width: TREE_CHILD_BRANCH_GAP }}
+          />
+          <TreeBranch showTop={true} showBottom={!isLast} />
+          <BlogCard blog={child.blog} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ProfileSearchTree = ({
+  tree,
+  query,
+}: {
+  tree: SearchTreeParent[];
+  query: string;
+}) => {
+  const [expanded, setExpanded] = useState<Record<ProfileCategoryId, boolean>>({
+    "security-systems": true,
+    "platform-social-infrastructure": true,
+  });
+
+  const isSearching = query.trim().length > 0;
+
+  return (
+    <div
+      className={css({
+        display: "flex",
+        flexDirection: "column",
+        gap: "layout",
+        w: "full",
+      })}
+    >
+      {tree.map((parent, index) => {
+        // During active search, matching parents are forced open so match context
+        // stays visible instead of being hidden behind collapsed state.
+        const isExpanded = isSearching ? true : (expanded[parent.id] ?? true);
+        const showChildren = isExpanded && parent.children.length > 0;
+        const isLastParent = index === tree.length - 1;
+
+        return (
+          <div
+            key={parent.id}
+            data-testid="search-tree-parent-group"
+            className={css({
+              display: "flex",
+              flexDirection: "column",
+              gap: "layout",
+            })}
+          >
+            <div
+              id={parent.id}
+              data-testid="search-tree-parent-row"
+              className={css({
+                scrollMarginTop: "navHeight",
+                display: "flex",
+                justifyContent: "center",
+                w: "full",
+              })}
+            >
+              <div
+                data-testid="search-tree-parent-content"
+                className={css({
+                  display: "flex",
+                  flexDirection: "row",
+                })}
+                style={{
+                  width: `calc(100% - ${TREE_PARENT_ROW_OFFSET})`,
+                  maxWidth: TREE_PARENT_CONTENT_MAX_WIDTH,
+                  marginLeft: TREE_PARENT_ROW_OFFSET,
+                }}
+              >
+                <TreeBranch showTop={true} showBottom={!isLastParent} />
+                <ProfileCategoryCard
+                  category={parent}
+                  isExpanded={isExpanded}
+                  onToggle={() =>
+                    setExpanded((current) => ({
+                      ...current,
+                      [parent.id]: !(current[parent.id] ?? true),
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            {showChildren ? (
+              <div
+                className={css({
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "layout",
+                })}
+              >
+                {parent.children.map((child, index) => (
+                  <SearchChildNode
+                    key={child.id}
+                    child={child}
+                    rootContinues={!isLastParent}
+                    isFirst={index === 0}
+                    isLast={index === parent.children.length - 1}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+</file>
+
+<file path="app/components/search/TreeNode.tsx">
+"use client";
+
+import React from "react";
+import { useMachine } from "@xstate/react";
+import { treeNodeMachine } from "./treeNodeMachine";
+import { css } from "../../../styled-system/css";
+import { BlogPost } from "../../../lib/blogs";
+import { TreeLines, TREE_COLUMN_WIDTH } from "./TreeLines";
+import { BlogCard } from "./BlogCard";
+
+type TreeNodeProps = {
+  blog: BlogPost;
+  depth: number;
+  isFirst: boolean;
+  isLast: boolean;
+};
+
+export const TreeNode = ({ blog, depth, isFirst, isLast }: TreeNodeProps) => {
+  useMachine(treeNodeMachine);
+
+  return (
+    <>
+      <div
+        className={css({
+          display: "flex",
+          justifyContent: "center",
+          w: "full",
+        })}
+      >
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "row",
+            w: "full",
+            maxW: "800px",
+          })}
+        >
+          {/* Indentation */}
+          {Array.from({ length: depth }).map((_, i) => (
+            <div key={i} style={{ width: TREE_COLUMN_WIDTH }} />
+          ))}
+
+          <TreeLines showTop={!isFirst} showBottom={!isLast} />
+          <BlogCard blog={blog} />
+        </div>
+      </div>
+
+      {blog.children?.map((child, index) => (
+        <TreeNode
+          key={child.slug}
+          blog={child}
+          depth={depth + 1}
+          isFirst={index === 0}
+          isLast={index === blog.children!.length - 1}
+        />
+      ))}
+    </>
+  );
+};
+</file>
+
+<file path="app/components/search/treeNodeMachine.ts">
+import { createMachine } from "xstate";
+
+export const treeNodeMachine = createMachine({
+  id: "treeNode",
+  initial: "visible",
+  states: {
+    visible: {}, // later: expanded/collapsed/etc
+  },
+});
+</file>
+
+<file path="app/components/shared/AnimatedCard.tsx">
+"use client";
+
+import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion";
+import React from "react";
+import { cx } from "../../../styled-system/css";
+
+type AnimatedCardProps = HTMLMotionProps<"div"> & {
+  delay?: number;
+  index?: number;
+  finalOpacity?: number;
+};
+
+export const AnimatedCard = React.forwardRef<HTMLDivElement, AnimatedCardProps>(
+  (
+    { delay, index, finalOpacity = 0.7, className, style, children, ...rest },
+    ref,
+  ) => {
+    const prefersReducedMotion = useReducedMotion();
+    const computedDelay = index !== undefined ? index * 0.06 : delay ?? 0;
+
+    return (
+      <motion.div
+        ref={ref}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+        animate={prefersReducedMotion ? {} : { opacity: finalOpacity, y: 0 }}
+        transition={{
+          duration: 0.4,
+          delay: computedDelay,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className={cx(className)}
+        style={{
+          ...style,
+          willChange: "transform, opacity",
+        }}
+        {...rest}
+      >
+        {children}
+      </motion.div>
+    );
+  },
+);
+
+AnimatedCard.displayName = "AnimatedCard";
+</file>
+
+<file path="app/components/shared/GlassCard.tsx">
+import { ReactNode } from "react";
+import { css, cx } from "../../../styled-system/css";
+import { SystemStyleObject } from "../../../styled-system/types";
+
+export interface GlassCardProps {
+    children: ReactNode;
+    /** Additional Panda CSS styles to merge */
+    styles?: SystemStyleObject;
+    /** CSS class name */
+    className?: string;
+}
+
+/**
+ * Reusable glass-effect card component with consistent styling.
+ * Provides the semi-transparent black background with border radius and shadow
+ * used throughout the homepage.
+ */
+export const GlassCard = ({ children, styles, className }: GlassCardProps) => {
+    return (
+        <div
+            className={cx(
+                css({
+                    bg: "#000000",
+                    opacity: 0.7,
+                    borderRadius: "10px",
+                    boxShadow: "#00000F 0 0 10px",
+                    ...styles,
+                }),
+                className
+            )}
+        >
+            {children}
+        </div>
+    );
+};
+
+/**
+ * Common glass card style object for use with css() when GlassCard component isn't suitable.
+ */
+export const glassCardStyles = {
+    bg: "#000000",
+    opacity: 0.7,
+    borderRadius: "10px",
+    boxShadow: "#00000F 0 0 10px",
+} as const;
+</file>
+
+<file path="app/components/shared/index.ts">
+/**
+ * Shared components used across the application
+ */
+
+export { GlassCard, glassCardStyles } from "./GlassCard";
+export type { GlassCardProps } from "./GlassCard";
+
+export { Route } from "./Route";
+export type { RouteProps } from "./Route";
+
+export { Loading } from "./Loading";
+export type { LoadingProps } from "./Loading";
+
+export { Navbar } from "./Navbar";
+export type { NavbarProps } from "./Navbar";
+</file>
+
+<file path="app/components/shared/Loading.tsx">
+import "./shared.css";
+
+export interface LoadingProps {
+    fontsize: number;
+}
+
+/**
+ * Simple loading indicator component.
+ */
+export function Loading({ fontsize }: LoadingProps) {
+    return (
+        <div className="loading text-white" style={{ fontSize: fontsize.toString() + "px" }}>
+            <h1>...</h1>
+        </div>
+    );
+}
+</file>
+
+<file path="app/components/shared/shared.css">
+/* Animation */
+
+.loading {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  animation: dots 300ms steps(4) infinite;
+}
+
+
+@keyframes dots {
+  to {
+    clip-path: inset(0 -100% 0 0);
+  }
+}
+</file>
+
+<file path="app/Search/layout.tsx">
+import { Navbar } from "../components/shared/Navbar";
+
+export const metadata = {
+  title: 'Homepage',
+  description: 'Generated by create next app',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <>
+      <Navbar />
+      <div>{children}</div>
+    </>
+  )
+}
+</file>
+
+<file path="app/Search/loading.tsx">
+import { Loading } from "../components/shared/Loading";
+
+export default function loading() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <Loading fontsize={100} />
+    </div>
+  );
+}
 </file>
 
 <file path="automation/github-secrets/README.md">
@@ -2403,7 +3417,6 @@ export type WorkflowFile = {
 const setupSteps = [
   { uses: "actions/checkout@v4" },
   { uses: "DeterminateSystems/nix-installer-action@main" },
-  { uses: "DeterminateSystems/magic-nix-cache-action@main" },
   { run: "nix develop --command pnpm install --frozen-lockfile" },
 ];
 
@@ -2825,1508 +3838,6 @@ main().catch((error) => {
   "schemaVersion": 1,
   "generatedAt": "2026-05-10T03:46:54.602Z",
   "insights": []
-}
-</file>
-
-<file path="content/posts/zed.mdx">
----
-title: Running the Latest Zed on a Platform That Hates Me
-date: '9 May 2026'
-description: Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
-tags: tech, nix, linux
----
-
-I run NixOS on an M2 MacBook Air through Asahi Linux.
-
-This is already a strange thing to do.
-
-Then I decided I wanted the latest Zed.
-
-Not the latest Zed in `nixpkgs`. Not the latest Zed that had politely made its way through the packaging pipeline. I wanted the build close enough to upstream that I could try the new agent features while they still felt new.
-
-This is where the computer started negotiating with me.
-
-The machine is Apple Silicon. The graphics stack is Asahi. The display stack is Wayland. The package manager is Nix. The editor is moving quickly. Each layer is reasonable in isolation. Together, they form a small distributed system whose primary observable behavior is telling me that a shared library does not exist.
-
-At first, I tried the obvious escape hatch: wrap Zed's upstream Linux binary.
-
-That worked, briefly.
-
-`zed --version` reported the preview build I wanted:
-
-```text
-Zed preview 1.2.2
-```
-
-Then launching the actual editor started walking through the ancient Linux ritual:
-
-```text
-libXau.so.6: cannot open shared object file
-libmount.so.1: cannot open shared object file
-libselinux.so.1: cannot open shared object file
-libffi.so.7: cannot open shared object file
-```
-
-This is the moment where the problem changed shape.
-
-I did not really want "a command that runs Zed."
-
-I wanted my system to know what `zed` means.
-
-## Keep the interface boring
-
-The nice part is that my Home Manager config does not need to care about any of this.
-
-It just installs `zed`.
-
-```nix
-home.packages = with pkgs; [
-  zed
-];
-```
-
-That is the interface I want. It should be boring.
-
-My shell muscle memory should keep working. My launcher should keep working. The interesting part should happen underneath that name, in the overlay.
-
-That is where Nix feels right to me.
-
-The platform-specific nonsense gets pushed to the edge. The user-facing interface stays stable. The implementation can become as cursed as it needs to be.
-
-In the first version, that meant an overlay that unpacked the upstream preview tarball, exposed a raw Zed package, and then wrapped it in an FHS environment:
-
-```nix
-{ zed-preview-bin }:
-
-final: prev:
-
-let
-  zedPreviewRaw = prev.stdenvNoCC.mkDerivation {
-    pname = "zed-preview-bin";
-    version = "1.2.2";
-
-    src = zed-preview-bin;
-
-    nativeBuildInputs = [ prev.makeWrapper ];
-
-
-    dontUnpack = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/opt $out/bin
-
-      if [ -d "$src/zed.app" ]; then
-        cp -R "$src/zed.app" "$out/opt/zed.app"
-      else
-        cp -R "$src" "$out/opt/zed.app"
-      fi
-
-      chmod -R u+w "$out/opt/zed.app"
-
-      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zed_raw"
-      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zeditor"
-
-      runHook postInstall
-    '';
-  };
-in
-{
-  zed_raw = zedPreviewRaw;
-
-  zed = prev.buildFHSEnv {
-    name = "zed";
-
-    targetPkgs = pkgs: with pkgs; [
-      zedPreviewRaw
-
-      glibc
-      gcc.cc
-      openssl
-      zlib
-      glib
-      gtk3
-      pango
-      cairo
-      gdk-pixbuf
-      fontconfig
-      freetype
-
-      libxkbcommon
-      wayland
-      libGL
-      vulkan-loader
-      alsa-lib
-    ];
-
-    runScript = "zed_raw";
-  };
-}
-```
-
-This is not beautiful code.
-
-But it made an important boundary explicit:
-
-```text
-zed     → the thing I use
-zed_raw → the upstream artifact underneath it
-```
-
-That split mattered later.
-
-Once the binary started asking for `libXau`, `libmount`, `libselinux`, and `libffi`, I did not have to go searching through my whole system for where Zed lived. The mess had a home.
-
-## The diagnostic became a package too
-
-Eventually, I got annoyed enough to stop discovering one missing library per launch.
-
-The binary already knows what it needs. Linux binaries carry this information around. The right move was not to keep guessing. The right move was to make the dependency report part of the flake.
-
-So the config grew a small diagnostic app:
-
-```nix
-packages.${system} = {
-  inherit (pkgs) zed_raw zed-deps-report;
-};
-
-apps.${system}.zed-deps-report = {
-  type = "app";
-  program = "${pkgs.zed-deps-report}/bin/zed-deps-report";
-};
-```
-
-And the script itself is just a little flashlight pointed at the editor binary:
-
-```nix
-zed-deps-report = prev.writeShellApplication {
-  name = "zed-deps-report";
-
-  runtimeInputs = with prev; [
-    patchelf
-    pax-utils
-    glibc
-  ];
-
-  text = ''
-    set -euo pipefail
-
-    ZED_EDITOR="${zedFromSource}/libexec/zed-editor"
-
-    if [[ ! -e "$ZED_EDITOR" ]]; then
-      echo "error: editor binary not found at: $ZED_EDITOR" >&2
-      echo "hint: build zed first: nix build .#zed_raw" >&2
-      exit 1
-    fi
-
-    echo "== Zed editor: $ZED_EDITOR"
-    echo
-
-    echo "== patchelf --print-needed"
-    patchelf --print-needed "$ZED_EDITOR" 2>/dev/null || {
-      echo "(patchelf failed — binary may be static or unsupported)" >&2
-    }
-
-    echo
-    echo "== ldd (direct dynamic deps)"
-    ldd "$ZED_EDITOR" 2>/dev/null || echo "(ldd unavailable or not a dynamic ELF)" >&2
-
-    echo
-    if command -v lddtree >/dev/null 2>&1; then
-      echo "== lddtree"
-      lddtree "$ZED_EDITOR"
-    else
-      echo "== lddtree: not available in PATH"
-    fi
-
-    echo
-    echo "== missing libraries (from ldd 'not found' lines)"
-    if ldd_out="$(ldd "$ZED_EDITOR" 2>/dev/null)"; then
-      missing="$(echo "$ldd_out" | grep 'not found' || true)"
-      if [[ -n "$missing" ]]; then
-        echo "$missing" >&2
-        exit 1
-      else
-        echo "none reported by ldd"
-      fi
-    else
-      echo "(skipped)" >&2
-    fi
-  '';
-};
-```
-
-Now the question is no longer:
-
-> What random `.so` will explode when I launch the editor?
-
-It is:
-
-```bash
-nix run .#zed-deps-report
-```
-
-That feels like the right direction.
-
-The failure becomes an artifact. The artifact becomes a command. The command becomes part of the system.
-
-## This is not just about Zed
-
-The funny part is that this tiny editor problem has the same shape as larger systems I keep caring about.
-
-There is a stable interface:
-
-```text
-zed
-```
-
-There is a fast-moving implementation underneath it:
-
-```text
-upstream Zed
-```
-
-There is a hostile runtime surface:
-
-```text
-Apple Silicon → Asahi → Wayland → NixOS → dynamic Linux libraries
-```
-
-And there is a boundary object that lets me keep the whole thing legible:
-
-```text
-flake input
-overlay
-package output
-diagnostic app
-```
-
-That is the part I like.
-
-Nix does not make this effortless. In some ways, Nix makes it more annoying, because every hidden assumption becomes explicit.
-
-But that is also why I like it.
-
-The missing libraries were always real. The runtime assumptions were always real. The difference is that now the assumptions have somewhere to live.
-
-They live in the overlay.
-
-They live in the flake input.
-
-They live in a command I can run again.
-
-## The rest of the machine is like this too
-
-This is not the only little wrapper in the config.
-
-For example, screenshots are not a desktop feature I hope exists. They are a small script made out of `grim`, `slurp`, `wl-copy`, and `tofi`:
-
-```nix
-(writeShellScriptBin "screenshot" ''
-  #!/usr/bin/env bash
-
-  mkdir -p "$HOME/Pictures"
-  FILE="$HOME/Pictures/$(date +'%Y-%m-%d_%H-%M-%S').png"
-
-  CHOICE=$(printf "Fullscreen\nRegion\nRegion → Clipboard\n" | tofi)
-
-  case "$CHOICE" in
-    "Fullscreen")
-      grim "$FILE"
-      ;;
-    "Region")
-      grim -g "$(slurp)" "$FILE"
-      ;;
-    "Region → Clipboard")
-      grim -g "$(slurp)" - | wl-copy
-      ;;
-  esac
-'')
-```
-
-Moonlight gets the same treatment. On this machine, it is not just "install Moonlight." It is "run Moonlight with the Asahi and Wayland assumptions made explicit":
-
-```nix
-(writeShellScriptBin "moonlight-asahi" ''
-  # Wayland + Asahi GPU environment
-  export QT_QPA_PLATFORM=wayland-egl
-  export QT_QPA_PLATFORMTHEME=qt5ct
-  export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-  export MOZ_ENABLE_WAYLAND=1
-  export NIXOS_OZONE_WL=1
-  export MESA_LOADER_DRIVER_OVERRIDE=asahi
-  export LIBVA_DRIVER_NAME=asahi
-  export VDPAU_DRIVER=va_gl
-  export XDG_SESSION_TYPE=wayland
-  export GDK_BACKEND=wayland
-
-  # Fix Moonlight audio on Asahi / PipeWire
-  export SDL_AUDIODRIVER=pulseaudio
-
-  DEFAULT_FLAGS=(
-    --no-audio-on-host
-    --audio-config stereo
-  )
-
-  if [ $# -eq 0 ]; then
-    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}"
-  else
-    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}" "$@"
-  fi
-'')
-```
-
-This is the real shape of the system.
-
-Not one clean abstraction.
-
-A bunch of small, explicit translations.
-
-## Why I like it
-
-The machine is hostile in a very particular way.
-
-It is not hostile because it is broken. It is hostile because every layer has a slightly different idea of what "normal Linux desktop application" means.
-
-Zed expects one shape.
-
-Wayland gives another.
-
-Asahi gives another.
-
-Nix gives another.
-
-Apple Silicon gives another.
-
-The job of the config is to keep those translations visible enough that I can keep moving.
-
-That is why this feels good to me.
-
-Not because it is elegant.
-
-Because it is inspectable.
-
-I can point at the thing that installs Zed. I can point at the thing that wraps Moonlight. I can point at the thing that takes screenshots. I can point at the command that explains which libraries the editor needs.
-
-The platform still hates me.
-
-But now it has to do it declaratively.
-</file>
-
-<file path="data/repo-catalog.json">
-{
-  "schemaVersion": 1,
-  "repos": [
-    {
-      "fullName": "owner/repo",
-      "defaultBranch": "main",
-      "enabled": false,
-      "visibility": "private",
-      "topics": [],
-      "writingThemes": [],
-      "safeToQuote": false,
-      "inspect": {
-        "githubApi": true,
-        "checkout": false,
-        "maxFiles": 20,
-        "maxBytesPerFile": 4000,
-        "maxTotalBytes": 24000
-      }
-    }
-  ]
-}
-</file>
-
-<file path="data/taste-profile.md">
-# Taste Profile
-
-## Manual Notes
-
-<!-- repo-insight:manual-start -->
-Add hand-written taste notes here. This section is preserved by regeneration.
-<!-- repo-insight:manual-end -->
-
-## Recurring Themes
-
-- tech (5)
-- tech, nix, linux (1)
-
-## Strong Claims
-
-- Prefer claims grounded in concrete system behavior, reproducible artifacts, and implementation tradeoffs.
-- Favor one clear thesis over broad activity summaries.
-
-## Preferred Evidence
-
-- Commit SHAs, file paths, code excerpts, docs, tests, release artifacts, and before/after behavior.
-
-## Voice Notes
-
-- Direct, technical, reflective, and skeptical of vague platform language.
-- Draftable seeds are useful; polished posts are not expected from automation.
-
-## Avoid
-
-- Generic push summaries.
-- Publishing claims without file-level evidence.
-- Treating diffs as the full context boundary.
-
-## Recently Covered
-
-- Running the Latest Zed on a Platform That Hates Me (9 May 2026): Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
-- Designing for two (31 December 2025): Designing control planes that separate expressive power from authority, trading generality for legibility in infrastructure coordination.
-- Tight Loops (25 January 2026): How frontend instincts about tooling and feedback loops shaped a structured fuzzing workflow.
-- AI Agents Need Release Reports, Not Just Traces (24 April 2026): Turning agent changes into release decisions, not just traces and scores.
-- The Firewall Doesn’t Live in the Kernel (20 February 2026): Tracing the path from human intent to packet-time execution, and examining how semantic authority shifts across libnftables, libnftnl, and firewalld.
-- AI Evals Need Bundles, Not Just Platforms (2 May 2026): Making agent evaluation inspectable, reproducible, and portable with file-native release artifacts.
-</file>
-
-<file path="tests/search-input-runtime.spec.ts">
-import { expect, test } from "@playwright/test";
-
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
-
-test("typing into the Search input does not trigger runtime errors", async ({
-  page,
-}) => {
-  test.setTimeout(30000);
-
-  const pageErrors: string[] = [];
-
-  page.on("pageerror", (error) => {
-    pageErrors.push(error.message);
-  });
-
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto(`${BASE_URL}/Search`);
-  await page.waitForTimeout(1500);
-
-  const input = page.getByTestId("search-root-input");
-  await expect(input).toBeVisible();
-
-  await input.fill("firewall");
-  await expect(input).toHaveValue("firewall");
-  await page.waitForTimeout(300);
-
-  await expect(page.getByTestId("search-tree-child-card").first()).toBeVisible();
-  expect(pageErrors).toEqual([]);
-});
-</file>
-
-<file path=".mermaid-cache/Z3JhcGggVEQK.mmd">
-graph TD
-    T["TABLE: firewalld_policy_drop"]
-
-    CI["filter_input<br/>hook=input<br/>prio=0 + OFFSET - 1"]
-    CF["filter_forward<br/>hook=forward<br/>prio=0 + OFFSET - 1"]
-    CO["filter_output<br/>hook=output<br/>prio=0 + OFFSET - 1"]
-
-    T --> CI
-    T --> CF
-    T --> CO
-</file>
-
-<file path=".mermaid-cache/Z3JhcGggVEQK.svg">
-<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 791.047px; background-color: transparent;" viewBox="0 0 791.046875 246" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Inter,system-ui,sans-serif;font-size:16px;fill:#ccc;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#a44141;}#my-svg .error-text{fill:#ddd;stroke:#ddd;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#94a3b8;stroke:#94a3b8;}#my-svg .marker.cross{stroke:#94a3b8;}#my-svg svg{font-family:Inter,system-ui,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:Inter,system-ui,sans-serif;color:#ccc;}#my-svg .cluster-label text{fill:#ffffff;}#my-svg .cluster-label span{color:#ffffff;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#ccc;color:#ccc;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#0b0f19;stroke:#3b82f6;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#94a3b8!important;stroke-width:0;stroke:#94a3b8;}#my-svg .arrowheadPath{fill:lightgrey;}#my-svg .edgePath .path{stroke:#94a3b8;stroke-width:2.0px;}#my-svg .flowchart-link{stroke:#94a3b8;fill:none;}#my-svg .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#my-svg .edgeLabel p{background-color:hsl(0, 0%, 34.4117647059%);}#my-svg .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#my-svg .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#my-svg .cluster rect{fill:#0b1220;stroke:#334155;stroke-width:1px;}#my-svg .cluster text{fill:#ffffff;}#my-svg .cluster span{color:#ffffff;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,system-ui,sans-serif;font-size:12px;background:#1e293b;border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:hsl(0, 0%, 34.4117647059%);padding:2px;}#my-svg .icon-shape rect,#my-svg .image-shape rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M265.523,77.253L241.354,82.877C217.185,88.502,168.846,99.751,144.677,108.875C120.508,118,120.508,125,120.508,128.5L120.508,132" id="L_T_CI_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CI_0" data-points="W3sieCI6MjY1LjUyMzQzNzUsInkiOjc3LjI1MjgyNjU0Mzk0NjM3fSx7IngiOjEyMC41MDc4MTI1LCJ5IjoxMTF9LHsieCI6MTIwLjUwNzgxMjUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M395.523,86L395.523,90.167C395.523,94.333,395.523,102.667,395.523,110.333C395.523,118,395.523,125,395.523,128.5L395.523,132" id="L_T_CF_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CF_0" data-points="W3sieCI6Mzk1LjUyMzQzNzUsInkiOjg2fSx7IngiOjM5NS41MjM0Mzc1LCJ5IjoxMTF9LHsieCI6Mzk1LjUyMzQzNzUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M525.523,77.253L549.693,82.877C573.862,88.502,622.201,99.751,646.37,108.875C670.539,118,670.539,125,670.539,128.5L670.539,132" id="L_T_CO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_CO_0" data-points="W3sieCI6NTI1LjUyMzQzNzUsInkiOjc3LjI1MjgyNjU0Mzk0NjM3fSx7IngiOjY3MC41MzkwNjI1LCJ5IjoxMTF9LHsieCI6NjcwLjUzOTA2MjUsInkiOjEzNn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_T_CI_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_CF_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_CO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-T-0" transform="translate(395.5234375, 47)"><rect class="basic label-container" style="" x="-130" y="-39" width="260" height="78"/><g class="label" style="" transform="translate(-100, -24)"><rect/><foreignObject width="200" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>TABLE: firewalld_policy_drop</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CI-1" transform="translate(120.5078125, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_input<br />hook=input<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CF-2" transform="translate(395.5234375, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_forward<br />hook=forward<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-CO-3" transform="translate(670.5390625, 187)"><rect class="basic label-container" style="" x="-112.5078125" y="-51" width="225.015625" height="102"/><g class="label" style="" transform="translate(-82.5078125, -36)"><rect/><foreignObject width="165.015625" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>filter_output<br />hook=output<br />prio=0 + OFFSET - 1</p></span></div></foreignObject></g></g></g></g></g></svg>
-</file>
-
-<file path="app/Blogs/[slug]/loading.tsx">
-import { Loading } from "../../components/shared/Loading";
-
-export default function loading() {
-  return (
-    <div className="w-screen h-screen flex justify-center items-center">
-      <Loading fontsize={100} />
-    </div>
-  );
-}
-</file>
-
-<file path="app/components/blog/BlogNavbarWrapper.tsx">
-"use client";
-
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
-import { useScrollFadeAnimation } from "../../../hooks";
-
-interface BlogNavbarWrapperProps {
-    children: ReactNode;
-}
-
-/**
- * Client-side wrapper that makes the navbar fade away on scroll
- * for the blog slug pages.
- */
-export const BlogNavbarWrapper = ({ children }: BlogNavbarWrapperProps) => {
-    const { opacity, y } = useScrollFadeAnimation();
-
-    return (
-        <motion.div
-            style={{
-                opacity,
-                y,
-            }}
-        >
-            {children}
-        </motion.div>
-    );
-};
-</file>
-
-<file path="app/components/home/BebopContainer.tsx">
-import { css } from "../../../styled-system/css";
-import { Bebop } from "./Bebop";
-
-/**
- * Container component for the Bebop SVG on desktop layout.
- * Centers the SVG and adds the "see ya space cowboy" tagline.
- */
-export const BebopContainer = () => {
-    return (
-        <div
-            className={css({
-                lg: { w: "100%" },
-                alignItems: "center",
-                display: "flex",
-                flexDirection: "column",
-                alignContent: "center",
-                justifyContent: "center",
-                h: "100%",
-                overflow: "hidden",
-            })}
-        >
-            <div className={css({
-                position: "relative",
-                w: "100%",
-                h: "100%",
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-                minHeight: 0,
-                alignItems: "center",
-                justifyContent: "center"
-            })}>
-                <Bebop />
-            </div>
-            <p className={css({ pr: "16", textAlign: "right" })}>
-                see ya space cowboy...
-            </p>
-        </div>
-    );
-};
-</file>
-
-<file path="app/components/home/ProfileIdentityPanel.tsx">
-import { css } from "../../../styled-system/css";
-import { PROFILE_PANEL_COPY } from "../../../lib/profileNavigation";
-import { ProfileWorkWithMe } from "./ProfileWorkWithMe";
-
-export const ProfileIdentityPanel = () => {
-  return (
-    <div
-      className={css({
-        display: "flex",
-        flexDirection: "column",
-        gap: "5",
-        h: "100%",
-        minH: 0,
-        overflowY: "auto",
-        px: { base: "5", lg: "6" },
-        py: { base: "5", lg: "6" },
-        scrollbarWidth: "thin",
-        scrollbarColor: "#444 transparent",
-        "&::-webkit-scrollbar": {
-          width: "6px",
-        },
-        "&::-webkit-scrollbar-track": {
-          background: "transparent",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          background: "#333",
-          borderRadius: "9999px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          background: "#555",
-        },
-      })}
-    >
-      <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          gap: "4",
-          alignItems: "flex-start",
-        })}
-      >
-        <div
-          className={css({
-            display: "flex",
-            flexDirection: "column",
-            gap: "3",
-          })}
-        >
-          <div
-            className={css({
-              display: "flex",
-              flexDirection: "column",
-              gap: "1",
-            })}
-          >
-            <h2
-              className={css({
-                fontSize: { base: "2xl", lg: "2xl" },
-                lineHeight: "1.1",
-                fontWeight: "bold",
-                color: "white",
-              })}
-            >
-              {PROFILE_PANEL_COPY.name}
-            </h2>
-          </div>
-
-          <p
-            className={css({
-              color: "gray.100",
-              fontSize: { base: "md", lg: "lg" },
-              lineHeight: "1.6",
-              maxW: "62ch",
-            })}
-          >
-            {PROFILE_PANEL_COPY.identity}
-          </p>
-        </div>
-      </div>
-
-      <p
-        className={css({
-          color: "gray.300",
-          fontSize: "sm",
-          lineHeight: "1.8",
-          maxW: "64ch",
-        })}
-      >
-        {PROFILE_PANEL_COPY.summary}
-      </p>
-
-      <ProfileWorkWithMe />
-    </div>
-  );
-};
-</file>
-
-<file path="app/components/home/ProfileWorkWithMe.tsx">
-import { css } from "../../../styled-system/css";
-import { PROFILE_WORK_WITH_ME_COPY } from "../../../lib/profileNavigation";
-
-export const ProfileWorkWithMe = () => {
-  return (
-    <section
-      aria-labelledby="profile-work-with-me-title"
-      className={css({
-        display: "flex",
-        flexDirection: "column",
-        gap: "3",
-        pt: "4",
-        borderTopWidth: "1px",
-        borderTopStyle: "solid",
-        borderTopColor: "white/10",
-      })}
-    >
-      <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          gap: "2",
-        })}
-      >
-        <h3
-          id="profile-work-with-me-title"
-          className={css({
-            fontSize: "sm",
-            fontWeight: "semibold",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "white/80",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.title}
-        </h3>
-
-        <p
-          className={css({
-            color: "gray.200",
-            fontSize: "sm",
-            lineHeight: "1.7",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.intro}
-        </p>
-
-        <p
-          className={css({
-            color: "gray.400",
-            fontSize: "xs",
-            lineHeight: "1.6",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.pricing}
-        </p>
-      </div>
-
-      <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          borderTopWidth: "1px",
-          borderTopStyle: "solid",
-          borderTopColor: "white/10",
-        })}
-      >
-        {PROFILE_WORK_WITH_ME_COPY.offerings.map((offering, index) => (
-          <div
-            key={offering.title}
-            className={css({
-              display: "grid",
-              gridTemplateColumns: "auto minmax(0, 1fr)",
-              columnGap: "3",
-              alignItems: "start",
-              py: "3",
-              borderBottomWidth: "1px",
-              borderBottomStyle: "solid",
-              borderBottomColor: "white/10",
-            })}
-          >
-            <span
-              aria-hidden="true"
-              className={css({
-                fontFamily: "mono",
-                fontSize: "xs",
-                letterSpacing: "0.12em",
-                color: "white/45",
-                pt: "0.5",
-              })}
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
-
-            <article
-              className={css({
-                display: "flex",
-                flexDirection: "column",
-                gap: "1",
-                minW: 0,
-              })}
-            >
-              <h4
-                className={css({
-                  color: "white",
-                  fontSize: "sm",
-                  fontWeight: "medium",
-                  lineHeight: "1.4",
-                })}
-              >
-                {offering.title}
-              </h4>
-
-              <p
-                className={css({
-                  color: "gray.400",
-                  fontSize: "xs",
-                  lineHeight: "1.6",
-                })}
-              >
-                {offering.description}
-              </p>
-            </article>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
-</file>
-
-<file path="app/components/home/Socials.tsx">
-import { css } from "../../../styled-system/css";
-import { Route } from "../shared/Route";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faGithub,
-    faInstagram,
-    faLinkedin,
-} from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-
-/**
- * Social media links component with dividers.
- * Displays GitHub, LinkedIn, Email, and Instagram icons.
- */
-export const Socials = () => (
-    <div
-        className={css({
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            height: "80%",
-        })}
-    >
-        <div
-            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
-        >
-            <Route href={"https://github.com/becker63"} size={30}>
-                <FontAwesomeIcon
-                    icon={faGithub}
-                    size="2xl"
-                    className={css({ _hover: { color: "#575757" } })}
-                />
-            </Route>
-        </div>
-        <div
-            className={css({
-                w: "1px",
-                bg: "white",
-                float: "left",
-                h: "80%",
-                alignSelf: "center",
-            })}
-        />
-        <div
-            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
-        >
-            <Route href={"https://www.linkedin.com/in/taylor-johnson-805061210/"} size={30}>
-                <FontAwesomeIcon
-                    icon={faLinkedin}
-                    size="2xl"
-                    className={css({ _hover: { color: "#ff63a4" } })}
-                />
-            </Route>
-        </div>
-        <div
-            className={css({
-                w: "1px",
-                bg: "white",
-                float: "left",
-                h: "80%",
-                alignSelf: "center",
-            })}
-        />
-        <div
-            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
-        >
-            <Route href={"mailto:johnsontaylor6320@gmail.com"} size={30}>
-                <FontAwesomeIcon
-                    icon={faEnvelope}
-                    size="2xl"
-                    className={css({ _hover: { color: "#06c1ff" } })}
-                />
-            </Route>
-        </div>
-        <div
-            className={css({
-                w: "1px",
-                bg: "white",
-                float: "left",
-                h: "80%",
-                alignSelf: "center",
-            })}
-        />
-        <div
-            className={css({ display: "flex", flexDirection: "column", justifyContent: "center" })}
-        >
-            <Route href={"https://www.instagram.com/taylorjohnson63200"} size={30}>
-                <FontAwesomeIcon
-                    icon={faInstagram}
-                    size="2xl"
-                    className={css({ _hover: { color: "#7301ff" } })}
-                />
-            </Route>
-        </div>
-    </div>
-);
-</file>
-
-<file path="app/components/search/index.ts">
-/**
- * Search-related components
- */
-
-export { DescriptionTags } from "./Badges";
-export type { tags } from "./Badges";
-
-export { SearchWrapper } from "./SearchWrapper";
-</file>
-
-<file path="app/components/search/ProfileCategoryCard.tsx">
-import { css } from "../../../styled-system/css";
-import { SearchTreeParent } from "../../../lib/profileNavigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronDown,
-  faChevronRight,
-  faDiagramProject,
-  faShield,
-} from "@fortawesome/free-solid-svg-icons";
-
-const glyphIconMap = {
-  shield: faShield,
-  nodes: faDiagramProject,
-} as const;
-
-export const ProfileCategoryCard = ({
-  category,
-  isExpanded,
-  onToggle,
-}: {
-  category: SearchTreeParent;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) => {
-  const icon = category.glyph ? glyphIconMap[category.glyph] : null;
-  const collapseIcon = isExpanded ? faChevronDown : faChevronRight;
-
-  return (
-    <div
-      data-testid="search-tree-parent-card"
-      className={css({
-        flex: 1,
-        minW: 0,
-        px: "5",
-        py: "4",
-        borderRadius: "10px",
-        boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
-        bg: "rgba(0, 0, 0, 0.7)",
-        backdropFilter: "blur(10px)",
-      })}
-    >
-      <div
-        className={css({
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "3",
-        })}
-      >
-        <div
-          className={css({
-            minW: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.5",
-            flex: 1,
-          })}
-        >
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "3",
-              minW: 0,
-            })}
-          >
-            {icon ? (
-              <span
-                className={css({
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  mt: "0.5",
-                  color: "gray.300",
-                  fontSize: "sm",
-                  flexShrink: 0,
-                })}
-              >
-                <FontAwesomeIcon icon={icon} />
-              </span>
-            ) : null}
-
-            <h2
-              className={css({
-                color: "white",
-                fontSize: "lg",
-                lineHeight: "1.2",
-                fontWeight: "bold",
-              })}
-            >
-              {category.title}
-            </h2>
-          </div>
-
-          <p
-            className={css({
-              color: "gray.400",
-              fontSize: "sm",
-              lineHeight: "relaxed",
-              maxW: "68ch",
-            })}
-          >
-            {category.description}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          aria-expanded={isExpanded}
-          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${category.title}`}
-          onClick={onToggle}
-          className={css({
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            w: "8",
-            h: "8",
-            borderRadius: "999px",
-            color: "gray.300",
-            _hover: {
-              bg: "white/8",
-              color: "white",
-            },
-          })}
-        >
-          <FontAwesomeIcon icon={collapseIcon} />
-        </button>
-      </div>
-    </div>
-  );
-};
-</file>
-
-<file path="app/components/search/ProfileSearchTree.tsx">
-"use client";
-
-import { useState } from "react";
-import { css } from "../../../styled-system/css";
-import {
-  ProfileCategoryId,
-  SearchTreeChild,
-  SearchTreeParent,
-} from "../../../lib/profileNavigation";
-import { BlogCard } from "./BlogCard";
-import { ProfileCategoryCard } from "./ProfileCategoryCard";
-import {
-  TREE_CHILD_BRANCH_GAP,
-  TREE_CHILD_CONTENT_MAX_WIDTH,
-  TREE_CHILD_ROW_MAX_WIDTH,
-  TREE_CHILD_ROW_OFFSET,
-  TREE_PARENT_ROW_OFFSET,
-  TREE_PARENT_CONTENT_MAX_WIDTH,
-  TREE_PARENT_ROW_MAX_WIDTH,
-  TreeBranch,
-  TreeIndent,
-} from "./TreeLines";
-
-const SearchChildNode = ({
-  child,
-  rootContinues,
-  isFirst,
-  isLast,
-}: {
-  child: SearchTreeChild;
-  rootContinues: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-}) => {
-  return (
-    <div
-      data-testid="search-tree-child-row"
-      className={css({
-        display: "flex",
-        justifyContent: "center",
-        w: "full",
-      })}
-    >
-      <div
-        className={css({
-          w: "full",
-          maxW: TREE_CHILD_ROW_MAX_WIDTH,
-        })}
-      >
-        <div
-          data-testid="search-tree-child-content"
-          className={css({
-            display: "flex",
-            flexDirection: "row",
-          })}
-          style={{
-            width: `calc(100% - ${TREE_PARENT_ROW_OFFSET})`,
-            maxWidth: TREE_CHILD_CONTENT_MAX_WIDTH,
-            marginLeft: TREE_PARENT_ROW_OFFSET,
-          }}
-        >
-          <TreeIndent continues={rootContinues} />
-          <div
-            aria-hidden="true"
-            className={css({
-              flexShrink: 0,
-            })}
-            style={{ width: TREE_CHILD_BRANCH_GAP }}
-          />
-          <TreeBranch showTop={true} showBottom={!isLast} />
-          <BlogCard blog={child.blog} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const ProfileSearchTree = ({
-  tree,
-  query,
-}: {
-  tree: SearchTreeParent[];
-  query: string;
-}) => {
-  const [expanded, setExpanded] = useState<Record<ProfileCategoryId, boolean>>({
-    "security-systems": true,
-    "platform-social-infrastructure": true,
-  });
-
-  const isSearching = query.trim().length > 0;
-
-  return (
-    <div
-      className={css({
-        display: "flex",
-        flexDirection: "column",
-        gap: "layout",
-        w: "full",
-      })}
-    >
-      {tree.map((parent, index) => {
-        // During active search, matching parents are forced open so match context
-        // stays visible instead of being hidden behind collapsed state.
-        const isExpanded = isSearching ? true : (expanded[parent.id] ?? true);
-        const showChildren = isExpanded && parent.children.length > 0;
-        const isLastParent = index === tree.length - 1;
-
-        return (
-          <div
-            key={parent.id}
-            data-testid="search-tree-parent-group"
-            className={css({
-              display: "flex",
-              flexDirection: "column",
-              gap: "layout",
-            })}
-          >
-            <div
-              id={parent.id}
-              data-testid="search-tree-parent-row"
-              className={css({
-                scrollMarginTop: "navHeight",
-                display: "flex",
-                justifyContent: "center",
-                w: "full",
-              })}
-            >
-              <div
-                data-testid="search-tree-parent-content"
-                className={css({
-                  display: "flex",
-                  flexDirection: "row",
-                })}
-                style={{
-                  width: `calc(100% - ${TREE_PARENT_ROW_OFFSET})`,
-                  maxWidth: TREE_PARENT_CONTENT_MAX_WIDTH,
-                  marginLeft: TREE_PARENT_ROW_OFFSET,
-                }}
-              >
-                <TreeBranch showTop={true} showBottom={!isLastParent} />
-                <ProfileCategoryCard
-                  category={parent}
-                  isExpanded={isExpanded}
-                  onToggle={() =>
-                    setExpanded((current) => ({
-                      ...current,
-                      [parent.id]: !(current[parent.id] ?? true),
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            {showChildren ? (
-              <div
-                className={css({
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "layout",
-                })}
-              >
-                {parent.children.map((child, index) => (
-                  <SearchChildNode
-                    key={child.id}
-                    child={child}
-                    rootContinues={!isLastParent}
-                    isFirst={index === 0}
-                    isLast={index === parent.children.length - 1}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-</file>
-
-<file path="app/components/search/TreeNode.tsx">
-"use client";
-
-import React from "react";
-import { useMachine } from "@xstate/react";
-import { treeNodeMachine } from "./treeNodeMachine";
-import { css } from "../../../styled-system/css";
-import { BlogPost } from "../../../lib/blogs";
-import { TreeLines, TREE_COLUMN_WIDTH } from "./TreeLines";
-import { BlogCard } from "./BlogCard";
-
-type TreeNodeProps = {
-  blog: BlogPost;
-  depth: number;
-  isFirst: boolean;
-  isLast: boolean;
-};
-
-export const TreeNode = ({ blog, depth, isFirst, isLast }: TreeNodeProps) => {
-  useMachine(treeNodeMachine);
-
-  return (
-    <>
-      <div
-        className={css({
-          display: "flex",
-          justifyContent: "center",
-          w: "full",
-        })}
-      >
-        <div
-          className={css({
-            display: "flex",
-            flexDirection: "row",
-            w: "full",
-            maxW: "800px",
-          })}
-        >
-          {/* Indentation */}
-          {Array.from({ length: depth }).map((_, i) => (
-            <div key={i} style={{ width: TREE_COLUMN_WIDTH }} />
-          ))}
-
-          <TreeLines showTop={!isFirst} showBottom={!isLast} />
-          <BlogCard blog={blog} />
-        </div>
-      </div>
-
-      {blog.children?.map((child, index) => (
-        <TreeNode
-          key={child.slug}
-          blog={child}
-          depth={depth + 1}
-          isFirst={index === 0}
-          isLast={index === blog.children!.length - 1}
-        />
-      ))}
-    </>
-  );
-};
-</file>
-
-<file path="app/components/search/treeNodeMachine.ts">
-import { createMachine } from "xstate";
-
-export const treeNodeMachine = createMachine({
-  id: "treeNode",
-  initial: "visible",
-  states: {
-    visible: {}, // later: expanded/collapsed/etc
-  },
-});
-</file>
-
-<file path="app/components/shared/AnimatedCard.tsx">
-"use client";
-
-import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion";
-import React from "react";
-import { cx } from "../../../styled-system/css";
-
-type AnimatedCardProps = HTMLMotionProps<"div"> & {
-  delay?: number;
-  index?: number;
-  finalOpacity?: number;
-};
-
-export const AnimatedCard = React.forwardRef<HTMLDivElement, AnimatedCardProps>(
-  (
-    { delay, index, finalOpacity = 0.7, className, style, children, ...rest },
-    ref,
-  ) => {
-    const prefersReducedMotion = useReducedMotion();
-    const computedDelay = index !== undefined ? index * 0.06 : delay ?? 0;
-
-    return (
-      <motion.div
-        ref={ref}
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-        animate={prefersReducedMotion ? {} : { opacity: finalOpacity, y: 0 }}
-        transition={{
-          duration: 0.4,
-          delay: computedDelay,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className={cx(className)}
-        style={{
-          ...style,
-          willChange: "transform, opacity",
-        }}
-        {...rest}
-      >
-        {children}
-      </motion.div>
-    );
-  },
-);
-
-AnimatedCard.displayName = "AnimatedCard";
-</file>
-
-<file path="app/components/shared/GlassCard.tsx">
-import { ReactNode } from "react";
-import { css, cx } from "../../../styled-system/css";
-import { SystemStyleObject } from "../../../styled-system/types";
-
-export interface GlassCardProps {
-    children: ReactNode;
-    /** Additional Panda CSS styles to merge */
-    styles?: SystemStyleObject;
-    /** CSS class name */
-    className?: string;
-}
-
-/**
- * Reusable glass-effect card component with consistent styling.
- * Provides the semi-transparent black background with border radius and shadow
- * used throughout the homepage.
- */
-export const GlassCard = ({ children, styles, className }: GlassCardProps) => {
-    return (
-        <div
-            className={cx(
-                css({
-                    bg: "#000000",
-                    opacity: 0.7,
-                    borderRadius: "10px",
-                    boxShadow: "#00000F 0 0 10px",
-                    ...styles,
-                }),
-                className
-            )}
-        >
-            {children}
-        </div>
-    );
-};
-
-/**
- * Common glass card style object for use with css() when GlassCard component isn't suitable.
- */
-export const glassCardStyles = {
-    bg: "#000000",
-    opacity: 0.7,
-    borderRadius: "10px",
-    boxShadow: "#00000F 0 0 10px",
-} as const;
-</file>
-
-<file path="app/components/shared/index.ts">
-/**
- * Shared components used across the application
- */
-
-export { GlassCard, glassCardStyles } from "./GlassCard";
-export type { GlassCardProps } from "./GlassCard";
-
-export { Route } from "./Route";
-export type { RouteProps } from "./Route";
-
-export { Loading } from "./Loading";
-export type { LoadingProps } from "./Loading";
-
-export { Navbar } from "./Navbar";
-export type { NavbarProps } from "./Navbar";
-</file>
-
-<file path="app/components/shared/Loading.tsx">
-import "./shared.css";
-
-export interface LoadingProps {
-    fontsize: number;
-}
-
-/**
- * Simple loading indicator component.
- */
-export function Loading({ fontsize }: LoadingProps) {
-    return (
-        <div className="loading text-white" style={{ fontSize: fontsize.toString() + "px" }}>
-            <h1>...</h1>
-        </div>
-    );
-}
-</file>
-
-<file path="app/components/shared/shared.css">
-/* Animation */
-
-.loading {
-  display: inline-block;
-  clip-path: inset(0 100% 0 0);
-  animation: dots 300ms steps(4) infinite;
-}
-
-
-@keyframes dots {
-  to {
-    clip-path: inset(0 -100% 0 0);
-  }
-}
-</file>
-
-<file path="app/Search/layout.tsx">
-import { Navbar } from "../components/shared/Navbar";
-
-export const metadata = {
-  title: 'Homepage',
-  description: 'Generated by create next app',
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <>
-      <Navbar />
-      <div>{children}</div>
-    </>
-  )
-}
-</file>
-
-<file path="app/Search/loading.tsx">
-import { Loading } from "../components/shared/Loading";
-
-export default function loading() {
-  return (
-    <div className="w-screen h-screen flex justify-center items-center">
-      <Loading fontsize={100} />
-    </div>
-  );
 }
 </file>
 
@@ -6398,6 +5909,460 @@ User space shapes what gets enforced.
 That boundary is worth examining.
 </file>
 
+<file path="content/posts/zed.mdx">
+---
+title: Running the Latest Zed on a Platform That Hates Me
+date: '9 May 2026'
+description: Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
+tags: tech, nix, linux
+---
+
+I run NixOS on an M2 MacBook Air through Asahi Linux.
+
+This is already a strange thing to do.
+
+Then I decided I wanted the latest Zed.
+
+Not the latest Zed in `nixpkgs`. Not the latest Zed that had politely made its way through the packaging pipeline. I wanted the build close enough to upstream that I could try the new agent features while they still felt new.
+
+This is where the computer started negotiating with me.
+
+The machine is Apple Silicon. The graphics stack is Asahi. The display stack is Wayland. The package manager is Nix. The editor is moving quickly. Each layer is reasonable in isolation. Together, they form a small distributed system whose primary observable behavior is telling me that a shared library does not exist.
+
+At first, I tried the obvious escape hatch: wrap Zed's upstream Linux binary.
+
+That worked, briefly.
+
+`zed --version` reported the preview build I wanted:
+
+```text
+Zed preview 1.2.2
+```
+
+Then launching the actual editor started walking through the ancient Linux ritual:
+
+```text
+libXau.so.6: cannot open shared object file
+libmount.so.1: cannot open shared object file
+libselinux.so.1: cannot open shared object file
+libffi.so.7: cannot open shared object file
+```
+
+This is the moment where the problem changed shape.
+
+I did not really want "a command that runs Zed."
+
+I wanted my system to know what `zed` means.
+
+## Keep the interface boring
+
+The nice part is that my Home Manager config does not need to care about any of this.
+
+It just installs `zed`.
+
+```nix
+home.packages = with pkgs; [
+  zed
+];
+```
+
+That is the interface I want. It should be boring.
+
+My shell muscle memory should keep working. My launcher should keep working. The interesting part should happen underneath that name, in the overlay.
+
+That is where Nix feels right to me.
+
+The platform-specific nonsense gets pushed to the edge. The user-facing interface stays stable. The implementation can become as cursed as it needs to be.
+
+In the first version, that meant an overlay that unpacked the upstream preview tarball, exposed a raw Zed package, and then wrapped it in an FHS environment:
+
+```nix
+{ zed-preview-bin }:
+
+final: prev:
+
+let
+  zedPreviewRaw = prev.stdenvNoCC.mkDerivation {
+    pname = "zed-preview-bin";
+    version = "1.2.2";
+
+    src = zed-preview-bin;
+
+    nativeBuildInputs = [ prev.makeWrapper ];
+
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/opt $out/bin
+
+      if [ -d "$src/zed.app" ]; then
+        cp -R "$src/zed.app" "$out/opt/zed.app"
+      else
+        cp -R "$src" "$out/opt/zed.app"
+      fi
+
+      chmod -R u+w "$out/opt/zed.app"
+
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zed_raw"
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zeditor"
+
+      runHook postInstall
+    '';
+  };
+in
+{
+  zed_raw = zedPreviewRaw;
+
+  zed = prev.buildFHSEnv {
+    name = "zed";
+
+    targetPkgs = pkgs: with pkgs; [
+      zedPreviewRaw
+
+      glibc
+      gcc.cc
+      openssl
+      zlib
+      glib
+      gtk3
+      pango
+      cairo
+      gdk-pixbuf
+      fontconfig
+      freetype
+
+      libxkbcommon
+      wayland
+      libGL
+      vulkan-loader
+      alsa-lib
+    ];
+
+    runScript = "zed_raw";
+  };
+}
+```
+
+This is not beautiful code.
+
+But it made an important boundary explicit:
+
+```text
+zed     → the thing I use
+zed_raw → the upstream artifact underneath it
+```
+
+That split mattered later.
+
+Once the binary started asking for `libXau`, `libmount`, `libselinux`, and `libffi`, I did not have to go searching through my whole system for where Zed lived. The mess had a home.
+
+## The diagnostic became a package too
+
+Eventually, I got annoyed enough to stop discovering one missing library per launch.
+
+The binary already knows what it needs. Linux binaries carry this information around. The right move was not to keep guessing. The right move was to make the dependency report part of the flake.
+
+So the config grew a small diagnostic app:
+
+```nix
+packages.${system} = {
+  inherit (pkgs) zed_raw zed-deps-report;
+};
+
+apps.${system}.zed-deps-report = {
+  type = "app";
+  program = "${pkgs.zed-deps-report}/bin/zed-deps-report";
+};
+```
+
+And the script itself is just a little flashlight pointed at the editor binary:
+
+```nix
+zed-deps-report = prev.writeShellApplication {
+  name = "zed-deps-report";
+
+  runtimeInputs = with prev; [
+    patchelf
+    pax-utils
+    glibc
+  ];
+
+  text = ''
+    set -euo pipefail
+
+    ZED_EDITOR="${zedFromSource}/libexec/zed-editor"
+
+    if [[ ! -e "$ZED_EDITOR" ]]; then
+      echo "error: editor binary not found at: $ZED_EDITOR" >&2
+      echo "hint: build zed first: nix build .#zed_raw" >&2
+      exit 1
+    fi
+
+    echo "== Zed editor: $ZED_EDITOR"
+    echo
+
+    echo "== patchelf --print-needed"
+    patchelf --print-needed "$ZED_EDITOR" 2>/dev/null || {
+      echo "(patchelf failed — binary may be static or unsupported)" >&2
+    }
+
+    echo
+    echo "== ldd (direct dynamic deps)"
+    ldd "$ZED_EDITOR" 2>/dev/null || echo "(ldd unavailable or not a dynamic ELF)" >&2
+
+    echo
+    if command -v lddtree >/dev/null 2>&1; then
+      echo "== lddtree"
+      lddtree "$ZED_EDITOR"
+    else
+      echo "== lddtree: not available in PATH"
+    fi
+
+    echo
+    echo "== missing libraries (from ldd 'not found' lines)"
+    if ldd_out="$(ldd "$ZED_EDITOR" 2>/dev/null)"; then
+      missing="$(echo "$ldd_out" | grep 'not found' || true)"
+      if [[ -n "$missing" ]]; then
+        echo "$missing" >&2
+        exit 1
+      else
+        echo "none reported by ldd"
+      fi
+    else
+      echo "(skipped)" >&2
+    fi
+  '';
+};
+```
+
+Now the question is no longer:
+
+> What random `.so` will explode when I launch the editor?
+
+It is:
+
+```bash
+nix run .#zed-deps-report
+```
+
+That feels like the right direction.
+
+The failure becomes an artifact. The artifact becomes a command. The command becomes part of the system.
+
+## This is not just about Zed
+
+The funny part is that this tiny editor problem has the same shape as larger systems I keep caring about.
+
+There is a stable interface:
+
+```text
+zed
+```
+
+There is a fast-moving implementation underneath it:
+
+```text
+upstream Zed
+```
+
+There is a hostile runtime surface:
+
+```text
+Apple Silicon → Asahi → Wayland → NixOS → dynamic Linux libraries
+```
+
+And there is a boundary object that lets me keep the whole thing legible:
+
+```text
+flake input
+overlay
+package output
+diagnostic app
+```
+
+That is the part I like.
+
+Nix does not make this effortless. In some ways, Nix makes it more annoying, because every hidden assumption becomes explicit.
+
+But that is also why I like it.
+
+The missing libraries were always real. The runtime assumptions were always real. The difference is that now the assumptions have somewhere to live.
+
+They live in the overlay.
+
+They live in the flake input.
+
+They live in a command I can run again.
+
+## The rest of the machine is like this too
+
+This is not the only little wrapper in the config.
+
+For example, screenshots are not a desktop feature I hope exists. They are a small script made out of `grim`, `slurp`, `wl-copy`, and `tofi`:
+
+```nix
+(writeShellScriptBin "screenshot" ''
+  #!/usr/bin/env bash
+
+  mkdir -p "$HOME/Pictures"
+  FILE="$HOME/Pictures/$(date +'%Y-%m-%d_%H-%M-%S').png"
+
+  CHOICE=$(printf "Fullscreen\nRegion\nRegion → Clipboard\n" | tofi)
+
+  case "$CHOICE" in
+    "Fullscreen")
+      grim "$FILE"
+      ;;
+    "Region")
+      grim -g "$(slurp)" "$FILE"
+      ;;
+    "Region → Clipboard")
+      grim -g "$(slurp)" - | wl-copy
+      ;;
+  esac
+'')
+```
+
+Moonlight gets the same treatment. On this machine, it is not just "install Moonlight." It is "run Moonlight with the Asahi and Wayland assumptions made explicit":
+
+```nix
+(writeShellScriptBin "moonlight-asahi" ''
+  # Wayland + Asahi GPU environment
+  export QT_QPA_PLATFORM=wayland-egl
+  export QT_QPA_PLATFORMTHEME=qt5ct
+  export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+  export MOZ_ENABLE_WAYLAND=1
+  export NIXOS_OZONE_WL=1
+  export MESA_LOADER_DRIVER_OVERRIDE=asahi
+  export LIBVA_DRIVER_NAME=asahi
+  export VDPAU_DRIVER=va_gl
+  export XDG_SESSION_TYPE=wayland
+  export GDK_BACKEND=wayland
+
+  # Fix Moonlight audio on Asahi / PipeWire
+  export SDL_AUDIODRIVER=pulseaudio
+
+  DEFAULT_FLAGS=(
+    --no-audio-on-host
+    --audio-config stereo
+  )
+
+  if [ $# -eq 0 ]; then
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}"
+  else
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}" "$@"
+  fi
+'')
+```
+
+This is the real shape of the system.
+
+Not one clean abstraction.
+
+A bunch of small, explicit translations.
+
+## Why I like it
+
+The machine is hostile in a very particular way.
+
+It is not hostile because it is broken. It is hostile because every layer has a slightly different idea of what "normal Linux desktop application" means.
+
+Zed expects one shape.
+
+Wayland gives another.
+
+Asahi gives another.
+
+Nix gives another.
+
+Apple Silicon gives another.
+
+The job of the config is to keep those translations visible enough that I can keep moving.
+
+That is why this feels good to me.
+
+Not because it is elegant.
+
+Because it is inspectable.
+
+I can point at the thing that installs Zed. I can point at the thing that wraps Moonlight. I can point at the thing that takes screenshots. I can point at the command that explains which libraries the editor needs.
+
+The platform still hates me.
+
+But now it has to do it declaratively.
+</file>
+
+<file path="data/repo-catalog.json">
+{
+  "schemaVersion": 1,
+  "repos": [
+    {
+      "fullName": "owner/repo",
+      "defaultBranch": "main",
+      "enabled": false,
+      "visibility": "private",
+      "topics": [],
+      "writingThemes": [],
+      "safeToQuote": false,
+      "inspect": {
+        "githubApi": true,
+        "checkout": false,
+        "maxFiles": 20,
+        "maxBytesPerFile": 4000,
+        "maxTotalBytes": 24000
+      }
+    }
+  ]
+}
+</file>
+
+<file path="data/taste-profile.md">
+# Taste Profile
+
+## Manual Notes
+
+<!-- repo-insight:manual-start -->
+Add hand-written taste notes here. This section is preserved by regeneration.
+<!-- repo-insight:manual-end -->
+
+## Recurring Themes
+
+- tech (5)
+- tech, nix, linux (1)
+
+## Strong Claims
+
+- Prefer claims grounded in concrete system behavior, reproducible artifacts, and implementation tradeoffs.
+- Favor one clear thesis over broad activity summaries.
+
+## Preferred Evidence
+
+- Commit SHAs, file paths, code excerpts, docs, tests, release artifacts, and before/after behavior.
+
+## Voice Notes
+
+- Direct, technical, reflective, and skeptical of vague platform language.
+- Draftable seeds are useful; polished posts are not expected from automation.
+
+## Avoid
+
+- Generic push summaries.
+- Publishing claims without file-level evidence.
+- Treating diffs as the full context boundary.
+
+## Recently Covered
+
+- Running the Latest Zed on a Platform That Hates Me (9 May 2026): Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
+- Designing for two (31 December 2025): Designing control planes that separate expressive power from authority, trading generality for legibility in infrastructure coordination.
+- Tight Loops (25 January 2026): How frontend instincts about tooling and feedback loops shaped a structured fuzzing workflow.
+- AI Agents Need Release Reports, Not Just Traces (24 April 2026): Turning agent changes into release decisions, not just traces and scores.
+- The Firewall Doesn’t Live in the Kernel (20 February 2026): Tracing the path from human intent to packet-time execution, and examining how semantic authority shifts across libnftables, libnftnl, and firewalld.
+- AI Evals Need Bundles, Not Just Platforms (2 May 2026): Making agent evaluation inspectable, reproducible, and portable with file-native release artifacts.
+</file>
+
 <file path="hooks/index.ts">
 /**
  * Custom React hooks for the blog application
@@ -6602,247 +6567,6 @@ export const layoutStyles = {
 
 /** Panda token name for use with css({ gap: LAYOUT_GAP }) */
 export const LAYOUT_GAP = "layout";
-</file>
-
-<file path="lib/profileNavigation.ts">
-import { BlogPost } from "./blogs";
-
-export type ProfileCategoryId =
-  | "security-systems"
-  | "platform-social-infrastructure";
-
-export type ProfileGlyph = "shield" | "nodes";
-
-export type ProfileLink = {
-  label: string;
-  href: string;
-  accent: string;
-};
-
-export type ProfileWorkOffering = {
-  title: string;
-  description: string;
-};
-
-export type ProfileWorkWithMeCopy = {
-  title: string;
-  intro: string;
-  pricing: string;
-  offerings: ProfileWorkOffering[];
-};
-
-export type ProfileCategoryDefinition = {
-  id: ProfileCategoryId;
-  title: string;
-  description: string;
-  glyph?: ProfileGlyph;
-};
-
-export type SearchTreeChild = {
-  kind: "child";
-  id: string;
-  title: string;
-  description?: string;
-  href: string;
-  type: "post" | "project" | "page";
-  tags?: string[];
-  date?: string;
-  blog: BlogPost;
-};
-
-export type SearchTreeParent = {
-  kind: "parent";
-  id: ProfileCategoryId;
-  title: string;
-  description: string;
-  glyph?: ProfileGlyph;
-  children: SearchTreeChild[];
-};
-
-export const PROFILE_PANEL_COPY = {
-  name: "Taylor Johnson",
-  portraitSrc:
-    "https://media.licdn.com/dms/image/v2/D4E35AQE5x00dVBomqQ/profile-framedphoto-shrink_200_200/B4EZxaLhS4IsAY-/0/1771039495656?e=1778529600&v=beta&t=CSc7v2PW1enN2Q2Ml61q6ut9W-E0G5KPnRfNoXTDp24",
-  portraitAlt: "Portrait of Taylor Johnson",
-  identity:
-    "I make opaque infrastructure and AI systems legible enough to debug, automate, and trust.",
-  summary:
-    "I work where systems are powerful but hard to explain: auth stacks, Linux/networking boundaries, developer environments, AI coding agents, eval harnesses, and internal platforms. My usual output is the missing map — docs, tools, traces, reports, and visualizations that help teams understand what the system is doing and decide what to change next.",
-};
-
-export const PROFILE_WORK_WITH_ME_COPY: ProfileWorkWithMeCopy = {
-  title: "Work with me",
-  intro:
-    "I help teams make complex infrastructure, developer tooling, security boundaries, and AI workflows easier to understand, reproduce, and improve.",
-  pricing:
-    "Typical starting point: $60/hr, with fixed-scope starter projects available for well-defined work.",
-  offerings: [
-    {
-      title: "System mapping sprint",
-      description:
-        "I reverse-engineer unclear infrastructure, auth flows, deployment paths, or internal tools into diagrams, runbooks, risk notes, and concrete cleanup recommendations.",
-    },
-    {
-      title: "Dev environment / CI sprint",
-      description:
-        "Make your project easier to run, test, and deploy by cleaning up Docker, local setup, dependency drift, CI/CD pipelines, and build reproducibility issues.",
-    },
-    {
-      title: "AI workflow evaluation sprint",
-      description:
-        "Make AI prototypes measurable by defining success criteria, capturing traces, comparing versions, and reporting what improved or regressed.",
-    },
-  ],
-};
-
-export const PROFILE_CATEGORIES: Record<
-  ProfileCategoryId,
-  ProfileCategoryDefinition
-> = {
-  "security-systems": {
-    id: "security-systems",
-    title: "Security / Systems Work",
-    description:
-      "Deep technical work on opaque systems: Linux networking, firewall behavior, fuzzing, IAM, reproducibility, and security boundaries. This is where I investigate how systems actually behave underneath their public interfaces.",
-    glyph: "shield",
-  },
-  "platform-social-infrastructure": {
-    id: "platform-social-infrastructure",
-    title: "Platform / Social Infrastructure Work",
-    description:
-      "Work about interfaces between people, agents, and infrastructure: AI evals, SearchBench, developer tools, documentation systems, configuration languages, visualization, and the ways teams coordinate through software.",
-    glyph: "nodes",
-  },
-};
-
-export const PROFILE_CATEGORY_ORDER: ProfileCategoryId[] = [
-  "platform-social-infrastructure",
-  "security-systems",
-];
-
-export const PROFILE_POST_CATEGORY_ASSIGNMENTS: Record<
-  string,
-  ProfileCategoryId
-> = {
-  "the-firewall-doesnt-live-in-the-kernel": "security-systems",
-  "tight-loops": "security-systems",
-  "ai-release-reports": "platform-social-infrastructure",
-  bundles: "platform-social-infrastructure",
-  "designing-for-two": "platform-social-infrastructure",
-  zed: "security-systems",
-};
-
-export const PROFILE_EXCLUDED_POSTS: Record<string, string> = {
-  // Add intentional exclusions here when a published post should stay out of the
-  // profile-navigation surface, along with the reason it is excluded.
-  //zed: "platform-social-infrastructure",
-};
-
-const formatChildHref = (slug: string) => `/Blogs/${slug}`;
-
-const childMatchesSearch = (child: SearchTreeChild, query: string) => {
-  const searchLower = query.toLowerCase();
-  return (
-    child.title.toLowerCase().includes(searchLower) ||
-    (child.description ?? "").toLowerCase().includes(searchLower) ||
-    (child.tags ?? []).some((tag) => tag.toLowerCase().includes(searchLower))
-  );
-};
-
-export const assertExhaustiveProfileAssignments = (posts: BlogPost[]) => {
-  const postSlugs = new Set(posts.map((post) => post.slug));
-
-  const assignedSlugs = Object.keys(PROFILE_POST_CATEGORY_ASSIGNMENTS);
-  const excludedSlugs = Object.keys(PROFILE_EXCLUDED_POSTS);
-
-  const overlap = assignedSlugs.filter(
-    (slug) => slug in PROFILE_EXCLUDED_POSTS,
-  );
-  if (overlap.length > 0) {
-    throw new Error(
-      `Posts cannot be both assigned and excluded: ${overlap.join(", ")}`,
-    );
-  }
-
-  const unknownAssigned = assignedSlugs.filter((slug) => !postSlugs.has(slug));
-  if (unknownAssigned.length > 0) {
-    throw new Error(
-      `Profile category assignments reference unknown posts: ${unknownAssigned.join(", ")}`,
-    );
-  }
-
-  const unknownExcluded = excludedSlugs.filter((slug) => !postSlugs.has(slug));
-  if (unknownExcluded.length > 0) {
-    throw new Error(
-      `Profile exclusions reference unknown posts: ${unknownExcluded.join(", ")}`,
-    );
-  }
-
-  const unassignedPosts = posts
-    .map((post) => post.slug)
-    .filter(
-      (slug) =>
-        !(slug in PROFILE_POST_CATEGORY_ASSIGNMENTS) &&
-        !(slug in PROFILE_EXCLUDED_POSTS),
-    );
-
-  if (unassignedPosts.length > 0) {
-    throw new Error(
-      `Every published post must be assigned or excluded. Missing: ${unassignedPosts.join(", ")}`,
-    );
-  }
-};
-
-export const buildProfileSearchTree = (
-  posts: BlogPost[],
-): SearchTreeParent[] => {
-  assertExhaustiveProfileAssignments(posts);
-
-  return PROFILE_CATEGORY_ORDER.map((categoryId) => {
-    const category = PROFILE_CATEGORIES[categoryId];
-    const children = posts
-      .filter(
-        (post) => PROFILE_POST_CATEGORY_ASSIGNMENTS[post.slug] === categoryId,
-      )
-      .map<SearchTreeChild>((post) => ({
-        kind: "child",
-        id: post.slug,
-        title: post.meta.title,
-        description: post.meta.description,
-        href: formatChildHref(post.slug),
-        type: "post",
-        tags: post.meta.tags,
-        date: post.meta.date.toISOString(),
-        blog: post,
-      }));
-
-    return {
-      kind: "parent",
-      id: category.id,
-      title: category.title,
-      description: category.description,
-      glyph: category.glyph,
-      children,
-    };
-  });
-};
-
-export const filterProfileSearchTree = (
-  tree: SearchTreeParent[],
-  query: string,
-) => {
-  const normalized = query.trim();
-  if (!normalized) return tree;
-
-  return tree
-    .map((parent) => ({
-      ...parent,
-      children: parent.children.filter((child) =>
-        childMatchesSearch(child, normalized),
-      ),
-    }))
-    .filter((parent) => parent.children.length > 0);
-};
 </file>
 
 <file path="tests/utils/gap-utils.ts">
@@ -7699,125 +7423,35 @@ test.describe("Mobile Navbar Positioning", () => {
 });
 </file>
 
-<file path="tests/search-root-gap.spec.ts">
+<file path="tests/search-input-runtime.spec.ts">
 import { expect, test } from "@playwright/test";
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
-const LOAD_WAIT_MS = 1500;
-test.describe("Search Root Gap", () => {
-  test("root gap vertical connector aligns with the first category vertical line", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${BASE_URL}/Search`);
-    await page.waitForTimeout(LOAD_WAIT_MS);
 
-    const rootVerticalLine = page.getByTestId("tree-root-vertical-line");
-    const parentVerticalLine = page
-      .locator('[data-testid="search-tree-parent-content"] [data-testid="tree-branch-vertical-line"]')
-      .first();
+test("typing into the Search input does not trigger runtime errors", async ({
+  page,
+}) => {
+  test.setTimeout(30000);
 
-    await expect(rootVerticalLine).toHaveCount(1);
-    await expect(parentVerticalLine).toHaveCount(1);
+  const pageErrors: string[] = [];
 
-    const rootVerticalBox = await rootVerticalLine.boundingBox();
-    const parentVerticalBox = await parentVerticalLine.boundingBox();
-
-    expect(rootVerticalBox).not.toBeNull();
-    expect(parentVerticalBox).not.toBeNull();
-
-    const xDelta = Math.abs(rootVerticalBox!.x - parentVerticalBox!.x);
-
-    expect(
-      xDelta,
-      "Expected the root gap vertical connector to align with the first category vertical line",
-    ).toBeLessThanOrEqual(2);
+  page.on("pageerror", (error) => {
+    pageErrors.push(error.message);
   });
 
-  test("root gap becomes visually transparent after scroll except for the connector line", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${BASE_URL}/Search`);
-    await page.waitForTimeout(LOAD_WAIT_MS);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(`${BASE_URL}/Search`);
+  await page.waitForTimeout(1500);
 
-    const scrollRegion = page.getByTestId("search-results-scroll-region");
-    const connectorContent = page.getByTestId("search-root-connector-content");
-    const connectorRow = page.getByTestId("search-root-connector-row");
+  const input = page.getByTestId("search-root-input");
+  await expect(input).toBeVisible();
 
-    await expect(connectorContent).toHaveCount(1);
-    await expect(connectorRow).toHaveCount(1);
+  await input.fill("firewall");
+  await expect(input).toHaveValue("firewall");
+  await page.waitForTimeout(300);
 
-    await scrollRegion.evaluate((element) => {
-      element.scrollTop = 120;
-      element.dispatchEvent(new Event("scroll", { bubbles: true }));
-    });
-
-    await page.waitForTimeout(150);
-
-    const metrics = await page.evaluate(() => {
-      const row = document.querySelector('[data-testid="search-root-connector-row"]');
-      const content = document.querySelector('[data-testid="search-root-connector-content"]');
-      if (!row || !content) {
-        return null;
-      }
-
-      const rowStyle = window.getComputedStyle(row);
-      const contentStyle = window.getComputedStyle(content);
-
-      return {
-        rowOpacity: rowStyle.opacity,
-        rowBackgroundColor: rowStyle.backgroundColor,
-        rowBoxShadow: rowStyle.boxShadow,
-        rowBackdropFilter: rowStyle.backdropFilter,
-        contentOpacity: contentStyle.opacity,
-        contentBackgroundColor: contentStyle.backgroundColor,
-        contentBoxShadow: contentStyle.boxShadow,
-        contentBackdropFilter: contentStyle.backdropFilter,
-      };
-    });
-
-    if (!metrics) {
-      throw new Error("Expected root gap row and content elements to exist");
-    }
-    expect(
-      Number(metrics.rowOpacity),
-      "Expected the root gap row itself to be visually gone after scroll",
-    ).toBe(0);
-    expect(metrics.rowBackgroundColor).toBe("rgba(0, 0, 0, 0)");
-    expect(metrics.rowBoxShadow).toBe("none");
-    expect(metrics.rowBackdropFilter).toBe("none");
-    expect(
-      Number(metrics.contentOpacity),
-      "Expected the root gap content wrapper to be visually gone after scroll",
-    ).toBe(0);
-    expect(metrics.contentBackgroundColor).toBe("rgba(0, 0, 0, 0)");
-    expect(metrics.contentBoxShadow).toBe("none");
-    expect(metrics.contentBackdropFilter).toBe("none");
-  });
-
-  test("root gap line disappears when the results scroll", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${BASE_URL}/Search`);
-    await page.waitForTimeout(LOAD_WAIT_MS);
-
-    const rootConnectorRow = page.getByTestId("search-root-connector-row");
-    const rootConnectorLine = page.getByTestId("tree-root-vertical-line");
-    const scrollRegion = page.getByTestId("search-results-scroll-region");
-
-    await expect(rootConnectorRow).toHaveCount(1);
-    await expect(rootConnectorLine).toHaveCount(1);
-
-    await scrollRegion.evaluate((element) => {
-      element.scrollTop = 120;
-      element.dispatchEvent(new Event("scroll", { bubbles: true }));
-    });
-
-    await page.waitForTimeout(150);
-
-    await expect(rootConnectorRow).toHaveCount(1);
-    await expect(rootConnectorLine).toHaveCount(0);
-  });
+  await expect(page.getByTestId("search-tree-child-card").first()).toBeVisible();
+  expect(pageErrors).toEqual([]);
 });
 </file>
 
@@ -8348,6 +7982,10 @@ test.describe("Viewport Consistency", () => {
 });
 </file>
 
+<file path=".codex">
+
+</file>
+
 <file path="flake.lock">
 {
   "nodes": {
@@ -8472,13 +8110,6 @@ clean:
     "fontSize": "16px"
   }
 }
-</file>
-
-<file path="pnpm-workspace.yaml">
-ignoredBuiltDependencies:
-  - puppeteer
-onlyBuiltDependencies:
-  - sqlite3
 </file>
 
 <file path="postcss.config.cjs">
@@ -9085,103 +8716,245 @@ export const Route = ({
 };
 </file>
 
-<file path="lib/blogs.ts">
-import fs from "fs";
-import path from "path";
-// @ts-ignore
-import matter from "gray-matter";
+<file path="lib/profileNavigation.ts">
+import { BlogPost } from "./blogs";
 
-const postsDirectory = path.join(process.cwd(), "content/posts");
+export type ProfileCategoryId =
+  | "security-systems"
+  | "platform-social-infrastructure";
 
-/* ------------------------- */
-/* Types                     */
-/* ------------------------- */
+export type ProfileGlyph = "shield" | "nodes";
 
-interface RawFrontmatter {
-  title: string;
-  date: string;
-  description: string;
-  tags: string | string[];
-  image?: string;
-}
-
-const normalizeTags = (tags: RawFrontmatter["tags"]): string[] => {
-  if (Array.isArray(tags)) {
-    return tags.filter((tag): tag is string => typeof tag === "string");
-  }
-
-  return typeof tags === "string" ? [tags] : [];
+export type ProfileLink = {
+  label: string;
+  href: string;
+  accent: string;
 };
 
-export interface BlogPost {
-  slug: string;
-  meta: {
-    title: string;
-    date: Date;
-    description: string;
-    tags: string[];
-    image?: string;
-  };
-  content: string;
-  text?: string;
-  children?: BlogPost[];
-}
+export type ProfileWorkOffering = {
+  title: string;
+  description: string;
+};
 
-/* ------------------------- */
-/* Slugs                     */
-/* ------------------------- */
+export type ProfileWorkWithMeCopy = {
+  title: string;
+  intro: string;
+  pricing: string;
+  offerings: ProfileWorkOffering[];
+};
 
-export function getPostSlugs(): string[] {
-  if (!fs.existsSync(postsDirectory)) return [];
-  return fs.readdirSync(postsDirectory);
-}
+export type ProfileCategoryDefinition = {
+  id: ProfileCategoryId;
+  title: string;
+  description: string;
+  glyph?: ProfileGlyph;
+};
 
-/* ------------------------- */
-/* Single Post               */
-/* ------------------------- */
+export type SearchTreeChild = {
+  kind: "child";
+  id: string;
+  title: string;
+  description?: string;
+  href: string;
+  type: "post" | "project" | "page";
+  tags?: string[];
+  date?: string;
+  blog: BlogPost;
+};
 
-export function getPostBySlug(slug: string): BlogPost | null {
-  const realSlug = slug.replace(/\.mdx$/, "");
-  const fullPath = path.join(postsDirectory, `${realSlug}.mdx`);
+export type SearchTreeParent = {
+  kind: "parent";
+  id: ProfileCategoryId;
+  title: string;
+  description: string;
+  glyph?: ProfileGlyph;
+  children: SearchTreeChild[];
+};
 
-  if (!fs.existsSync(fullPath)) return null;
+export const PROFILE_PANEL_COPY = {
+  name: "Taylor Johnson",
+  portraitSrc:
+    "https://media.licdn.com/dms/image/v2/D4E35AQE5x00dVBomqQ/profile-framedphoto-shrink_200_200/B4EZxaLhS4IsAY-/0/1771039495656?e=1778529600&v=beta&t=CSc7v2PW1enN2Q2Ml61q6ut9W-E0G5KPnRfNoXTDp24",
+  portraitAlt: "Portrait of Taylor Johnson",
+  identity:
+    "I make opaque infrastructure and AI systems legible enough to debug, automate, and trust.",
+  summary:
+    "I work where systems are powerful but hard to explain: auth stacks, Linux/networking boundaries, developer environments, AI coding agents, eval harnesses, and internal platforms. My usual output is the missing map — docs, tools, traces, reports, and visualizations that help teams understand what the system is doing and decide what to change next.",
+};
 
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
+export const PROFILE_WORK_WITH_ME_COPY: ProfileWorkWithMeCopy = {
+  title: "Work with me",
+  intro:
+    "I help teams make complex infrastructure, developer tooling, security boundaries, and AI workflows easier to understand, reproduce, and improve.",
+  pricing:
+    "Typical starting point: $60/hr, with fixed-scope starter projects available for well-defined work.",
+  offerings: [
+    {
+      title: "System mapping sprint",
+      description:
+        "I reverse-engineer unclear infrastructure, auth flows, deployment paths, or internal tools into diagrams, runbooks, risk notes, and concrete cleanup recommendations.",
+    },
+    {
+      title: "Dev environment / CI sprint",
+      description:
+        "Make your project easier to run, test, and deploy by cleaning up Docker, local setup, dependency drift, CI/CD pipelines, and build reproducibility issues.",
+    },
+    {
+      title: "AI workflow evaluation sprint",
+      description:
+        "Make AI prototypes measurable by defining success criteria, capturing traces, comparing versions, and reporting what improved or regressed.",
+    },
+  ],
+};
 
-  const frontmatter = data as RawFrontmatter;
+export const PROFILE_CATEGORIES: Record<
+  ProfileCategoryId,
+  ProfileCategoryDefinition
+> = {
+  "security-systems": {
+    id: "security-systems",
+    title: "Security / Systems Work",
+    description:
+      "Deep technical work on opaque systems: Linux networking, firewall behavior, fuzzing, IAM, reproducibility, and security boundaries. This is where I investigate how systems actually behave underneath their public interfaces.",
+    glyph: "shield",
+  },
+  "platform-social-infrastructure": {
+    id: "platform-social-infrastructure",
+    title: "Platform / Social Infrastructure Work",
+    description:
+      "Work about interfaces between people, agents, and infrastructure: AI evals, SearchBench, developer tools, documentation systems, configuration languages, visualization, and the ways teams coordinate through software.",
+    glyph: "nodes",
+  },
+};
 
-  const parsedDate = new Date(frontmatter.date);
+export const PROFILE_CATEGORY_ORDER: ProfileCategoryId[] = [
+  "platform-social-infrastructure",
+  "security-systems",
+];
 
-  if (isNaN(parsedDate.getTime())) {
-    throw new Error(`Invalid date format in ${realSlug}: ${frontmatter.date}`);
+export const PROFILE_POST_CATEGORY_ASSIGNMENTS: Record<
+  string,
+  ProfileCategoryId
+> = {
+  "the-firewall-doesnt-live-in-the-kernel": "security-systems",
+  "tight-loops": "security-systems",
+  "ai-release-reports": "platform-social-infrastructure",
+  bundles: "platform-social-infrastructure",
+  "designing-for-two": "platform-social-infrastructure",
+  zed: "security-systems",
+};
+
+export const PROFILE_EXCLUDED_POSTS: Record<string, string> = {
+  // Add intentional exclusions here when a published post should stay out of the
+  // profile-navigation surface, along with the reason it is excluded.
+  //zed: "platform-social-infrastructure",
+};
+
+const formatChildHref = (slug: string) => `/Blogs/${slug}`;
+
+const childMatchesSearch = (child: SearchTreeChild, query: string) => {
+  const searchLower = query.toLowerCase();
+  return (
+    child.title.toLowerCase().includes(searchLower) ||
+    (child.description ?? "").toLowerCase().includes(searchLower) ||
+    (child.tags ?? []).some((tag) => tag.toLowerCase().includes(searchLower))
+  );
+};
+
+export const assertExhaustiveProfileAssignments = (posts: BlogPost[]) => {
+  const postSlugs = new Set(posts.map((post) => post.slug));
+
+  const assignedSlugs = Object.keys(PROFILE_POST_CATEGORY_ASSIGNMENTS);
+  const excludedSlugs = Object.keys(PROFILE_EXCLUDED_POSTS);
+
+  const overlap = assignedSlugs.filter(
+    (slug) => slug in PROFILE_EXCLUDED_POSTS,
+  );
+  if (overlap.length > 0) {
+    throw new Error(
+      `Posts cannot be both assigned and excluded: ${overlap.join(", ")}`,
+    );
   }
 
-  return {
-    slug: realSlug,
-    meta: {
-      title: frontmatter.title,
-      description: frontmatter.description,
-      tags: normalizeTags(frontmatter.tags),
-      image: frontmatter.image,
-      date: parsedDate,
-    },
-    content,
-  };
-}
+  const unknownAssigned = assignedSlugs.filter((slug) => !postSlugs.has(slug));
+  if (unknownAssigned.length > 0) {
+    throw new Error(
+      `Profile category assignments reference unknown posts: ${unknownAssigned.join(", ")}`,
+    );
+  }
 
-/* ------------------------- */
-/* All Posts                 */
-/* ------------------------- */
+  const unknownExcluded = excludedSlugs.filter((slug) => !postSlugs.has(slug));
+  if (unknownExcluded.length > 0) {
+    throw new Error(
+      `Profile exclusions reference unknown posts: ${unknownExcluded.join(", ")}`,
+    );
+  }
 
-export function getAllPosts(): BlogPost[] {
-  const slugs = getPostSlugs();
+  const unassignedPosts = posts
+    .map((post) => post.slug)
+    .filter(
+      (slug) =>
+        !(slug in PROFILE_POST_CATEGORY_ASSIGNMENTS) &&
+        !(slug in PROFILE_EXCLUDED_POSTS),
+    );
 
-  return slugs
-    .map((slug) => getPostBySlug(slug))
-    .filter((post): post is BlogPost => post !== null)
-    .sort((a, b) => b.meta.date.getTime() - a.meta.date.getTime());
-}
+  if (unassignedPosts.length > 0) {
+    throw new Error(
+      `Every published post must be assigned or excluded. Missing: ${unassignedPosts.join(", ")}`,
+    );
+  }
+};
+
+export const buildProfileSearchTree = (
+  posts: BlogPost[],
+): SearchTreeParent[] => {
+  assertExhaustiveProfileAssignments(posts);
+
+  return PROFILE_CATEGORY_ORDER.map((categoryId) => {
+    const category = PROFILE_CATEGORIES[categoryId];
+    const children = posts
+      .filter(
+        (post) => PROFILE_POST_CATEGORY_ASSIGNMENTS[post.slug] === categoryId,
+      )
+      .map<SearchTreeChild>((post) => ({
+        kind: "child",
+        id: post.slug,
+        title: post.meta.title,
+        description: post.meta.description,
+        href: formatChildHref(post.slug),
+        type: "post",
+        tags: post.meta.tags,
+        date: post.meta.date.toISOString(),
+        blog: post,
+      }));
+
+    return {
+      kind: "parent",
+      id: category.id,
+      title: category.title,
+      description: category.description,
+      glyph: category.glyph,
+      children,
+    };
+  });
+};
+
+export const filterProfileSearchTree = (
+  tree: SearchTreeParent[],
+  query: string,
+) => {
+  const normalized = query.trim();
+  if (!normalized) return tree;
+
+  return tree
+    .map((parent) => ({
+      ...parent,
+      children: parent.children.filter((child) =>
+        childMatchesSearch(child, normalized),
+      ),
+    }))
+    .filter((parent) => parent.children.length > 0);
+};
 </file>
 
 <file path="public/resume.html">
@@ -9491,6 +9264,128 @@ export function getAllPosts(): BlogPost[] {
 </html>
 </file>
 
+<file path="tests/search-root-gap.spec.ts">
+import { expect, test } from "@playwright/test";
+
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const LOAD_WAIT_MS = 1500;
+test.describe("Search Root Gap", () => {
+  test("root gap vertical connector aligns with the first category vertical line", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${BASE_URL}/Search`);
+    await page.waitForTimeout(LOAD_WAIT_MS);
+
+    const rootVerticalLine = page.getByTestId("tree-root-vertical-line");
+    const parentVerticalLine = page
+      .locator('[data-testid="search-tree-parent-content"] [data-testid="tree-branch-vertical-line"]')
+      .first();
+
+    await expect(rootVerticalLine).toHaveCount(1);
+    await expect(parentVerticalLine).toHaveCount(1);
+
+    const rootVerticalBox = await rootVerticalLine.boundingBox();
+    const parentVerticalBox = await parentVerticalLine.boundingBox();
+
+    expect(rootVerticalBox).not.toBeNull();
+    expect(parentVerticalBox).not.toBeNull();
+
+    const xDelta = Math.abs(rootVerticalBox!.x - parentVerticalBox!.x);
+
+    expect(
+      xDelta,
+      "Expected the root gap vertical connector to align with the first category vertical line",
+    ).toBeLessThanOrEqual(2);
+  });
+
+  test("root gap becomes visually transparent after scroll except for the connector line", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${BASE_URL}/Search`);
+    await page.waitForTimeout(LOAD_WAIT_MS);
+
+    const scrollRegion = page.getByTestId("search-results-scroll-region");
+    const connectorContent = page.getByTestId("search-root-connector-content");
+    const connectorRow = page.getByTestId("search-root-connector-row");
+
+    await expect(connectorContent).toHaveCount(1);
+    await expect(connectorRow).toHaveCount(1);
+
+    await scrollRegion.evaluate((element) => {
+      element.scrollTop = 120;
+      element.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    await page.waitForTimeout(150);
+
+    const metrics = await page.evaluate(() => {
+      const row = document.querySelector('[data-testid="search-root-connector-row"]');
+      const content = document.querySelector('[data-testid="search-root-connector-content"]');
+      if (!row || !content) {
+        return null;
+      }
+
+      const rowStyle = window.getComputedStyle(row);
+      const contentStyle = window.getComputedStyle(content);
+
+      return {
+        rowOpacity: rowStyle.opacity,
+        rowBackgroundColor: rowStyle.backgroundColor,
+        rowBoxShadow: rowStyle.boxShadow,
+        rowBackdropFilter: rowStyle.backdropFilter,
+        contentOpacity: contentStyle.opacity,
+        contentBackgroundColor: contentStyle.backgroundColor,
+        contentBoxShadow: contentStyle.boxShadow,
+        contentBackdropFilter: contentStyle.backdropFilter,
+      };
+    });
+
+    if (!metrics) {
+      throw new Error("Expected root gap row and content elements to exist");
+    }
+    expect(
+      Number(metrics.rowOpacity),
+      "Expected the root gap row itself to be visually gone after scroll",
+    ).toBe(0);
+    expect(metrics.rowBackgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.rowBoxShadow).toBe("none");
+    expect(metrics.rowBackdropFilter).toBe("none");
+    expect(
+      Number(metrics.contentOpacity),
+      "Expected the root gap content wrapper to be visually gone after scroll",
+    ).toBe(0);
+    expect(metrics.contentBackgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.contentBoxShadow).toBe("none");
+    expect(metrics.contentBackdropFilter).toBe("none");
+  });
+
+  test("root gap line disappears when the results scroll", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${BASE_URL}/Search`);
+    await page.waitForTimeout(LOAD_WAIT_MS);
+
+    const rootConnectorRow = page.getByTestId("search-root-connector-row");
+    const rootConnectorLine = page.getByTestId("tree-root-vertical-line");
+    const scrollRegion = page.getByTestId("search-results-scroll-region");
+
+    await expect(rootConnectorRow).toHaveCount(1);
+    await expect(rootConnectorLine).toHaveCount(1);
+
+    await scrollRegion.evaluate((element) => {
+      element.scrollTop = 120;
+      element.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    await page.waitForTimeout(150);
+
+    await expect(rootConnectorRow).toHaveCount(1);
+    await expect(rootConnectorLine).toHaveCount(0);
+  });
+});
+</file>
+
 <file path="next.config.js">
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const withMDX = require('@next/mdx')({
@@ -9540,6 +9435,13 @@ const nextConfig = {
 
 // Merge MDX config with Next.js config
 module.exports = withMDX(nextConfig)
+</file>
+
+<file path="pnpm-workspace.yaml">
+ignoredBuiltDependencies:
+  - puppeteer
+onlyBuiltDependencies:
+  - sqlite3
 </file>
 
 <file path="app/components/home/HomeDesktopLayout.tsx">
@@ -10493,63 +10395,110 @@ By moving ambiguity into explicit boundaries — into code, tooling, and environ
 That legibility is the result. It’s what made the exploration sustainable and sharable, and it’s what let the work continue without collapsing under its own complexity.
 </file>
 
+<file path="lib/blogs.ts">
+import fs from "fs";
+import path from "path";
+// @ts-ignore
+import matter from "gray-matter";
+
+const postsDirectory = path.join(process.cwd(), "content/posts");
+
+/* ------------------------- */
+/* Types                     */
+/* ------------------------- */
+
+interface RawFrontmatter {
+  title: string;
+  date: string;
+  description: string;
+  tags: string | string[];
+  image?: string;
+}
+
+const normalizeTags = (tags: RawFrontmatter["tags"]): string[] => {
+  if (Array.isArray(tags)) {
+    return tags.filter((tag): tag is string => typeof tag === "string");
+  }
+
+  return typeof tags === "string" ? [tags] : [];
+};
+
+export interface BlogPost {
+  slug: string;
+  meta: {
+    title: string;
+    date: Date;
+    description: string;
+    tags: string[];
+    image?: string;
+  };
+  content: string;
+  text?: string;
+  children?: BlogPost[];
+}
+
+/* ------------------------- */
+/* Slugs                     */
+/* ------------------------- */
+
+export function getPostSlugs(): string[] {
+  if (!fs.existsSync(postsDirectory)) return [];
+  return fs.readdirSync(postsDirectory);
+}
+
+/* ------------------------- */
+/* Single Post               */
+/* ------------------------- */
+
+export function getPostBySlug(slug: string): BlogPost | null {
+  const realSlug = slug.replace(/\.mdx$/, "");
+  const fullPath = path.join(postsDirectory, `${realSlug}.mdx`);
+
+  if (!fs.existsSync(fullPath)) return null;
+
+  const fileContents = fs.readFileSync(fullPath, "utf8");
+  const { data, content } = matter(fileContents);
+
+  const frontmatter = data as RawFrontmatter;
+
+  const parsedDate = new Date(frontmatter.date);
+
+  if (isNaN(parsedDate.getTime())) {
+    throw new Error(`Invalid date format in ${realSlug}: ${frontmatter.date}`);
+  }
+
+  return {
+    slug: realSlug,
+    meta: {
+      title: frontmatter.title,
+      description: frontmatter.description,
+      tags: normalizeTags(frontmatter.tags),
+      image: frontmatter.image,
+      date: parsedDate,
+    },
+    content,
+  };
+}
+
+/* ------------------------- */
+/* All Posts                 */
+/* ------------------------- */
+
+export function getAllPosts(): BlogPost[] {
+  const slugs = getPostSlugs();
+
+  return slugs
+    .map((slug) => getPostBySlug(slug))
+    .filter((post): post is BlogPost => post !== null)
+    .sort((a, b) => b.meta.date.getTime() - a.meta.date.getTime());
+}
+</file>
+
 <file path=".eslintrc">
 {
   "extends": [
     "next"
   ]
-}
-</file>
-
-<file path="flake.nix">
-{
-  description = "Multi-platform dev shell with VSCode + Playwright browsers";
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
-
-  outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            nodejs
-            pnpm
-            git
-            gh
-            jq
-            curl
-            actionlint
-            repomix
-            playwright-driver.browsers
-            chromium
-            just
-          ];
-
-          shellHook = ''
-            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
-            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
-
-            # Tell Puppeteer to use Nix Chromium
-            export PUPPETEER_EXECUTABLE_PATH=${pkgs.chromium}/bin/chromium
-            export PUPPETEER_SKIP_DOWNLOAD=true
-          '';
-        };
-      }
-    );
 }
 </file>
 
@@ -11586,6 +11535,58 @@ export const mdxOptions: MDXRemoteProps["options"] = {
     rehypePlugins: [rehypeRaw, [rehypeHighlight, { languages }]] as any,
   },
 };
+</file>
+
+<file path="flake.nix">
+{
+  description = "Multi-platform dev shell with VSCode + Playwright browsers";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            nodejs
+            pnpm
+            git
+            gh
+            jq
+            curl
+            actionlint
+            repomix
+            playwright-driver.browsers
+            chromium
+            just
+          ];
+
+          shellHook = ''
+            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+
+            # Tell Puppeteer to use Nix Chromium
+            export PUPPETEER_EXECUTABLE_PATH=${pkgs.chromium}/bin/chromium
+            export PUPPETEER_SKIP_DOWNLOAD=true
+          '';
+        };
+      }
+    );
+}
 </file>
 
 <file path=".mermaid-cache/cXVhZHJhbnRD.mmd">
