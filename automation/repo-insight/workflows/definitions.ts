@@ -58,9 +58,7 @@ export const workflowDefinitions: WorkflowFile[] = [
     workflow: {
       name: "Repo Insight",
       on: {
-        repository_dispatch: {
-          types: ["repo-insight"],
-        },
+        schedule: [{ cron: "17 * * * *" }],
         workflow_dispatch: {
           inputs: {
             force: {
@@ -103,7 +101,6 @@ export const workflowDefinitions: WorkflowFile[] = [
                 CURSOR_API_KEY: "${{ secrets.CURSOR_API_KEY }}",
                 CURSOR_MODEL: "${{ vars.CURSOR_MODEL }}",
                 CURSOR_COMPACTION_MODEL: "${{ vars.CURSOR_COMPACTION_MODEL }}",
-                REPO_INSIGHT_PAYLOAD: "${{ github.event_name == 'repository_dispatch' && toJson(github.event.client_payload) || '' }}",
               },
               run: [
                 "if [ \"${{ github.event.inputs.force }}\" = \"true\" ]; then",
@@ -118,10 +115,48 @@ export const workflowDefinitions: WorkflowFile[] = [
               run: nixBash([
                 "git config user.name github-actions[bot]",
                 "git config user.email github-actions[bot]@users.noreply.github.com",
-                "git add data/taste-profile.md content/insights",
+                "git add data/taste-profile.md data/repo-insight-poll-state.json content/insights",
                 "git diff --cached --quiet || git commit -m \"Generate repo insight artifacts\"",
                 "git push",
               ]),
+            },
+          ],
+        },
+      },
+    },
+  },
+  {
+    filename: "repo-insight-aggregate.yml",
+    workflow: {
+      name: "Repo Insight Aggregate",
+      on: {
+        schedule: [{ cron: "47 13 * * 0" }],
+        workflow_dispatch: null,
+      },
+      permissions: {
+        contents: "read",
+        issues: "write",
+      },
+      concurrency: {
+        group: "repo-insight-aggregate-${{ github.run_id }}",
+        "cancel-in-progress": false,
+      },
+      jobs: {
+        aggregate: {
+          "runs-on": "ubuntu-latest",
+          env: {
+            CACHIX_AUTH_TOKEN: "${{ secrets.CACHIX_AUTH_TOKEN }}",
+          },
+          steps: [
+            ...setupSteps,
+            {
+              name: "Aggregate insights",
+              env: {
+                GITHUB_TOKEN: "${{ github.token }}",
+                CURSOR_API_KEY: "${{ secrets.CURSOR_API_KEY }}",
+                CURSOR_MODEL: "${{ vars.CURSOR_MODEL }}",
+              },
+              run: nix("pnpm aggregate-insights --ci"),
             },
           ],
         },

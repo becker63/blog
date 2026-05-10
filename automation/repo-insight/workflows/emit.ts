@@ -13,4 +13,6 @@ export const renderWorkflow = (workflow: WorkflowFile) =>
     lineWidth: 0,
     nullStr: "",
     // GitHub cron expressions contain `*`; keep only that fragile scalar quoted.
-  }).replace("cron: 17 */6 * * *", 'cron: "17 */6 * * *"');
+  })
+    .replace("cron: 17 * * * *", 'cron: "17 * * * *"')
+    .replace("cron: 47 13 * * 0", 'cron: "47 13 * * 0"');
