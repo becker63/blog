@@ -285,13 +285,12 @@ const main = async () => {
     await ensureSecret({
       repo: blogRepo,
       name: "GH_REPO_INSIGHT_TOKEN",
-      explanation: "GH_REPO_INSIGHT_TOKEN should be a fine-grained read-only PAT for source repos (Contents: read, Metadata: read).",
+      explanation: "GH_REPO_INSIGHT_TOKEN should be a fine-grained read-only PAT for repos repo-insight may inspect (Contents: read, Metadata: read).",
       required: true,
       existingSecrets: blogSecrets,
       dryRun,
       overwrite,
       prompt,
-      skipMessage: "Optional CACHIX_AUTH_TOKEN not provided; skipping Cachix setup.",
     });
 
     await ensureVariable({
@@ -326,6 +325,7 @@ const main = async () => {
       dryRun,
       overwrite,
       prompt,
+      skipMessage: "Optional CACHIX_AUTH_TOKEN not provided; skipping Cachix setup.",
     });
     if (cachix.configured) {
       await ensureVariable({
@@ -338,41 +338,6 @@ const main = async () => {
         overwrite,
         prompt,
       });
-    }
-
-    const sourceRepoInput =
-      getFlagValue("--source-repos") ??
-      (await promptLine(rl, pipedAnswers, "Source repos for BLOG_REPO_DISPATCH_TOKEN, comma-separated, blank to skip"));
-
-    const sourceRepos = sourceRepoInput
-      .split(",")
-      .map((repo) => repo.trim())
-      .filter(Boolean);
-    for (const repo of sourceRepos) validateRepo(repo, "Source repo");
-
-    if (sourceRepos.length > 0) {
-      console.log("Reading existing source repo dispatch secrets...");
-      const reposNeedingDispatchToken: string[] = [];
-      for (const repo of sourceRepos) {
-        const sourceSecrets = await listRepoSecrets(repo);
-        if (!overwrite && sourceSecrets.has("BLOG_REPO_DISPATCH_TOKEN")) {
-          console.log(`Secret BLOG_REPO_DISPATCH_TOKEN already set for ${repo}; skipping`);
-        } else {
-          reposNeedingDispatchToken.push(repo);
-        }
-      }
-
-      if (reposNeedingDispatchToken.length > 0) {
-        const dispatchToken = await promptSecret(rl, pipedAnswers, "BLOG_REPO_DISPATCH_TOKEN");
-        if (!dispatchToken) {
-          throw new Error("BLOG_REPO_DISPATCH_TOKEN cannot be blank when selected source repos need it.");
-        }
-        console.log("Setting source repo dispatch secrets");
-        for (const repo of reposNeedingDispatchToken) {
-          await setSecret(repo, "BLOG_REPO_DISPATCH_TOKEN", dispatchToken, dryRun);
-          console.log(`Configured BLOG_REPO_DISPATCH_TOKEN for ${repo}`);
-        }
-      }
     }
 
     console.log("Done");

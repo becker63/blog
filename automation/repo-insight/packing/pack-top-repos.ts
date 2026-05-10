@@ -1,19 +1,20 @@
 import { RepoPack } from "./types";
 import { discoverTopRepos } from "../adapters/github-repos";
-import { DispatchPayload, RepoCatalog } from "../model/types";
+import { RepoCatalog } from "../model/types";
+import { AccessibleRepo } from "./types";
 import { packRepoWithRepomix } from "./repomix-pack";
 
 export const packTopRepos = async ({
   catalog,
-  triggerHint,
+  repos,
 }: {
   catalog: RepoCatalog;
-  triggerHint?: DispatchPayload;
+  repos?: AccessibleRepo[];
 }): Promise<RepoPack[]> => {
-  const repos = await discoverTopRepos({ catalog, triggerHint });
+  const selectedRepos = repos ?? (await discoverTopRepos({ catalog }));
   const packs: RepoPack[] = [];
 
-  for (const repo of repos) {
+  for (const repo of selectedRepos) {
     packs.push(await packRepoWithRepomix(repo));
   }
 

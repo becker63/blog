@@ -1,4 +1,4 @@
-import { DispatchPayload, RepoCatalog } from "../model/types";
+import { RepoCatalog } from "../model/types";
 import { findRepoOverlay } from "../storage/repo-catalog";
 import { AccessibleRepo } from "../packing/types";
 
@@ -42,12 +42,10 @@ const repoAllowed = (repo: AccessibleRepo) => {
 
 export const discoverTopRepos = async ({
   catalog,
-  triggerHint,
   token = process.env.GH_REPO_INSIGHT_TOKEN,
   limit = Number(process.env.REPO_INSIGHT_REPO_LIMIT ?? "5"),
 }: {
   catalog: RepoCatalog;
-  triggerHint?: DispatchPayload;
   token?: string;
   limit?: number;
 }): Promise<AccessibleRepo[]> => {
@@ -67,23 +65,5 @@ export const discoverTopRepos = async ({
     .map((repo) => toAccessibleRepo(repo, catalog))
     .filter(repoAllowed);
 
-  let selected = repos.slice(0, limit);
-  if (triggerHint && !selected.some((repo) => repo.fullName === triggerHint.repo)) {
-    const triggerRepo =
-      repos.find((repo) => repo.fullName === triggerHint.repo) ??
-      (await fetchTriggerRepo(triggerHint.repo, catalog, token).catch(() => undefined));
-    if (triggerRepo && repoAllowed(triggerRepo)) {
-      selected = [...selected.slice(0, Math.max(0, limit - 1)), triggerRepo];
-    }
-  }
-
-  return selected;
-};
-
-const fetchTriggerRepo = async (fullName: string, catalog: RepoCatalog, token: string) => {
-  const response = await fetch(`https://api.github.com/repos/${fullName}`, {
-    headers: headers(token),
-  });
-  if (!response.ok) return undefined;
-  return toAccessibleRepo((await response.json()) as GitHubRepoResponse, catalog);
+  return repos.slice(0, limit);
 };

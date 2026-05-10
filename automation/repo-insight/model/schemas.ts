@@ -48,6 +48,20 @@ export const repoCatalogSchema = z.object({
   ),
 });
 
+export const repoInsightPollStateSchema = z.object({
+  schemaVersion: z.literal(1),
+  updatedAt: isoDateString,
+  repos: z.record(
+    repoFullName,
+    z.object({
+      pushedAt: isoDateString,
+      defaultBranch: z.string().min(1),
+      lastSeenSha: z.string().min(7).optional(),
+      lastSeenAt: isoDateString,
+    }),
+  ),
+});
+
 export const packStatsSchema = z.object({
   byteCount: z.number().int().nonnegative(),
   truncated: z.boolean(),
@@ -144,6 +158,67 @@ export const insightArtifactSchema = z.object({
     relationToPreviousWriting: z.string().min(20),
     followUpQuestions: z.array(z.string().min(10)).min(1),
   }),
+});
+
+export const insightSeedSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  source: z.enum(["artifact", "issue"]),
+  artifactPath: z.string().min(1).optional(),
+  issueNumber: z.number().int().positive().optional(),
+  issueUrl: z.string().url().optional(),
+  createdAt: isoDateString.optional(),
+  sourceRepos: z.array(repoFullName).default([]),
+  relatedCommits: z.array(z.string().min(1)).default([]),
+  hiddenThesis: z.string().min(1).optional(),
+  whySelected: z.string().min(1).optional(),
+  possibleHooks: z.array(z.string().min(1)).default([]),
+  relationToPreviousWriting: z.string().min(1).optional(),
+  followUpQuestions: z.array(z.string().min(1)).default([]),
+  evidenceSummaries: z.array(z.string().min(1)).default([]),
+  labels: z.array(z.string().min(1)).optional(),
+  state: z.enum(["open", "closed"]).optional(),
+});
+
+const scoreSchema = z.number().int().min(1).max(5);
+
+export const insightClusterSchema = z.object({
+  title: z.string().min(1),
+  thesis: z.string().min(1),
+  plainLanguageThesis: z.string().min(1),
+  philosophicalSummary: z.string().min(1),
+  whatThisSaysAboutTheWork: z.string().min(1),
+  essayDirection: z.string().min(1),
+  relatedSeedIds: z.array(z.string().min(1)).default([]),
+  relatedIssueNumbers: z.array(z.number().int().positive()).default([]),
+  relatedArtifactPaths: z.array(z.string().min(1)).default([]),
+  score: z.object({
+    novelty: scoreSchema,
+    evidenceStrength: scoreSchema,
+    profileFit: scoreSchema,
+    writingPotential: scoreSchema,
+    promotionReadiness: scoreSchema,
+  }),
+  recommendedAction: z.enum(["promote", "merge", "watch", "close"]),
+  rationale: z.string().min(1),
+  possiblePostTitles: z.array(z.string().min(1)).default([]),
+  nextMoves: z.array(z.string().min(1)).default([]),
+});
+
+export const insightDigestSchema = z.object({
+  generatedAt: isoDateString,
+  totalSeeds: z.number().int().nonnegative(),
+  whatThisSeemsToSayAboutTheWork: z.string().min(1),
+  clusters: z.array(insightClusterSchema).default([]),
+  staleOrLowValueSeeds: z
+    .array(
+      z.object({
+        seedId: z.string().min(1),
+        reason: z.string().min(1),
+        recommendedAction: z.enum(["promote", "merge", "watch", "close"]),
+      }),
+    )
+    .default([]),
 });
 
 export const curatorDecisionSchema = z.discriminatedUnion("kind", [

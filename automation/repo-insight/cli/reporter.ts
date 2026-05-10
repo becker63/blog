@@ -2,6 +2,7 @@ import { CuratorDecision, InsightRunTrigger } from "../model/types";
 import { ProjectCapsule } from "../model/types";
 import { CapsuleCacheEvent } from "../cache/capsule-cache";
 import { RepoPack } from "../packing/types";
+import { PollStateChange } from "../storage/poll-state";
 
 export class Reporter {
   private readonly compact: boolean;
@@ -15,7 +16,7 @@ export class Reporter {
     const range = trigger.before && trigger.after ? `${trigger.before} -> ${trigger.after}` : "inferred from pushed_at";
     this.log(
       this.compact
-        ? `trigger=${trigger.kind} repo=${trigger.repo}${trigger.after ? ` sha=${trigger.after}` : ""} changedFiles=${changedCount}`
+        ? `trigger=${trigger.kind} repo=${trigger.repo}${trigger.pushedAt ? ` pushedAt=${trigger.pushedAt}` : ""}${trigger.after ? ` sha=${trigger.after}` : ""} changedFiles=${changedCount}`
         : [
             "Repo Insight",
             "",
@@ -23,10 +24,40 @@ export class Reporter {
             `  kind: ${trigger.kind}`,
             `  repo: ${trigger.repo}`,
             `  branch: ${trigger.branch ?? "unknown"}`,
+            ...(trigger.pushedAt ? [`  pushed at: ${trigger.pushedAt}`] : []),
             `  range: ${range}`,
             `  changed files: ${changedCount}`,
             ...(trigger.note ? [`  note: ${trigger.note}`] : []),
           ].join("\n"),
+    );
+  }
+
+  polling(context: { reposChecked: number; changes: PollStateChange[]; trigger?: InsightRunTrigger }) {
+    if (this.compact) {
+      if (context.changes.length === 0) {
+        this.log(`poll=no_changes repos=${context.reposChecked}`);
+        return;
+      }
+      this.log(`poll=repos_checked count=${context.reposChecked} changed=${context.changes.length}`);
+      return;
+    }
+
+    const triggerRepo = context.trigger?.repo ?? "none";
+    const firstChange = context.changes[0];
+    this.log(
+      [
+        "",
+        "Polling",
+        `  repos checked: ${context.reposChecked}`,
+        `  changed repos: ${context.changes.length}`,
+        `  trigger: ${triggerRepo}`,
+        ...(firstChange
+          ? [
+              `  last seen: ${firstChange.previous?.pushedAt ?? "never"}`,
+              `  current: ${firstChange.repo.pushedAt}`,
+            ]
+          : []),
+      ].join("\n"),
     );
   }
 

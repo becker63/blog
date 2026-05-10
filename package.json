@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit",
     "generate-insight": "tsx automation/repo-insight/cli/generate-insight.ts",
     "generate-insight:force": "tsx automation/repo-insight/cli/generate-insight.ts --force",
+    "aggregate-insights": "tsx automation/repo-insight/cli/aggregate-insights.ts",
+    "aggregate-insights:dry-run": "tsx automation/repo-insight/cli/aggregate-insights.ts --dry-run",
     "secrets:setup": "tsx automation/github-secrets/setup.ts",
     "automation:generate-workflows": "tsx automation/generate-workflows.ts",
     "automation:check-workflows": "tsx automation/check-workflows.ts",

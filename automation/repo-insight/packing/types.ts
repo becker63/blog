@@ -1,4 +1,4 @@
-import { DispatchPayload, PackStats, RepoCatalogEntry } from "../model/types";
+import { PackStats, RepoCatalogEntry } from "../model/types";
 
 export type AccessibleRepo = {
   fullName: string;
@@ -27,7 +27,3 @@ export type RepoPack = {
   packedText: string;
 };
 
-export type GenerateInsightInput = {
-  trigger: DispatchPayload;
-  force: boolean;
-};

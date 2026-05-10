@@ -1,33 +1,23 @@
 import { readFile } from "node:fs/promises";
 import { GitHubIssuePublisher } from "../adapters/github-issues";
 import { CursorSdkAgentBackend } from "../adapters/cursor-sdk-agent";
+import { discoverTopRepos } from "../adapters/github-repos";
 import { buildAuthorProfile } from "../context/build-author-profile";
 import { buildWritingCorpus } from "../context/build-writing-corpus";
-import { dispatchPayloadSchema } from "../model/schemas";
-import { CuratorInput, DispatchPayload, InsightRunTrigger } from "../model/types";
+import { CuratorInput, InsightRunTrigger } from "../model/types";
+import { AccessibleRepo } from "../packing/types";
 import { packTopRepos } from "../packing/pack-top-repos";
 import { compactPacks } from "../packing/compact-packs";
 import { writeInsightIssueMetadata } from "../render/index-json";
 import { readRepoCatalog } from "../storage/repo-catalog";
 import { writeInsightArtifact } from "../storage/insight-store";
 import { insightIndexPath } from "../storage/paths";
+import { buildUpdatedPollState, diffPollState, PollStateChange, readPollState, writePollState } from "../storage/poll-state";
 import { buildTasteProfile } from "../taste-profile";
-import { getArgValue, hasFlag } from "./args";
+import { hasFlag } from "./args";
 import { Reporter } from "./reporter";
 
 const runId = () => new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-
-const readOptionalTriggerHint = async (): Promise<DispatchPayload | undefined> => {
-  const payloadArg = getArgValue("--payload");
-  const payloadFile = getArgValue("--payload-file");
-  const envPayload = process.env.REPO_INSIGHT_PAYLOAD?.trim();
-
-  if (payloadArg) return dispatchPayloadSchema.parse(JSON.parse(payloadArg));
-  if (payloadFile) return dispatchPayloadSchema.parse(JSON.parse(await readFile(payloadFile, "utf8")));
-  if (envPayload) return dispatchPayloadSchema.parse(JSON.parse(envPayload));
-
-  return undefined;
-};
 
 const readPreviousInsightTitles = async () => {
   try {
@@ -57,45 +47,45 @@ const stripUnsafeQuotes = <T extends { artifact: { sections: { evidence: Array<{
   },
 });
 
-const toTrigger = (
-  triggerHint: DispatchPayload | undefined,
-  packs: Array<{ fullName: string; defaultBranch: string }>,
+const toPollingTrigger = (
+  changes: PollStateChange[],
+  repos: AccessibleRepo[],
 ): InsightRunTrigger => {
-  if (triggerHint) {
-    return {
-      kind: "github-push",
-      repo: triggerHint.repo,
-      branch: triggerHint.branch,
-      before: triggerHint.before,
-      after: triggerHint.after,
-      pusher: triggerHint.pusher,
-      eventType: triggerHint.eventType,
-      changedFiles: triggerHint.changedFiles,
-    };
-  }
-
-  const topRepo = packs[0];
+  const changedRepo = changes[0]?.repo;
+  const topRepo = changedRepo ?? repos[0];
   if (!topRepo) {
     throw new Error("No accessible repositories were selected for repo insight generation.");
   }
 
   return {
-    kind: "inferred-top-repo",
+    kind: "poll",
     repo: topRepo.fullName,
     branch: topRepo.defaultBranch,
-    note: "No explicit push payload was provided; this run was inferred from the most recently pushed accessible repo.",
+    pushedAt: topRepo.pushedAt,
+    lastSeenAt: changes[0]?.previous?.lastSeenAt,
+    lastSeenSha: changes[0]?.previous?.lastSeenSha,
+    changedFiles: [],
+    note: "No repository_dispatch payload was provided; this run was triggered by scheduled polling and inferred from recently pushed repositories.",
   };
 };
 
 const main = async () => {
   const force = hasFlag("--force");
   const reporter = new Reporter({ ci: hasFlag("--ci") });
-  const triggerHint = await readOptionalTriggerHint();
 
   const catalog = await readRepoCatalog();
-  const packs = await packTopRepos({ catalog, triggerHint });
-  const trigger = toTrigger(triggerHint, packs);
+  const repos = await discoverTopRepos({ catalog });
+  const previousPollState = await readPollState();
+  const pollChanges = diffPollState(repos, previousPollState);
+  const trigger = toPollingTrigger(pollChanges, repos);
+  reporter.polling({ reposChecked: repos.length, changes: pollChanges, trigger });
+
+  if (!force && pollChanges.length === 0) {
+    return;
+  }
+
   reporter.trigger(trigger);
+  const packs = await packTopRepos({ catalog, repos });
   reporter.packs(packs);
 
   const { capsules, cacheEvents } = await compactPacks(packs);
@@ -121,9 +111,11 @@ const main = async () => {
 
   const decision = await new CursorSdkAgentBackend().generateInsight(input);
   reporter.decision(decision);
+  const updatedPollState = buildUpdatedPollState(repos, previousPollState);
 
   if (decision.kind === "no_insight") {
     if (force) throw new Error("generate-insight:force received no_insight, which is invalid in force mode.");
+    await writePollState(updatedPollState);
     reporter.output({});
     return;
   }
@@ -147,6 +139,7 @@ const main = async () => {
     runId: safeDecision.artifact.frontmatter.runId,
     issue,
   });
+  await writePollState(updatedPollState);
   reporter.output({ artifactPath, issueUrl: issue.url });
 };
 

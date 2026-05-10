@@ -97,9 +97,7 @@ export const buildInsightPrompt = (input: CuratorInput) => {
     "",
     "## Context",
     "",
-    input.trigger.kind === "inferred-top-repo"
-      ? "No explicit push payload was provided. Treat the most recently pushed selected repo as the current signal."
-      : "An explicit repository_dispatch push payload was provided as trigger metadata.",
+    "No repository_dispatch payload was provided. Treat the scheduled polling trigger repo as the current signal.",
     "",
     JSON.stringify(input, null, 2),
   ].join("\n");
