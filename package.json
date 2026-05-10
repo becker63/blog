@@ -2,6 +2,7 @@
   "name": "next",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,6 +10,17 @@
     "lint": "next lint",
     "prepare": "panda codegen",
     "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "generate-insight": "tsx automation/repo-insight/cli/generate-insight.ts",
+    "generate-insight:force": "tsx automation/repo-insight/cli/generate-insight.ts --force",
+    "secrets:setup": "tsx automation/github-secrets/setup.ts",
+    "automation:generate-workflows": "tsx automation/generate-workflows.ts",
+    "automation:check-workflows": "tsx automation/check-workflows.ts",
+    "automation:actionlint": "if command -v actionlint >/dev/null 2>&1; then actionlint .github/workflows/*.yml; else nix develop --command actionlint .github/workflows/*.yml; fi",
+    "insight:taste-profile": "tsx automation/repo-insight/cli/build-taste-profile.ts",
+    "insight:index": "tsx automation/repo-insight/cli/build-insight-index.ts",
+    "insight:validate": "tsx automation/repo-insight/cli/validate-artifacts.ts",
+    "ci:automation": "pnpm automation:check-workflows && pnpm automation:actionlint && pnpm typecheck && pnpm insight:validate",
     "vercel:login": "vercel login",
     "vercel:link": "vercel link",
     "vercel:pull": "vercel pull --yes",
@@ -23,6 +35,7 @@
   },
   "dependencies": {
     "@apple/highlightjs-pkl": "^1.0.1",
+    "@cursor/sdk": "^1.0.12",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
@@ -65,6 +78,9 @@
     "puppeteer": "^23.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "*"
+    "tsx": "^4.21.0",
+    "typescript": "*",
+    "yaml": "^2.8.4",
+    "zod": "^4.4.3"
   }
 }

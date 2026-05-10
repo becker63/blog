@@ -1,0 +1,383 @@
+---
+title: Running the Latest Zed on a Platform That Hates Me
+date: '9 May 2026'
+description: Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
+tags: tech, nix, linux
+---
+
+I run NixOS on an M2 MacBook Air through Asahi Linux.
+
+This is already a strange thing to do.
+
+Then I decided I wanted the latest Zed.
+
+Not the latest Zed in `nixpkgs`. Not the latest Zed that had politely made its way through the packaging pipeline. I wanted the build close enough to upstream that I could try the new agent features while they still felt new.
+
+This is where the computer started negotiating with me.
+
+The machine is Apple Silicon. The graphics stack is Asahi. The display stack is Wayland. The package manager is Nix. The editor is moving quickly. Each layer is reasonable in isolation. Together, they form a small distributed system whose primary observable behavior is telling me that a shared library does not exist.
+
+At first, I tried the obvious escape hatch: wrap Zed's upstream Linux binary.
+
+That worked, briefly.
+
+`zed --version` reported the preview build I wanted:
+
+```text
+Zed preview 1.2.2
+```
+
+Then launching the actual editor started walking through the ancient Linux ritual:
+
+```text
+libXau.so.6: cannot open shared object file
+libmount.so.1: cannot open shared object file
+libselinux.so.1: cannot open shared object file
+libffi.so.7: cannot open shared object file
+```
+
+This is the moment where the problem changed shape.
+
+I did not really want "a command that runs Zed."
+
+I wanted my system to know what `zed` means.
+
+## Keep the interface boring
+
+The nice part is that my Home Manager config does not need to care about any of this.
+
+It just installs `zed`.
+
+```nix
+home.packages = with pkgs; [
+  zed
+];
+```
+
+That is the interface I want. It should be boring.
+
+My shell muscle memory should keep working. My launcher should keep working. The interesting part should happen underneath that name, in the overlay.
+
+That is where Nix feels right to me.
+
+The platform-specific nonsense gets pushed to the edge. The user-facing interface stays stable. The implementation can become as cursed as it needs to be.
+
+In the first version, that meant an overlay that unpacked the upstream preview tarball, exposed a raw Zed package, and then wrapped it in an FHS environment:
+
+```nix
+{ zed-preview-bin }:
+
+final: prev:
+
+let
+  zedPreviewRaw = prev.stdenvNoCC.mkDerivation {
+    pname = "zed-preview-bin";
+    version = "1.2.2";
+
+    src = zed-preview-bin;
+
+    nativeBuildInputs = [ prev.makeWrapper ];
+
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/opt $out/bin
+
+      if [ -d "$src/zed.app" ]; then
+        cp -R "$src/zed.app" "$out/opt/zed.app"
+      else
+        cp -R "$src" "$out/opt/zed.app"
+      fi
+
+      chmod -R u+w "$out/opt/zed.app"
+
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zed_raw"
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zeditor"
+
+      runHook postInstall
+    '';
+  };
+in
+{
+  zed_raw = zedPreviewRaw;
+
+  zed = prev.buildFHSEnv {
+    name = "zed";
+
+    targetPkgs = pkgs: with pkgs; [
+      zedPreviewRaw
+
+      glibc
+      gcc.cc
+      openssl
+      zlib
+      glib
+      gtk3
+      pango
+      cairo
+      gdk-pixbuf
+      fontconfig
+      freetype
+
+      libxkbcommon
+      wayland
+      libGL
+      vulkan-loader
+      alsa-lib
+    ];
+
+    runScript = "zed_raw";
+  };
+}
+```
+
+This is not beautiful code.
+
+But it made an important boundary explicit:
+
+```text
+zed     → the thing I use
+zed_raw → the upstream artifact underneath it
+```
+
+That split mattered later.
+
+Once the binary started asking for `libXau`, `libmount`, `libselinux`, and `libffi`, I did not have to go searching through my whole system for where Zed lived. The mess had a home.
+
+## The diagnostic became a package too
+
+Eventually, I got annoyed enough to stop discovering one missing library per launch.
+
+The binary already knows what it needs. Linux binaries carry this information around. The right move was not to keep guessing. The right move was to make the dependency report part of the flake.
+
+So the config grew a small diagnostic app:
+
+```nix
+packages.${system} = {
+  inherit (pkgs) zed_raw zed-deps-report;
+};
+
+apps.${system}.zed-deps-report = {
+  type = "app";
+  program = "${pkgs.zed-deps-report}/bin/zed-deps-report";
+};
+```
+
+And the script itself is just a little flashlight pointed at the editor binary:
+
+```nix
+zed-deps-report = prev.writeShellApplication {
+  name = "zed-deps-report";
+
+  runtimeInputs = with prev; [
+    patchelf
+    pax-utils
+    glibc
+  ];
+
+  text = ''
+    set -euo pipefail
+
+    ZED_EDITOR="${zedFromSource}/libexec/zed-editor"
+
+    if [[ ! -e "$ZED_EDITOR" ]]; then
+      echo "error: editor binary not found at: $ZED_EDITOR" >&2
+      echo "hint: build zed first: nix build .#zed_raw" >&2
+      exit 1
+    fi
+
+    echo "== Zed editor: $ZED_EDITOR"
+    echo
+
+    echo "== patchelf --print-needed"
+    patchelf --print-needed "$ZED_EDITOR" 2>/dev/null || {
+      echo "(patchelf failed — binary may be static or unsupported)" >&2
+    }
+
+    echo
+    echo "== ldd (direct dynamic deps)"
+    ldd "$ZED_EDITOR" 2>/dev/null || echo "(ldd unavailable or not a dynamic ELF)" >&2
+
+    echo
+    if command -v lddtree >/dev/null 2>&1; then
+      echo "== lddtree"
+      lddtree "$ZED_EDITOR"
+    else
+      echo "== lddtree: not available in PATH"
+    fi
+
+    echo
+    echo "== missing libraries (from ldd 'not found' lines)"
+    if ldd_out="$(ldd "$ZED_EDITOR" 2>/dev/null)"; then
+      missing="$(echo "$ldd_out" | grep 'not found' || true)"
+      if [[ -n "$missing" ]]; then
+        echo "$missing" >&2
+        exit 1
+      else
+        echo "none reported by ldd"
+      fi
+    else
+      echo "(skipped)" >&2
+    fi
+  '';
+};
+```
+
+Now the question is no longer:
+
+> What random `.so` will explode when I launch the editor?
+
+It is:
+
+```bash
+nix run .#zed-deps-report
+```
+
+That feels like the right direction.
+
+The failure becomes an artifact. The artifact becomes a command. The command becomes part of the system.
+
+## This is not just about Zed
+
+The funny part is that this tiny editor problem has the same shape as larger systems I keep caring about.
+
+There is a stable interface:
+
+```text
+zed
+```
+
+There is a fast-moving implementation underneath it:
+
+```text
+upstream Zed
+```
+
+There is a hostile runtime surface:
+
+```text
+Apple Silicon → Asahi → Wayland → NixOS → dynamic Linux libraries
+```
+
+And there is a boundary object that lets me keep the whole thing legible:
+
+```text
+flake input
+overlay
+package output
+diagnostic app
+```
+
+That is the part I like.
+
+Nix does not make this effortless. In some ways, Nix makes it more annoying, because every hidden assumption becomes explicit.
+
+But that is also why I like it.
+
+The missing libraries were always real. The runtime assumptions were always real. The difference is that now the assumptions have somewhere to live.
+
+They live in the overlay.
+
+They live in the flake input.
+
+They live in a command I can run again.
+
+## The rest of the machine is like this too
+
+This is not the only little wrapper in the config.
+
+For example, screenshots are not a desktop feature I hope exists. They are a small script made out of `grim`, `slurp`, `wl-copy`, and `tofi`:
+
+```nix
+(writeShellScriptBin "screenshot" ''
+  #!/usr/bin/env bash
+
+  mkdir -p "$HOME/Pictures"
+  FILE="$HOME/Pictures/$(date +'%Y-%m-%d_%H-%M-%S').png"
+
+  CHOICE=$(printf "Fullscreen\nRegion\nRegion → Clipboard\n" | tofi)
+
+  case "$CHOICE" in
+    "Fullscreen")
+      grim "$FILE"
+      ;;
+    "Region")
+      grim -g "$(slurp)" "$FILE"
+      ;;
+    "Region → Clipboard")
+      grim -g "$(slurp)" - | wl-copy
+      ;;
+  esac
+'')
+```
+
+Moonlight gets the same treatment. On this machine, it is not just "install Moonlight." It is "run Moonlight with the Asahi and Wayland assumptions made explicit":
+
+```nix
+(writeShellScriptBin "moonlight-asahi" ''
+  # Wayland + Asahi GPU environment
+  export QT_QPA_PLATFORM=wayland-egl
+  export QT_QPA_PLATFORMTHEME=qt5ct
+  export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+  export MOZ_ENABLE_WAYLAND=1
+  export NIXOS_OZONE_WL=1
+  export MESA_LOADER_DRIVER_OVERRIDE=asahi
+  export LIBVA_DRIVER_NAME=asahi
+  export VDPAU_DRIVER=va_gl
+  export XDG_SESSION_TYPE=wayland
+  export GDK_BACKEND=wayland
+
+  # Fix Moonlight audio on Asahi / PipeWire
+  export SDL_AUDIODRIVER=pulseaudio
+
+  DEFAULT_FLAGS=(
+    --no-audio-on-host
+    --audio-config stereo
+  )
+
+  if [ $# -eq 0 ]; then
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}"
+  else
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}" "$@"
+  fi
+'')
+```
+
+This is the real shape of the system.
+
+Not one clean abstraction.
+
+A bunch of small, explicit translations.
+
+## Why I like it
+
+The machine is hostile in a very particular way.
+
+It is not hostile because it is broken. It is hostile because every layer has a slightly different idea of what "normal Linux desktop application" means.
+
+Zed expects one shape.
+
+Wayland gives another.
+
+Asahi gives another.
+
+Nix gives another.
+
+Apple Silicon gives another.
+
+The job of the config is to keep those translations visible enough that I can keep moving.
+
+That is why this feels good to me.
+
+Not because it is elegant.
+
+Because it is inspectable.
+
+I can point at the thing that installs Zed. I can point at the thing that wraps Moonlight. I can point at the thing that takes screenshots. I can point at the command that explains which libraries the editor needs.
+
+The platform still hates me.
+
+But now it has to do it declaratively.

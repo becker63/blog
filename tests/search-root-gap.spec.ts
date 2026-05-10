@@ -75,7 +75,9 @@ test.describe("Search Root Gap", () => {
       };
     });
 
-    expect(metrics).not.toBeNull();
+    if (!metrics) {
+      throw new Error("Expected root gap row and content elements to exist");
+    }
     expect(
       Number(metrics.rowOpacity),
       "Expected the root gap row itself to be visually gone after scroll",

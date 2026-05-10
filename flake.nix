@@ -23,9 +23,16 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             nodejs
+            pnpm
+            git
+            gh
+            jq
+            curl
+            actionlint
+            repomix
             playwright-driver.browsers
             chromium
-	    just
+            just
           ];
 
           shellHook = ''

@@ -122,11 +122,13 @@ export const PROFILE_POST_CATEGORY_ASSIGNMENTS: Record<
   "ai-release-reports": "platform-social-infrastructure",
   bundles: "platform-social-infrastructure",
   "designing-for-two": "platform-social-infrastructure",
+  zed: "security-systems",
 };
 
 export const PROFILE_EXCLUDED_POSTS: Record<string, string> = {
   // Add intentional exclusions here when a published post should stay out of the
   // profile-navigation surface, along with the reason it is excluded.
+  //zed: "platform-social-infrastructure",
 };
 
 const formatChildHref = (slug: string) => `/Blogs/${slug}`;

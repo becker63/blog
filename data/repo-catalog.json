@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "repos": [
+    {
+      "fullName": "owner/repo",
+      "defaultBranch": "main",
+      "enabled": false,
+      "visibility": "private",
+      "topics": [],
+      "writingThemes": [],
+      "safeToQuote": false,
+      "inspect": {
+        "githubApi": true,
+        "checkout": false,
+        "maxFiles": 20,
+        "maxBytesPerFile": 4000,
+        "maxTotalBytes": 24000
+      }
+    }
+  ]
+}

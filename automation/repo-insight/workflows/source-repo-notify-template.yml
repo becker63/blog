@@ -1,0 +1,37 @@
+name: Notify Blog Repo Insight
+
+# Required source-repo secret:
+# - BLOG_REPO_DISPATCH_TOKEN: fine-scoped token allowed to dispatch to the blog repo
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch repo insight signal
+        env:
+          BLOG_REPO_DISPATCH_TOKEN: ${{ secrets.BLOG_REPO_DISPATCH_TOKEN }}
+          BLOG_REPO: becker63/<blog-repo-name>
+        run: |
+          changed_files="$(jq -c '[.commits[]? | (.added + .modified + .removed)[]] | unique' "$GITHUB_EVENT_PATH")"
+          curl -fsSL \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${BLOG_REPO_DISPATCH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${BLOG_REPO}/dispatches" \
+            -d "$(jq -n \
+              --arg repo "${GITHUB_REPOSITORY}" \
+              --arg before "${{ github.event.before }}" \
+              --arg after "${GITHUB_SHA}" \
+              --arg branch "${GITHUB_REF_NAME}" \
+              --arg pusher "${GITHUB_ACTOR}" \
+              --argjson changedFiles "${changed_files}" \
+              '{event_type:"repo-insight",client_payload:{repo:$repo,before:$before,after:$after,branch:$branch,pusher:$pusher,eventType:"push",changedFiles:$changedFiles}}')"

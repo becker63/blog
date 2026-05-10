@@ -13,9 +13,17 @@ interface RawFrontmatter {
   title: string;
   date: string;
   description: string;
-  tags: string[];
+  tags: string | string[];
   image?: string;
 }
+
+const normalizeTags = (tags: RawFrontmatter["tags"]): string[] => {
+  if (Array.isArray(tags)) {
+    return tags.filter((tag): tag is string => typeof tag === "string");
+  }
+
+  return typeof tags === "string" ? [tags] : [];
+};
 
 export interface BlogPost {
   slug: string;
@@ -66,7 +74,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     meta: {
       title: frontmatter.title,
       description: frontmatter.description,
-      tags: frontmatter.tags,
+      tags: normalizeTags(frontmatter.tags),
       image: frontmatter.image,
       date: parsedDate,
     },
