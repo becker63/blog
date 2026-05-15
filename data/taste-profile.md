@@ -15,16 +15,17 @@ Avoid generic changelog summaries. Avoid resume-flavored self-promotion. The wor
 ## Recurring Themes
 
 - tech (5)
+- tech, ai, build-systems (1)
 - tech, nix, linux (1)
 
 ## Strong Claims
 
-- Prefer claims grounded in concrete system behavior, reproducible artifacts, and implementation tradeoffs.
+- Prefer claims grounded in concrete system behavior, reproducible evidence, and implementation tradeoffs.
 - Favor one clear thesis over broad activity summaries.
 
 ## Preferred Evidence
 
-- Commit SHAs, file paths, code excerpts, docs, tests, release artifacts, and before/after behavior.
+- Commit SHAs, file paths, code excerpts, docs, tests, release evidence, and before/after behavior.
 
 ## Voice Notes
 
@@ -45,3 +46,4 @@ Avoid generic changelog summaries. Avoid resume-flavored self-promotion. The wor
 - AI Agents Need Release Reports, Not Just Traces (24 April 2026): Turning agent changes into release decisions, not just traces and scores.
 - The Firewall Doesn’t Live in the Kernel (20 February 2026): Tracing the path from human intent to packet-time execution, and examining how semantic authority shifts across libnftables, libnftnl, and firewalld.
 - AI Evals Need Bundles, Not Just Platforms (2 May 2026): Making agent evaluation inspectable, reproducible, and portable with file-native release artifacts.
+- You Are Giving Your AI Cognitive Overload (14 May 2026): Using Buck2 and Nix to turn repository operations into a small graph of sanctioned actions instead of a pile of debugging commands.
