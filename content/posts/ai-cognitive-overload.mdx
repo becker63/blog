@@ -447,44 +447,6 @@ They trigger the graph.
 
 That is a cleaner division of responsibility.
 
-## This matters more for agents than for humans
-
-A human can read a long `AGENTS.md` and slowly learn the local rituals.
-
-An agent can too, but only unreliably.
-
-The larger the operational surface gets, the more likely the agent is to do something plausible but wrong:
-
-```text
-run the wrong subset
-skip the generated-file check
-forget the submodule smoke
-run a mutating command at the wrong time
-trust a stale Repomix snapshot
-test from the wrong working directory
-```
-
-Good agent infrastructure is not about giving the model more tools.
-
-It is about removing invalid operational choices.
-
-That is why this change feels important. Buck2 gives the repository a way to expose fewer, stronger affordances.
-
-Instead of saying:
-
-```text
-Here are fifteen commands. Good luck.
-```
-
-the repo says:
-
-```text
-Run //:check.
-Run //:check_full.
-```
-
-That is a much better interface for a coding agent.
-
 ## The monorepo shape
 
 This also made the repository layout more honest.
