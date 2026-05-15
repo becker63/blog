@@ -89,12 +89,7 @@ Before, the repository exposed a list of procedures.
 nix develop -c searchbench-staticcheck
 nix develop -c searchbench-golangci
 nix develop -c searchbench-go-test-all
-nix develop -c searchbench-check-generated
-nix develop -c searchbench-check-templ-generated
-nix develop -c searchbench-check-pkl-generated
-nix develop -c searchbench-e2e
-nix develop -c searchbench-architecture-check
-nix develop -c searchbench-repomix-fresh-check
+...
 ```
 
 That surface area matters.
@@ -261,10 +256,6 @@ real adapter boundaries
 This is exactly the kind of repository where an agent can get lost.
 
 Not because the code is impossible to understand, but because the operational surface is too wide. There are many valid-looking things to run, many local conventions to remember, and many steps that are only meaningful in relation to other steps.
-
-The agent should not decide how to validate the repo.
-
-The repo should expose the validation graph.
 
 ## Buck2 as an agent interface
 
