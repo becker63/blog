@@ -1,10 +1,11 @@
-import type { SystemStyleObject } from "../../../styled-system/types";
+import { css } from "../../../styled-system/css";
 
 /**
- * Typography and element styles for MDX blog body — reuse on home so prose
- * matches post pages.
+ * MDX / identity prose — defined at module scope so Panda’s static extractor
+ * emits nested selector utilities (plain objects passed to `css()` from other
+ * files are not reliably extracted, which produced class names without CSS).
  */
-export const blogContentProseStyles: SystemStyleObject = {
+export const blogContentProseClass = css({
   maxWidth: "65ch",
   mx: "auto",
   color: "rgba(255,255,255,0.85)",
@@ -91,4 +92,4 @@ export const blogContentProseStyles: SystemStyleObject = {
     my: "2rem",
     w: "full",
   },
-};
+});

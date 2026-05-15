@@ -19,4 +19,4 @@ export { Aside } from "./Aside";
 export { PaneChild, paneChildBackground, paneChildSurfaceStyles } from "./PaneChild";
 export type { PaneChildProps } from "./PaneChild";
 
-export { blogContentProseStyles } from "./blogContentProseStyles";
+export { blogContentProseClass } from "./blogContentProseStyles";

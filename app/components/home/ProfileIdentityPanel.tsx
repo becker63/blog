@@ -1,6 +1,6 @@
 import { cx, css } from "../../../styled-system/css";
 import { PROFILE_PANEL_COPY } from "../../../lib/profileNavigation";
-import { blogContentProseStyles } from "../shared/blogContentProseStyles";
+import { blogContentProseClass } from "../shared/blogContentProseStyles";
 import { ProfileWorkWithMe } from "./ProfileWorkWithMe";
 
 export const ProfileIdentityPanel = () => {
@@ -33,7 +33,7 @@ export const ProfileIdentityPanel = () => {
     >
       <div
         className={cx(
-          css(blogContentProseStyles),
+          blogContentProseClass,
           css({
             width: "100%",
             "& h2:first-of-type": {

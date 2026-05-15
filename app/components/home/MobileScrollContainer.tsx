@@ -36,6 +36,7 @@ export const MobileLayout = ({ navbar, children }: MobileLayoutProps) => {
     // SSR/initial render - show mobile layout without animation
     return (
       <div
+        data-testid="home-mobile-layout-root"
         className={css({
           lg: { display: "none" },
           w: "100%", // Changed from 100vw to prevent horizontal scroll
@@ -71,6 +72,7 @@ export const MobileLayout = ({ navbar, children }: MobileLayoutProps) => {
 
   return (
     <div
+      data-testid="home-mobile-layout-root"
       className={css({
         lg: { display: "none" },
         w: "100%", // Changed from 100vw to prevent horizontal scroll caused by vertical scrollbar

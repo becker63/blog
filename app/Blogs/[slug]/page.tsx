@@ -10,7 +10,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxOptions } from "../../../lib/mdx";
 import "highlight.js/styles/atom-one-dark.css";
 import { Aside } from "../../components/shared/Aside";
-import { blogContentProseStyles } from "../../components/shared/blogContentProseStyles";
+import { blogContentProseClass } from "../../components/shared/blogContentProseStyles";
 /* ------------------------- */
 /* Date Utility              */
 /* ------------------------- */
@@ -64,7 +64,7 @@ export default async function Post({ params }: { params: { slug: string } }) {
           ...blogArticleShellStyles,
         })}
       >
-        <div className={css(blogContentProseStyles)}>
+        <div data-testid="blog-post-prose" className={blogContentProseClass}>
           {/* Header */}
           <div className={css({ mb: "5" })}>
             <h1

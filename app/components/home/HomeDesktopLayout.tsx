@@ -18,6 +18,7 @@ export const HomeDesktopLayout = () => {
       </div>
 
       <div
+        data-testid="home-desktop-layout-root"
         className={css({
           display: "none",
           lg: { display: "flex" },

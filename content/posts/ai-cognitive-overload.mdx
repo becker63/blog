@@ -1,5 +1,5 @@
 ---
-title: Agents Need Fewer Commands
+title: You Are Giving Your AI Cognitive Overload
 date: '14 May 2026'
 description: Using Buck2 and Nix to turn repository operations into a small graph of sanctioned actions instead of a pile of debugging commands.
 tags: tech, ai, build-systems
@@ -7,7 +7,11 @@ tags: tech, ai, build-systems
 
 The hook is not that I added Buck2.
 
-The hook is that I deleted this:
+The hook is that I realized I was giving my AI cognitive overload.
+
+I had handed the repository a long list of valid-looking commands and expected an agent to infer which ones mattered.
+
+Then I deleted this:
 
 ```md
 **Debugging commands** (use only when a hook failed and you need the same check ad hoc):
@@ -112,6 +116,40 @@ The commands themselves do not carry enough meaning.
 
 They are procedures without structure.
 
+The agent-facing documentation eventually became a mirror of that complexity.
+
+This was not bad documentation. It was accurate documentation. That was the problem.
+
+```diff
+diff --git a/AGENTS.md b/AGENTS.md
+index 99518ef..61f8c7f 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -52,22 +52,16 @@ The flake provides a reproducible toolchain, pre-commit hooks, and `searchbench-
+
+ | Stage | What runs |
+ | --- | --- |
+-| **`git commit` (pre-commit)** | Fast repo-local checks: formatting (Go/Nix/shell), hygiene, **golangci-lint** (includes **staticcheck** via `.golangci.yml`), **govet**, architecture + prompt contract tests, Pkl/templ generated-file checks, **Repomix** snapshot (`repomix-output.xml` regenerated and staged) |
+-| **`git push` (pre-push)** | **`go test ./...`**, root **e2e**, **searchbench-check-generated**, **go mod tidy** check, **standalone staticcheck** (`searchbench-staticcheck`), **standalone golangci-lint**, **`nix flake check`**, **Repomix freshness** (regenerate `repomix-output.xml`; **fail the push** if it differs from what is committed — commit or amend the snapshot, then push again; hooks never auto-amend) |
++| **`git commit` (pre-commit)** | Hygiene (Go/Nix/shell formatting, JSON/YAML/TOML, merge conflicts, …), then **Repomix + `buck2 test //:check`** |
++| **`git push` (pre-push)** | **`buck2 test //:check_full`** |
+
+-Hook staging avoids duplicate **staticcheck** on the same stage: pre-commit uses **golangci-lint** with `staticcheck` enabled in `.golangci.yml`. Pre-push runs **explicit** `searchbench-staticcheck` and `searchbench-golangci` as a fuller proof pass.
++The flake provides a **dev shell**, **git-hooks.nix** wiring, and the **Buck2 Nix cell** under `toolchains/`. It does **not** ship a separate `nix/tools/` command layer: substantive checks run through **Buck2**.
+```
+
+This is the transition I care about.
+
+The docs still exist.
+
+The hooks still exist.
+
+But the shape of the interface changed. The agent no longer gets handed a catalog of project-specific spells and asked to infer which subset matters.
+
+The docs point to graph targets.
+
+The graph targets carry the semantics.
+
 ## After: a graph
 
 After, the repository exposes named targets in a graph.
@@ -124,6 +162,16 @@ After, the repository exposes named targets in a graph.
 Those targets are not just shorter commands.
 
 They are semantic entrypoints.
+
+<Aside title="Why Buck2?" tone="system">
+
+Buck2 matters here because targets are named nodes in a dependency graph, not just shell commands with shorter names.
+
+A target can depend on other targets. A suite can compose local checks from multiple parts of the repository.
+
+The actor does not need to remember the checklist, because the checklist has become part of the graph.
+
+</Aside>
 
 `//:check` means:
 
@@ -141,11 +189,56 @@ includes the fast gate
 also proves the Repomix snapshot is committed
 ```
 
-An agent does not need to reconstruct that meaning from a command table.
+The root `BUCK` file says that directly:
 
-The target name carries it.
+```diff
+diff --git a/BUCK b/BUCK
+new file mode 100644
+index 0000000..2f2e2e1
+--- /dev/null
++++ b/BUCK
+@@ -0,0 +1,25 @@
++load("@prelude//:rules.bzl", "sh_test", "test_suite")
++
++sh_test(
++    name = "repomix_fresh_check",
++    test = "repomix_fresh_check.sh",
++)
++
++# Fast gate: Go module tests + CLI build + Iterative Context `check` (import smoke + pytest; no Repomix).
++test_suite(
++    name = "check",
++    tests = [
++        "//src/searchbench-go:check",
++        "//src/iterative-context:check",
++    ],
++)
++
++# Full gate: Go `check` + Iterative Context `check_full` (adds basedpyright) + Repomix snapshot freshness (pre-push / manual).
++test_suite(
++    name = "check_full",
++    tests = [
++        "//src/searchbench-go:check",
++        "//src/iterative-context:check_full",
++        ":repomix_fresh_check",
++    ],
++)
+```
 
-The graph enforces it.
+That is the shape I wanted.
+
+The important part is not that the command got shorter.
+
+The important part is that the repository now has a place to say:
+
+```text
+These are the entrypoints.
+These are the dependencies.
+This is the fast gate.
+This is the full gate.
+```
+
+The policy moved out of a checklist and into a graph.
 
 ## The repo should decide
 
@@ -169,44 +262,15 @@ This is exactly the kind of repository where an agent can get lost.
 
 Not because the code is impossible to understand, but because the operational surface is too wide. There are many valid-looking things to run, many local conventions to remember, and many steps that are only meaningful in relation to other steps.
 
-The thing I want is much smaller:
-
-```text
-buck2 test //:check
-buck2 test //:check_full
-```
-
 The agent should not decide how to validate the repo.
 
 The repo should expose the validation graph.
 
 ## Buck2 as an agent interface
 
-The root Buck file is tiny:
+The root Buck file is tiny.
 
-```python
-load("@prelude//:rules.bzl", "test_suite")
-
-# Fast gate: Go module tests + CLI build + Iterative Context smoke.
-test_suite(
-    name = "check",
-    tests = [
-        "//src/searchbench-go:check",
-        "//src:iterative_context_check",
-    ],
-)
-
-# Full gate: `check` plus Repomix snapshot freshness.
-test_suite(
-    name = "check_full",
-    tests = [
-        ":check",
-        "toolchains//:repomix_fresh_check",
-    ],
-)
-```
-
-There is not much code here.
+There is not much code there.
 
 We are compressing or hiding a lot of information.
 
@@ -231,6 +295,119 @@ Humans can recover missing context socially.
 Maybe that is the source of differentiation between agents and humans.
 
 Agents need the repository to make valid operations explicit.
+
+## The nice part is the implicit coordination
+
+The part I find most satisfying is not just the root target.
+
+It is the way the root target composes other targets without needing to know their internal details.
+
+The Go harness has its own `BUCK` file:
+
+```diff
+diff --git a/src/searchbench-go/BUCK b/src/searchbench-go/BUCK
+new file mode 100644
+index 0000000..f1a6fba
+--- /dev/null
++++ b/src/searchbench-go/BUCK
+@@ -0,0 +1,24 @@
++load("@prelude//:rules.bzl", "sh_test", "test_suite")
++
++sh_test(
++    name = "go_tests",
++    test = "go_tests.sh",
++)
++
++sh_test(
++    name = "go_cli_build",
++    test = "cli_build.sh",
++)
++
++sh_test(
++    name = "pkl_go_types",
++    test = "pkl_go_types.sh",
++)
++
++test_suite(
++    name = "check",
++    tests = [
++        ":go_tests",
++        ":go_cli_build",
++    ],
++)
+```
+
+That file says what the Go module needs:
+
+```text
+run the Go tests
+build the CLI
+keep Pkl generation as an explicit opt-in target
+```
+
+The root file does not need to know the shape of that local workflow.
+
+It just composes the Go module's `:check` with the Python tool's `:check`.
+
+```diff
+diff --git a/BUCK b/BUCK
+new file mode 100644
+index 0000000..2f2e2e1
+--- /dev/null
++++ b/BUCK
+@@ -8,18 +8,18 @@
++# Fast gate: Go module tests + CLI build + Iterative Context `check` (import smoke + pytest; no Repomix).
++test_suite(
++    name = "check",
++    tests = [
++        "//src/searchbench-go:check",
++        "//src/iterative-context:check",
++    ],
++)
++
++# Full gate: Go `check` + Iterative Context `check_full` (adds basedpyright) + Repomix snapshot freshness (pre-push / manual).
++test_suite(
++    name = "check_full",
++    tests = [
++        "//src/searchbench-go:check",
++        "//src/iterative-context:check_full",
++        ":repomix_fresh_check",
++    ],
++)
+```
+
+That is the build graph doing coordination work.
+
+The Go target owns Go semantics.
+
+The Python target owns Python semantics.
+
+The root target owns repository semantics.
+
+This is exactly the kind of boundary I want agents to see.
+
+The agent does not need to remember:
+
+```text
+cd into the Go module
+run Go tests
+build the CLI
+cd back to root
+run the Python import smoke
+run pytest
+maybe run basedpyright on push
+maybe refresh Repomix
+make sure it is committed
+```
+
+The repo says:
+
+```text
+buck2 test //:check
+buck2 test //:check_full
+```
+
+That feels like a small control plane.
 
 ## Nix still owns the environment
 
@@ -263,6 +440,12 @@ Git hooks answer:
 > When should those operations run?
 
 The result is less clever than the previous system, and better because of it.
+
+The hooks still exist, but they no longer contain the entire checklist.
+
+They trigger the graph.
+
+That is a cleaner division of responsibility.
 
 ## This matters more for agents than for humans
 
@@ -307,10 +490,6 @@ That is a much better interface for a coding agent.
 This also made the repository layout more honest.
 
 SearchBench is not really a single-language project anymore.
-
-I do not want to collapse SearchBench into one language just to make the repository look simpler.
-
-Different parts of the system want different semantics.
 
 I do not want to collapse SearchBench into one language just to make the repository look simpler.
 
@@ -378,62 +557,118 @@ The validation target needs to know about the Go app, the Python submodule, the 
 
 That is exactly what a build graph is for.
 
-## Removing knobs is a feature
-
-The thing I like most about this change is that it removes knobs.
-
-The old system asked contributors and agents to understand a pile of project-specific commands.
-
-The new system asks them to understand two targets.
-
-That is not a loss of power. It is a gain in structure.
-
-There are still lower-level commands. You can still run `go test ./...` inside the Go module. You can still run `golangci-lint`. You can still inspect Repomix manually. But those are no longer the main interface.
-
-The main interface is the graph.
-
-That changes the feel of the repository.
-
-The repository stops being a bag of scripts and starts becoming a small control plane for its own correctness.
-
 ## The external harness owns orchestration
 
 One line in the diff is easy to miss:
 
-```md
-**Orchestration outside this repo:** Worktrees, branch lifecycle, task assignment, agent summary packs, and merge orchestration are owned by an external meta harness, not by SearchBench-Go.
+```diff
++**Orchestration outside this repo:** Worktrees, branch lifecycle, task assignment, agent summary packs, and merge orchestration are owned by an **external meta harness**, not by SearchBench-Go.
 ```
 
-That line is doing a lot of work.
+I find this boundary beautiful.
 
-SearchBench-Go should not become an agent worktree manager.
+SearchBench-Go owns local correctness: what can be built, tested, generated, checked, and released.
 
-It should not own task assignment.
+The external harness owns global orchestration: which branch, which issue, which agent, which worktree, and which merge strategy.
 
-It should not own branch lifecycle.
+Those are both necessary, but they should not be the same system.
 
-It should not own global agent coordination.
+A future release diff could make that boundary concrete. This part is hypothetical, but it is the shape I want: the meta harness proposes a release by changing a Pkl round manifest and adding a Buck graph target. The repository still owns validation. The harness owns orchestration.
 
-The repository owns local correctness.
-
-The external harness owns orchestration.
-
-That boundary is important.
-
-A coding agent needs both:
-
-```text
-local capability graph
-global workflow coordination
+```diff
+diff --git a/configs/releases/2026-05-15-ic-v2/round.pkl b/configs/releases/2026-05-15-ic-v2/round.pkl
+new file mode 100644
+index 0000000..7a41c10
+--- /dev/null
++++ b/configs/releases/2026-05-15-ic-v2/round.pkl
+@@ -0,0 +1,47 @@
++amends "../../schema/SearchBenchRound.pkl"
++
++name = "ic-v2-release-candidate"
++game = "code-localization"
++
++dataset {
++  kind = "lca"
++  name = "JetBrains-Research/lca-bug-localization"
++  config = "py"
++  split = "dev"
++  maxItems = 24
++}
++
++incumbent {
++  name = "jcodemunch"
++  backend = "mcp"
++  command = env("SEARCHBENCH_JCODEMUNCH_COMMAND")
++}
++
++challenger {
++  name = "iterative-context-v2"
++  backend = "mcp"
++  command = env("SEARCHBENCH_ITERATIVE_CONTEXT_COMMAND")
++  policy = read("policies/challenger_policy.py")
++}
++
++objective = import("scoring/localization-objective.pkl")
++
++promotion {
++  requirePrimaryScoreImprovement = true
++  maxTokenRatio = 1.10
++  protectedCasesMayRegress = false
++}
++
++artifacts {
++  bundleRoot = "artifacts/releases/2026-05-15-ic-v2"
++  report = "report.md"
++  evidence = "evidence.pkl"
++  decision = "decision.json"
++}
+diff --git a/releases/BUCK b/releases/BUCK
+new file mode 100644
+index 0000000..ad6129c
+--- /dev/null
++++ b/releases/BUCK
+@@ -0,0 +1,35 @@
++load("@prelude//:rules.bzl", "sh_test", "test_suite")
++
++sh_test(
++    name = "run_ic_v2_release",
++    test = "run_release.sh",
++    args = [
++        "../configs/releases/2026-05-15-ic-v2/round.pkl",
++        "--bundle-root",
++        "../artifacts/releases/2026-05-15-ic-v2",
++    ],
++)
++
++sh_test(
++    name = "check_ic_v2_release_report",
++    test = "check_release_report.sh",
++    args = [
++        "../artifacts/releases/2026-05-15-ic-v2/decision.json",
++    ],
++)
++
++test_suite(
++    name = "ic_v2_release_candidate",
++    tests = [
++        "//:check_full",
++        ":run_ic_v2_release",
++        ":check_ic_v2_release_report",
++    ],
++)
 ```
 
-But those should not be the same system.
+That is the release-engineering version of the same idea.
 
-Buck2 gives the repository a local capability graph. It says what can be built, tested, generated, checked, or packaged.
+The Pkl says what is being evaluated.
 
-The meta harness can decide which branch, which issue, which agent, and which merge strategy.
+The Buck target says what is allowed to run.
 
-That separation keeps SearchBench from turning into a generic agent platform by accident.
+The artifact bundle says what happened.
+
+The meta harness does not need to smuggle project policy through a prompt. It proposes a small, legible diff. The repository graph either accepts it or rejects it.
+
+That is the beautiful part.
 
 ## The broader pattern
 
@@ -477,9 +712,9 @@ Give them a smaller interface that preserves the important choices and removes t
 
 ## The thesis
 
-Agents need fewer commands.
+You are giving your AI cognitive overload when you hand it a pile of valid-looking commands and ask it to infer the real workflow.
 
-Not because they are dumb.
+Not because the model is dumb.
 
 Because repositories are full of implicit operational knowledge, and agents force that knowledge into the open.
 
@@ -489,18 +724,14 @@ Every ad hoc script is a hidden policy decision.
 
 Every setup step is a chance for the model to do something plausible and wrong.
 
-Buck2 is useful here because it lets the repository turn those decisions into graph structure.
+The fix is not always to give the agent more context.
 
-Nix is useful because it makes the environment closure explicit.
+Sometimes the fix is to move the workflow out of prose and into the repository itself.
 
-Together, they let the repo say:
+Not a longer checklist.
+
+A smaller set of legal moves.
 
 ```text
 Here are the legal moves.
 ```
-
-That is the interface I want agents to have.
-
-Not a pile of commands.
-
-A graph.
