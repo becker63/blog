@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "days": {
     "2026-05-15": {
-      "producerScheduledRuns": 1,
+      "producerScheduledRuns": 2,
       "producerManualRuns": 0,
       "aggregatorRuns": 0,
-      "estimatedInputTokens": 15990,
-      "estimatedOutputTokens": 3943,
-      "lastProducerRunAt": "2026-05-15T07:29:45.271Z"
+      "estimatedInputTokens": 75360,
+      "estimatedOutputTokens": 8039,
+      "lastProducerRunAt": "2026-05-15T09:25:03.634Z"
     }
   }
 }
