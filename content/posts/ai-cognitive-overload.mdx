@@ -407,46 +407,6 @@ buck2 test //:check
 buck2 test //:check_full
 ```
 
-That feels like a small control plane.
-
-## Nix still owns the environment
-
-Buck2 does not replace Nix here.
-
-Nix still owns the development shell. It puts Go, Pkl, Buck2, Repomix, pre-commit, and the surrounding toolchain on `PATH`.
-
-The difference is that Nix no longer has to be the place where every project operation becomes a custom shell command.
-
-The split now looks like this:
-
-```text
-Nix   → toolchain and environment closure
-Buck2 → repository action graph
-Git   → lifecycle trigger
-```
-
-That separation feels much cleaner.
-
-Nix answers:
-
-> What tools exist, and which versions are they?
-
-Buck2 answers:
-
-> What are the sanctioned operations over this repository?
-
-Git hooks answer:
-
-> When should those operations run?
-
-The result is less clever than the previous system, and better because of it.
-
-The hooks still exist, but they no longer contain the entire checklist.
-
-They trigger the graph.
-
-That is a cleaner division of responsibility.
-
 ## The monorepo shape
 
 This also made the repository layout more honest.
