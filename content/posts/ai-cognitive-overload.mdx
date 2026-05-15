@@ -1,0 +1,506 @@
+---
+title: Agents Need Fewer Commands
+date: '14 May 2026'
+description: Using Buck2 and Nix to turn repository operations into a small graph of sanctioned actions instead of a pile of debugging commands.
+tags: tech, ai, build-systems
+---
+
+The hook is not that I added Buck2.
+
+The hook is that I deleted this:
+
+```md
+**Debugging commands** (use only when a hook failed and you need the same check ad hoc):
+
+| Command | Purpose |
+| --- | --- |
+| `nix develop -c searchbench-update-repomix` | Regenerate + `git add` `repomix-output.xml` |
+| `nix develop -c searchbench-repomix-fresh-check` | Same as pre-push Repomix gate |
+| `nix develop -c searchbench-staticcheck` | `staticcheck ./...` |
+| `nix develop -c searchbench-golangci` | `golangci-lint run ./...` |
+| `nix develop -c searchbench-go-mod-tidy-check` | Fail if `go mod tidy` would change files |
+| `nix develop -c searchbench-prompt-contract-check` | Tests for `.templ` XML prompt contracts |
+| `nix develop -c searchbench-refresh-pkl-example-fixtures` | Regenerate optimize-IC fixtures |
+| `nix develop -c searchbench-go-build-root` | `go build -o searchbench ./cmd/searchbench` |
+| `nix develop -c searchbench-architecture-check` | Import-boundary tests |
+| `nix develop -c searchbench-check-generated` | Pkl + templ generated outputs |
+| `nix develop -c searchbench-check-pkl-generated` | Pkl bindings vs schema |
+| `nix develop -c searchbench-check-templ-generated` | Templ-generated prompts |
+| `nix develop -c searchbench-e2e` | Root package integration tests |
+| `nix develop -c searchbench-go-test-all` | `go test ./...` |
+| `nix develop -c searchbench-nix-flake-check` | `nix flake check` |
+```
+
+and replaced the operational surface with this:
+
+```diff
++nix develop -c buck2 test //:check
++nix develop -c buck2 test //:check_full
+```
+
+That is the whole idea.
+
+AI agents do not struggle because repositories lack commands.
+
+They struggle because repositories expose too many operational decisions.
+
+## Commands are cognitive branches
+
+A list of debugging commands looks responsible.
+
+It tells future contributors how to run the formatter, the linter, the generated-file checks, the integration tests, the static analysis pass, the Repomix snapshot, and the pre-push gate.
+
+For a human, that can be fine. Humans bring social context. We know when a command is canonical, when it is historical, when it is only for debugging, and when the right move is to ignore the docs and ask someone.
+
+Agents do not have that same context.
+
+An agent sees a table of commands and has to infer:
+
+```text
+Which command matters?
+Which one is complete?
+Which one is fast?
+Which one is authoritative?
+Which one mutates the tree?
+Which one should run before commit?
+Which one should run before push?
+Which one is only for reproducing a failed hook?
+```
+
+Every command is a branch in the search space.
+
+The problem is not that any individual command is bad. Most of these commands were useful. They came from real debugging sessions, real project constraints, and real attempts to make the repository easier to operate.
+
+That is what makes the diff interesting.
+
+The old system was not sloppy. It was already disciplined.
+
+It still leaked too much operational cognition.
+
+## Before: a list of procedures
+
+Before, the repository exposed a list of procedures.
+
+```text
+nix develop -c searchbench-staticcheck
+nix develop -c searchbench-golangci
+nix develop -c searchbench-go-test-all
+nix develop -c searchbench-check-generated
+nix develop -c searchbench-check-templ-generated
+nix develop -c searchbench-check-pkl-generated
+nix develop -c searchbench-e2e
+nix develop -c searchbench-architecture-check
+nix develop -c searchbench-repomix-fresh-check
+```
+
+That surface area matters.
+
+Even if every command is documented correctly, the repository is still asking the actor — human or agent — to reconstruct policy from procedures.
+
+The actor has to understand:
+
+```text
+ordering
+completeness
+intent
+authority
+speed
+mutation semantics
+```
+
+The commands themselves do not carry enough meaning.
+
+They are procedures without structure.
+
+## After: a graph
+
+After, the repository exposes named targets in a graph.
+
+```text
+//:check
+//:check_full
+```
+
+Those targets are not just shorter commands.
+
+They are semantic entrypoints.
+
+`//:check` means:
+
+```text
+fast enough for normal local validation
+safe enough for pre-commit
+covers Go tests, CLI build, and Iterative Context smoke
+```
+
+`//:check_full` means:
+
+```text
+the full push gate
+includes the fast gate
+also proves the Repomix snapshot is committed
+```
+
+An agent does not need to reconstruct that meaning from a command table.
+
+The target name carries it.
+
+The graph enforces it.
+
+## The repo should decide
+
+SearchBench is an agentic code-search evaluation harness. It compares a baseline code-search system against a candidate system, runs both against bounded tasks, collects evidence, scores results, tracks regressions, and produces a release decision.
+
+That means the repository has a lot going on:
+
+```text
+Go application code
+Python submodule
+Pkl schemas
+templ-generated prompts
+MCP backends
+Repomix snapshots
+release bundles
+fake e2e paths
+real adapter boundaries
+```
+
+This is exactly the kind of repository where an agent can get lost.
+
+Not because the code is impossible to understand, but because the operational surface is too wide. There are many valid-looking things to run, many local conventions to remember, and many steps that are only meaningful in relation to other steps.
+
+The thing I want is much smaller:
+
+```text
+buck2 test //:check
+buck2 test //:check_full
+```
+
+The agent should not decide how to validate the repo.
+
+The repo should expose the validation graph.
+
+## Buck2 as an agent interface
+
+The root Buck file is tiny:
+
+```python
+load("@prelude//:rules.bzl", "test_suite")
+
+# Fast gate: Go module tests + CLI build + Iterative Context smoke.
+test_suite(
+    name = "check",
+    tests = [
+        "//src/searchbench-go:check",
+        "//src:iterative_context_check",
+    ],
+)
+
+# Full gate: `check` plus Repomix snapshot freshness.
+test_suite(
+    name = "check_full",
+    tests = [
+        ":check",
+        "toolchains//:repomix_fresh_check",
+    ],
+)
+```
+
+There is not much code here.
+
+We are compressing or hiding a lot of information.
+
+That is the point.
+
+The important thing is not the number of lines. It is the shift in authority.
+
+Before, the repository exposed procedures.
+
+After, it exposes capability boundaries.
+
+Buck2 gives the repository a way to define:
+
+```text
+These are the sanctioned transformations of the system.
+```
+
+That matters much more for agents than for humans.
+
+Humans can recover missing context socially.
+
+Maybe that is the source of differentiation between agents and humans.
+
+Agents need the repository to make valid operations explicit.
+
+## Nix still owns the environment
+
+Buck2 does not replace Nix here.
+
+Nix still owns the development shell. It puts Go, Pkl, Buck2, Repomix, pre-commit, and the surrounding toolchain on `PATH`.
+
+The difference is that Nix no longer has to be the place where every project operation becomes a custom shell command.
+
+The split now looks like this:
+
+```text
+Nix   → toolchain and environment closure
+Buck2 → repository action graph
+Git   → lifecycle trigger
+```
+
+That separation feels much cleaner.
+
+Nix answers:
+
+> What tools exist, and which versions are they?
+
+Buck2 answers:
+
+> What are the sanctioned operations over this repository?
+
+Git hooks answer:
+
+> When should those operations run?
+
+The result is less clever than the previous system, and better because of it.
+
+## This matters more for agents than for humans
+
+A human can read a long `AGENTS.md` and slowly learn the local rituals.
+
+An agent can too, but only unreliably.
+
+The larger the operational surface gets, the more likely the agent is to do something plausible but wrong:
+
+```text
+run the wrong subset
+skip the generated-file check
+forget the submodule smoke
+run a mutating command at the wrong time
+trust a stale Repomix snapshot
+test from the wrong working directory
+```
+
+Good agent infrastructure is not about giving the model more tools.
+
+It is about removing invalid operational choices.
+
+That is why this change feels important. Buck2 gives the repository a way to expose fewer, stronger affordances.
+
+Instead of saying:
+
+```text
+Here are fifteen commands. Good luck.
+```
+
+the repo says:
+
+```text
+Run //:check.
+Run //:check_full.
+```
+
+That is a much better interface for a coding agent.
+
+## The monorepo shape
+
+This also made the repository layout more honest.
+
+SearchBench is not really a single-language project anymore.
+
+I do not want to collapse SearchBench into one language just to make the repository look simpler.
+
+Different parts of the system want different semantics.
+
+I do not want to collapse SearchBench into one language just to make the repository look simpler.
+
+Different parts of the system want different semantics.
+
+The harness wanted Go.
+
+<Aside title="Why Go?" tone="system">
+
+Go is good for the backend harness because it keeps me close to operational reality: simple binaries, clear package boundaries, boring tooling, and direct tests.
+
+Moving the harness into Go made the pure model easier to see. It surfaced file boundaries quickly, gave me a reliable `go test ./...` loop, and let me build the CLI, bundle writer, adapters, and fake e2e paths without disappearing into configuration design too early.
+
+</Aside>
+
+The tool wanted Python.
+
+<Aside title="Why Python?" tone="system">
+
+Python is still the right home for Iterative Context because its testing story is excellent.
+
+The interesting work there is policy behavior, invariants, property-style tests, metamorphic cases, and pytest-driven exploration. A theme of mine, see [`designing-for-two`](https://github.com/becker63/designing-for-two).
+
+</Aside>
+
+The visualization wanted TypeScript.
+
+<Aside title="Why TypeScript?" tone="system">
+
+Because the browser is the runtime.
+
+React Flow, RxJS, Jotai, animation, replay controls, and rich trace interaction are exactly the kind of work TypeScript is good at. That part is basically already real; the second pane is the easy part.
+
+</Aside>
+
+The goal is not one language.
+
+The goal is one system.
+
+SearchBench now has a small monorepo structure:
+
+```text
+src/searchbench-go/
+src/iterative-context/
+src/visualization/
+configs/
+toolchains/
+BUCK
+flake.nix
+```
+
+The Go module lives under `src/searchbench-go`.
+
+The Iterative Context Python project lives under `src/iterative-context`.
+
+The visualization will live under `src/visualization`.
+
+Shared Pkl schemas and round manifests stay at the root under `configs`.
+
+That shape matters because SearchBench is now mature enough that it is time to bring its parts together.
+
+A single `go test ./...` is not the whole system anymore.
+
+The validation target needs to know about the Go app, the Python submodule, the visualization, and the artifact snapshot.
+
+That is exactly what a build graph is for.
+
+## Removing knobs is a feature
+
+The thing I like most about this change is that it removes knobs.
+
+The old system asked contributors and agents to understand a pile of project-specific commands.
+
+The new system asks them to understand two targets.
+
+That is not a loss of power. It is a gain in structure.
+
+There are still lower-level commands. You can still run `go test ./...` inside the Go module. You can still run `golangci-lint`. You can still inspect Repomix manually. But those are no longer the main interface.
+
+The main interface is the graph.
+
+That changes the feel of the repository.
+
+The repository stops being a bag of scripts and starts becoming a small control plane for its own correctness.
+
+## The external harness owns orchestration
+
+One line in the diff is easy to miss:
+
+```md
+**Orchestration outside this repo:** Worktrees, branch lifecycle, task assignment, agent summary packs, and merge orchestration are owned by an external meta harness, not by SearchBench-Go.
+```
+
+That line is doing a lot of work.
+
+SearchBench-Go should not become an agent worktree manager.
+
+It should not own task assignment.
+
+It should not own branch lifecycle.
+
+It should not own global agent coordination.
+
+The repository owns local correctness.
+
+The external harness owns orchestration.
+
+That boundary is important.
+
+A coding agent needs both:
+
+```text
+local capability graph
+global workflow coordination
+```
+
+But those should not be the same system.
+
+Buck2 gives the repository a local capability graph. It says what can be built, tested, generated, checked, or packaged.
+
+The meta harness can decide which branch, which issue, which agent, and which merge strategy.
+
+That separation keeps SearchBench from turning into a generic agent platform by accident.
+
+## The broader pattern
+
+I keep coming back to the same design shape:
+
+```text
+wide human intent
+→ narrow machine interface
+→ durable artifact
+```
+
+In infrastructure, that might be:
+
+```text
+operator intent
+→ schema-constrained configuration
+→ reconciled resources
+```
+
+In AI evaluation, it might be:
+
+```text
+candidate agent change
+→ fixed round manifest
+→ release bundle
+```
+
+In this build-system change, it is:
+
+```text
+developer or agent intent
+→ Buck2 target
+→ validated repository state
+```
+
+The pattern is the same.
+
+Do not let every actor reach directly into the full complexity of the system.
+
+Give them a smaller interface that preserves the important choices and removes the rest.
+
+## The thesis
+
+Agents need fewer commands.
+
+Not because they are dumb.
+
+Because repositories are full of implicit operational knowledge, and agents force that knowledge into the open.
+
+Every debugging command is a cognitive branch.
+
+Every ad hoc script is a hidden policy decision.
+
+Every setup step is a chance for the model to do something plausible and wrong.
+
+Buck2 is useful here because it lets the repository turn those decisions into graph structure.
+
+Nix is useful because it makes the environment closure explicit.
+
+Together, they let the repo say:
+
+```text
+Here are the legal moves.
+```
+
+That is the interface I want agents to have.
+
+Not a pile of commands.
+
+A graph.

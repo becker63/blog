@@ -3,7 +3,7 @@ import { css } from "../../../styled-system/css";
 import { HomeNav } from "./HomeNav";
 import { LatestBlogCard } from "./LatestBlogCard";
 import { Card, Socials, BebopContainer } from ".";
-import { glassCardStyles } from "../shared/GlassCard";
+import { glassCardStyles, glassPanelShellStyles } from "../shared/GlassCard";
 import { AnimatedCard } from "../shared/AnimatedCard";
 import { seededDelay } from "../../../lib/animationDelay";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
@@ -53,8 +53,9 @@ export const HomeDesktopLayout = () => {
         >
           <AnimatedCard
             delay={seededDelay("identity-desktop")}
+            finalOpacity={1}
             className={css({
-              ...glassCardStyles,
+              ...glassPanelShellStyles,
               gridArea: "About",
               display: "flex",
               flexDirection: "column",
@@ -123,8 +124,9 @@ export const HomeDesktopLayout = () => {
 
           <AnimatedCard
             delay={seededDelay("latest-desktop")}
+            finalOpacity={1}
             className={css({
-              ...glassCardStyles,
+              ...glassPanelShellStyles,
               gridArea: "Latest-Blog",
               display: "flex",
               flexDirection: "column",

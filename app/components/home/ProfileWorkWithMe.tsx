@@ -1,128 +1,61 @@
 import { css } from "../../../styled-system/css";
 import { PROFILE_WORK_WITH_ME_COPY } from "../../../lib/profileNavigation";
+import { Aside } from "../shared/Aside";
 
 export const ProfileWorkWithMe = () => {
+  const { intro, pricing, offerings } = PROFILE_WORK_WITH_ME_COPY;
+
   return (
-    <section
-      aria-labelledby="profile-work-with-me-title"
-      className={css({
-        display: "flex",
-        flexDirection: "column",
-        gap: "3",
-        pt: "4",
-        borderTopWidth: "1px",
-        borderTopStyle: "solid",
-        borderTopColor: "white/10",
-      })}
-    >
-      <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          gap: "2",
-        })}
-      >
-        <h3
-          id="profile-work-with-me-title"
-          className={css({
-            fontSize: "sm",
-            fontWeight: "semibold",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "white/80",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.title}
-        </h3>
+    <section aria-labelledby="profile-work-with-me-title">
+      <h3 id="profile-work-with-me-title">
+        {PROFILE_WORK_WITH_ME_COPY.title}
+      </h3>
 
-        <p
-          className={css({
-            color: "gray.200",
-            fontSize: "sm",
-            lineHeight: "1.7",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.intro}
-        </p>
-
-        <p
-          className={css({
-            color: "gray.400",
-            fontSize: "xs",
-            lineHeight: "1.6",
-          })}
-        >
-          {PROFILE_WORK_WITH_ME_COPY.pricing}
-        </p>
-      </div>
+      <p>{intro}</p>
 
       <div
         className={css({
           display: "flex",
           flexDirection: "column",
-          borderTopWidth: "1px",
-          borderTopStyle: "solid",
-          borderTopColor: "white/10",
+          gap: "8",
+          "& details": {
+            my: "0",
+          },
         })}
       >
-        {PROFILE_WORK_WITH_ME_COPY.offerings.map((offering, index) => (
-          <div
-            key={offering.title}
-            className={css({
-              display: "grid",
-              gridTemplateColumns: "auto minmax(0, 1fr)",
-              columnGap: "3",
-              alignItems: "start",
-              py: "3",
-              borderBottomWidth: "1px",
-              borderBottomStyle: "solid",
-              borderBottomColor: "white/10",
-            })}
-          >
-            <span
-              aria-hidden="true"
-              className={css({
-                fontFamily: "mono",
-                fontSize: "xs",
-                letterSpacing: "0.12em",
-                color: "white/45",
-                pt: "0.5",
-              })}
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
+        <Aside title="What I can help with" tone="system" defaultOpen>
+          <p>
+            Typical themes: opaque software and infrastructure, security
+            boundaries, developer tooling, and AI-agent workflows — made easier
+            to inspect, debug, and trust.
+          </p>
+          <ul>
+            {offerings.map((o) => (
+              <li key={o.title}>{o.title}</li>
+            ))}
+          </ul>
+        </Aside>
 
-            <article
-              className={css({
-                display: "flex",
-                flexDirection: "column",
-                gap: "1",
-                minW: 0,
-              })}
-            >
-              <h4
-                className={css({
-                  color: "white",
-                  fontSize: "sm",
-                  fontWeight: "medium",
-                  lineHeight: "1.4",
-                })}
-              >
-                {offering.title}
-              </h4>
+        <Aside title="Good first projects" tone="system" defaultOpen={false}>
+          <p>
+            Small, bounded work tends to fit best: diagnostics, internal tools,
+            repo or CI cleanup, observability hooks, eval or reporting passes,
+            dashboards, or documentation that makes a system legible.
+          </p>
+          {offerings.map((o) => (
+            <p key={o.title}>
+              <strong>{o.title}.</strong> {o.description}
+            </p>
+          ))}
+        </Aside>
 
-              <p
-                className={css({
-                  color: "gray.400",
-                  fontSize: "xs",
-                  lineHeight: "1.6",
-                })}
-              >
-                {offering.description}
-              </p>
-            </article>
-          </div>
-        ))}
+        <Aside title="Rates and scope" tone="system" defaultOpen={false}>
+          <p>{pricing}</p>
+          <p>
+            If you are not sure how to scope something, describe the system and
+            what feels unclear — we can pick a narrow first slice.
+          </p>
+        </Aside>
       </div>
     </section>
   );

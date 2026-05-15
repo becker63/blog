@@ -33,8 +33,9 @@ const SEARCH_VIEWPORTS = [
 
 const LOAD_WAIT_MS = 1500;
 const WIDTH_TOLERANCE_PX = 2;
-const MIN_CHILD_INDENT_DELTA_PX = 56;
-const TREE_GAP_PX = 12;
+const MIN_CHILD_INDENT_DELTA_PX = 44;
+/** Keep in sync with `SEARCH_ROOT_CATEGORY_GAP_PX` in `app/components/search/TreeLines.tsx`. */
+const TREE_GAP_PX = 24;
 
 test.describe("Viewport Consistency", () => {
   test("desktop dashboard shell matches the status bar width across laptop and desktop viewports", async ({

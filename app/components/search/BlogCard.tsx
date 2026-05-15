@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BlogPost } from "../../../lib/blogs";
 import { DescriptionTags, tags } from "./Badges";
+import { PaneChild } from "../shared/PaneChild";
 
 /* ------------------------- */
 /* Date Utilities            */
@@ -56,14 +57,9 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
       className={css({
         flex: 1,
         minW: 0,
-        px: "5",
-        py: "5",
-        borderRadius: "10px",
-        boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
-        bg: "rgba(0, 0, 0, 0.7)",
-        backdropFilter: "blur(10px)",
       })}
     >
+      <PaneChild className={css({ minW: 0, w: "full" })}>
       <Link href={`/Blogs/${blog.slug}`} className={css({ display: "block" })}>
         <div
           className={css({
@@ -169,6 +165,7 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
           </div>
         )}
       </Link>
+      </PaneChild>
     </motion.div>
   );
 };

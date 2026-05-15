@@ -8,6 +8,7 @@ import {
   filterProfileSearchTree,
 } from "../../../lib/profileNavigation";
 import { ProfileSearchTree } from "./ProfileSearchTree";
+import { PaneChild } from "../shared/PaneChild";
 import {
   TREE_COLUMN_WIDTH,
   TREE_NODE_MAX_WIDTH,
@@ -15,10 +16,11 @@ import {
   TREE_PARENT_ROW_OFFSET,
   TreeRootConnector,
   TREE_ROOT_GAP_WIDTH,
+  SEARCH_ROOT_CATEGORY_GAP_PX,
 } from "./TreeLines";
 
 export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
-  const ROOT_CATEGORY_GAP_PX = 12;
+  const ROOT_CATEGORY_GAP_PX = SEARCH_ROOT_CATEGORY_GAP_PX;
   const [search, setSearch] = useState("");
   const [showRootConnectorLine, setShowRootConnectorLine] = useState(true);
   const deferredSearch = useDeferredValue(search);
@@ -37,8 +39,8 @@ export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
         w: "full",
         display: "flex",
         flexDirection: "column",
-        minH: "calc(100dvh - 82px)",
-        h: "calc(100dvh - 82px)",
+        flex: 1,
+        minH: 0,
       })}
     >
       <div
@@ -56,6 +58,7 @@ export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
             maxW: TREE_NODE_MAX_WIDTH,
           })}
         >
+          <PaneChild className={css({ w: "full" })}>
           <input
             data-testid="search-root-input"
             type="text"
@@ -64,21 +67,19 @@ export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
             onChange={(e) => setSearch(e.target.value)}
             className={css({
               w: "100%",
-              p: "5",
-              bg: "rgba(0, 0, 0, 0.82)",
-              borderRadius: "10px",
-              boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
-              backdropFilter: "blur(10px)",
+              p: "3",
+              bg: "transparent",
+              borderRadius: "8px",
               color: "white",
               outline: "none",
               fontSize: "xl",
               _focus: {
-                borderColor: "white",
-                boxShadow: "0 0 15px rgba(255,255,255,0.4)",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.25)",
               },
-              transition: "all 0.3s ease",
+              transition: "box-shadow 0.2s ease",
             })}
           />
+          </PaneChild>
         </div>
       </div>
 
@@ -168,7 +169,7 @@ export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
               w: "full",
             })}
           >
-            <div
+            <PaneChild
               className={css({
                 w: "full",
                 maxW: TREE_NODE_MAX_WIDTH,
@@ -183,7 +184,7 @@ export const SearchWrapper = ({ posts }: { posts: BlogPost[] }) => {
               >
                 No matching entries.
               </p>
-            </div>
+            </PaneChild>
           </div>
         )}
       </div>

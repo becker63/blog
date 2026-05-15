@@ -4,6 +4,7 @@ import { Loading } from "../shared/Loading";
 import { DescriptionTags, tags } from "../search/Badges";
 import Link from "next/link";
 import { css } from "../../../styled-system/css";
+import { PaneChild } from "../shared/PaneChild";
 import { getAllPosts, BlogPost } from "../../../lib/blogs";
 
 /* ------------------------- */
@@ -80,12 +81,21 @@ const BlogRow = ({ blog }: BlogRowProps) => {
       <Link
         href={`/Blogs/${blog.slug}`}
         className={css({
-          display: "flex",
-          gap: "4",
-          alignItems: "flex-start",
-          py: "3",
+          display: "block",
+          textDecoration: "none",
+          color: "inherit",
+          "&:hover [data-latest-row-tags]": {
+            opacity: 1,
+          },
         })}
       >
+        <PaneChild
+          className={css({
+            display: "flex",
+            gap: "4",
+            alignItems: "flex-start",
+          })}
+        >
         <div
           className={css({
             flex: 1,
@@ -158,13 +168,18 @@ const BlogRow = ({ blog }: BlogRowProps) => {
               color: "gray.400",
               fontSize: "sm",
               lineHeight: "relaxed",
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              overflow: "hidden",
             })}
+            style={{ WebkitBoxOrient: "vertical" }}
           >
             {blog.meta.description}
           </p>
 
           {/* Tags */}
           <div
+            data-latest-row-tags
             className={css({
               display: { base: "none", lg: "flex" },
               flexWrap: "wrap",
@@ -172,7 +187,6 @@ const BlogRow = ({ blog }: BlogRowProps) => {
               minH: "24px",
               opacity: 0,
               transition: "opacity 0.2s ease-in-out",
-              _groupHover: { opacity: 1 },
             })}
           >
             {tagBadges}
@@ -201,6 +215,7 @@ const BlogRow = ({ blog }: BlogRowProps) => {
             </Suspense>
           </div>
         )}
+        </PaneChild>
       </Link>
     </li>
   );
@@ -215,8 +230,9 @@ const FetchBlogs = async () => {
 
   return (
     <ul
+      style={{ maxHeight: "min(15.5rem, 100%)" }}
       className={css({
-        flex: 1,
+        flex: "1 1 0",
         minH: 0,
         overflowY: "auto",
         display: "flex",
@@ -259,7 +275,7 @@ export const LatestBlogCard = () => {
       className={css({
         px: { sm: "20", lg: "5", base: "5" },
         py: "5",
-        h: "f l",
+        h: "full",
         minH: 0,
         overflow: "hidden",
         display: "flex",

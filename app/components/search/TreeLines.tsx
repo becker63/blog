@@ -1,20 +1,37 @@
 import { css } from "../../../styled-system/css";
 import { motion } from "framer-motion";
 
-const LAYOUT_GAP_PX = 12;
+/** Panda spacing token: same vertical gap everywhere on Search (root, sections, parent→children, siblings). */
+export const SEARCH_TREE_VERTICAL_GAP = "6";
+
+/**
+ * Root spacer under the search field (px). Keep equal to theme spacing for
+ * {@link SEARCH_TREE_VERTICAL_GAP} (default preset: `6` → 24px).
+ */
+export const SEARCH_ROOT_CATEGORY_GAP_PX = 24;
+
+const LAYOUT_GAP_PX = 14;
 const FULL_LAYOUT_GAP = `${LAYOUT_GAP_PX}px`;
-const LINE_WIDTH = "2px";
-const BRANCH_LENGTH = "32px";
+
+/** Default vertical run-in (px string) for TreeBranch / TreeIndent segments. */
+export const TREE_BRANCH_RUN_IN_GAP = FULL_LAYOUT_GAP;
+
+const LINE_WIDTH = "1.5px";
+const BRANCH_LENGTH = "28px";
+
+/** Reads white on the shell without harsh pure #fff. */
+export const TREE_LINE_COLOR = "rgba(255, 255, 255, 0.88)";
+
 export const TREE_ROOT_GAP_WIDTH = "64px";
 export const TREE_COLUMN_WIDTH = `calc(0px + ${BRANCH_LENGTH})`;
 export const TREE_NODE_MAX_WIDTH = "800px";
 export const TREE_PARENT_ROW_MAX_WIDTH = TREE_NODE_MAX_WIDTH;
 export const TREE_CHILD_ROW_MAX_WIDTH = TREE_NODE_MAX_WIDTH;
-export const TREE_PARENT_ROW_OFFSET = "20px";
-export const TREE_CHILD_ROW_OFFSET = "56px";
+export const TREE_PARENT_ROW_OFFSET = "22px";
+/** Horizontal space between child indent column and branch column (grid lane). */
+export const TREE_CHILD_BRANCH_GAP = "22px";
 export const TREE_PARENT_CONTENT_MAX_WIDTH = `calc(${TREE_PARENT_ROW_MAX_WIDTH} - ${TREE_PARENT_ROW_OFFSET})`;
 export const TREE_CHILD_CONTENT_MAX_WIDTH = `calc(${TREE_CHILD_ROW_MAX_WIDTH} - ${TREE_PARENT_ROW_OFFSET})`;
-export const TREE_CHILD_BRANCH_GAP = `calc(${TREE_CHILD_ROW_OFFSET} - ${TREE_COLUMN_WIDTH})`;
 
 type Props = {
   showTop: boolean;
@@ -59,7 +76,7 @@ const VerticalSegment = ({
         position: "absolute",
         left: 0,
         width: LINE_WIDTH,
-        background: "white",
+        background: TREE_LINE_COLOR,
         top: showTop ? `-${topExtension}` : "50%",
         bottom: showBottom ? `-${bottomExtension}` : "50%",
       }}
@@ -79,14 +96,20 @@ export const TreeIndent = ({ continues }: { continues: boolean }) => (
 export const TreeBranch = ({
   showTop,
   showBottom,
+  topExtension,
+  bottomExtension,
 }: {
   showTop: boolean;
   showBottom: boolean;
+  topExtension?: string;
+  bottomExtension?: string;
 }) => (
   <TreeGutter>
     <VerticalSegment
       showTop={showTop}
       showBottom={showBottom}
+      topExtension={topExtension}
+      bottomExtension={bottomExtension}
       testId="tree-branch-vertical-line"
     />
     <motion.div
@@ -100,7 +123,7 @@ export const TreeBranch = ({
         left: 0,
         height: LINE_WIDTH,
         width: BRANCH_LENGTH,
-        background: "white",
+        background: TREE_LINE_COLOR,
       }}
     />
   </TreeGutter>
@@ -116,11 +139,28 @@ export const TreeRootConnector = () => (
       style={{
         transformOrigin: "top",
         position: "absolute",
-        left: "-7px",
+        left: "-6px",
         top: 0,
         bottom: 0,
-        width: "1.5px",
-        background: "white",
+        width: LINE_WIDTH,
+        background: TREE_LINE_COLOR,
+      }}
+    />
+  </TreeGutter>
+);
+
+/** Vertical trunk in the gap between a parent category row and its child list (aligns with parent TreeBranch). */
+export const TreeParentChildGapConnector = () => (
+  <TreeGutter>
+    <div
+      data-testid="tree-section-gap-vertical"
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: LINE_WIDTH,
+        background: TREE_LINE_COLOR,
       }}
     />
   </TreeGutter>

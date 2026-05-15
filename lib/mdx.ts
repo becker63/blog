@@ -10,9 +10,25 @@ const languages = {
   pkl,
 };
 
+const mdxPassThrough = [
+  "mdxjsEsm",
+  "mdxFlowExpression",
+  "mdxJsxFlowElement",
+  "mdxJsxTextElement",
+  "mdxTextExpression",
+];
+
 export const mdxOptions: MDXRemoteProps["options"] = {
   mdxOptions: {
     remarkPlugins: [remarkMermaidStatic],
-    rehypePlugins: [rehypeRaw, [rehypeHighlight, { languages }]] as any,
+    rehypePlugins: [
+      [rehypeHighlight, { languages }],
+      [
+        rehypeRaw,
+        {
+          passThrough: mdxPassThrough,
+        },
+      ],
+    ] as any,
   },
 };

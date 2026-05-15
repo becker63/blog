@@ -117,6 +117,7 @@ export const PROFILE_POST_CATEGORY_ASSIGNMENTS: Record<
   string,
   ProfileCategoryId
 > = {
+  "ai-cognitive-overload": "platform-social-infrastructure",
   "the-firewall-doesnt-live-in-the-kernel": "security-systems",
   "tight-loops": "security-systems",
   "ai-release-reports": "platform-social-infrastructure",

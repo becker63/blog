@@ -1,5 +1,6 @@
-import { css } from "../../../styled-system/css";
+import { cx, css } from "../../../styled-system/css";
 import { PROFILE_PANEL_COPY } from "../../../lib/profileNavigation";
+import { blogContentProseStyles } from "../shared/blogContentProseStyles";
 import { ProfileWorkWithMe } from "./ProfileWorkWithMe";
 
 export const ProfileIdentityPanel = () => {
@@ -8,7 +9,6 @@ export const ProfileIdentityPanel = () => {
       className={css({
         display: "flex",
         flexDirection: "column",
-        gap: "5",
         h: "100%",
         minH: 0,
         overflowY: "auto",
@@ -32,64 +32,26 @@ export const ProfileIdentityPanel = () => {
       })}
     >
       <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          gap: "4",
-          alignItems: "flex-start",
-        })}
+        className={cx(
+          css(blogContentProseStyles),
+          css({
+            width: "100%",
+            "& h2:first-of-type": {
+              mt: 0,
+            },
+          }),
+        )}
       >
-        <div
-          className={css({
-            display: "flex",
-            flexDirection: "column",
-            gap: "3",
-          })}
-        >
-          <div
-            className={css({
-              display: "flex",
-              flexDirection: "column",
-              gap: "1",
-            })}
-          >
-            <h2
-              className={css({
-                fontSize: { base: "2xl", lg: "2xl" },
-                lineHeight: "1.1",
-                fontWeight: "bold",
-                color: "white",
-              })}
-            >
-              {PROFILE_PANEL_COPY.name}
-            </h2>
-          </div>
+        <h2>{PROFILE_PANEL_COPY.name}</h2>
 
-          <p
-            className={css({
-              color: "gray.100",
-              fontSize: { base: "md", lg: "lg" },
-              lineHeight: "1.6",
-              maxW: "62ch",
-            })}
-          >
-            {PROFILE_PANEL_COPY.identity}
-          </p>
-        </div>
+        <p>{PROFILE_PANEL_COPY.identity}</p>
+
+        <p>{PROFILE_PANEL_COPY.summary}</p>
+
+        <hr />
+
+        <ProfileWorkWithMe />
       </div>
-
-      <p
-        className={css({
-          color: "gray.300",
-          fontSize: "sm",
-          lineHeight: "1.8",
-          maxW: "64ch",
-        })}
-      >
-        {PROFILE_PANEL_COPY.summary}
-      </p>
-
-      <ProfileWorkWithMe />
     </div>
   );
 };

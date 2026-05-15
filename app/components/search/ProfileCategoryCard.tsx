@@ -7,6 +7,7 @@ import {
   faDiagramProject,
   faShield,
 } from "@fortawesome/free-solid-svg-icons";
+import { PaneChild } from "../shared/PaneChild";
 
 const glyphIconMap = {
   shield: faShield,
@@ -26,17 +27,11 @@ export const ProfileCategoryCard = ({
   const collapseIcon = isExpanded ? faChevronDown : faChevronRight;
 
   return (
-    <div
+    <PaneChild
       data-testid="search-tree-parent-card"
       className={css({
         flex: 1,
         minW: 0,
-        px: "5",
-        py: "4",
-        borderRadius: "10px",
-        boxShadow: "0 0 4px rgba(0, 0, 15, 0.35)",
-        bg: "rgba(0, 0, 0, 0.7)",
-        backdropFilter: "blur(10px)",
       })}
     >
       <div
@@ -127,6 +122,6 @@ export const ProfileCategoryCard = ({
           <FontAwesomeIcon icon={collapseIcon} />
         </button>
       </div>
-    </div>
+    </PaneChild>
   );
 };

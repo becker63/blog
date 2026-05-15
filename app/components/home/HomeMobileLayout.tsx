@@ -5,7 +5,7 @@ import { HomeNav } from "./HomeNav";
 import { MobileLayout } from "./MobileScrollContainer";
 import { LatestBlogCard } from "./LatestBlogCard";
 import { Card, Socials } from ".";
-import { glassCardStyles } from "../shared/GlassCard";
+import { glassCardStyles, glassPanelShellStyles } from "../shared/GlassCard";
 import { AnimatedCard } from "../shared/AnimatedCard";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons";
 import { faMarkdown } from "@fortawesome/free-brands-svg-icons";
@@ -66,8 +66,9 @@ export const HomeMobileLayout = () => {
       >
         <AnimatedCard
           index={1}
+          finalOpacity={1}
           className={css({
-            ...glassCardStyles,
+            ...glassPanelShellStyles,
             minH: "330px",
             display: "flex",
             flexDirection: "column",
@@ -120,8 +121,9 @@ export const HomeMobileLayout = () => {
 
         <AnimatedCard
           index={4}
+          finalOpacity={1}
           className={css({
-            ...glassCardStyles,
+            ...glassPanelShellStyles,
             h: "400px",
             display: "flex",
             flexDirection: "column",

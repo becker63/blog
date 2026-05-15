@@ -13,12 +13,17 @@ import {
   TREE_CHILD_BRANCH_GAP,
   TREE_CHILD_CONTENT_MAX_WIDTH,
   TREE_CHILD_ROW_MAX_WIDTH,
-  TREE_CHILD_ROW_OFFSET,
   TREE_PARENT_ROW_OFFSET,
   TREE_PARENT_CONTENT_MAX_WIDTH,
   TREE_PARENT_ROW_MAX_WIDTH,
+  SEARCH_ROOT_CATEGORY_GAP_PX,
+  SEARCH_TREE_VERTICAL_GAP,
+  TREE_COLUMN_WIDTH,
+  TREE_ROOT_GAP_WIDTH,
+  TREE_BRANCH_RUN_IN_GAP,
   TreeBranch,
   TreeIndent,
+  TreeParentChildGapConnector,
 } from "./TreeLines";
 
 const SearchChildNode = ({
@@ -39,6 +44,7 @@ const SearchChildNode = ({
         display: "flex",
         justifyContent: "center",
         w: "full",
+        mt: isFirst ? 0 : SEARCH_TREE_VERTICAL_GAP,
       })}
     >
       <div
@@ -67,7 +73,11 @@ const SearchChildNode = ({
             })}
             style={{ width: TREE_CHILD_BRANCH_GAP }}
           />
-          <TreeBranch showTop={true} showBottom={!isLast} />
+          <TreeBranch
+            showTop={true}
+            showBottom={!isLast}
+            topExtension={isFirst ? "0px" : TREE_BRANCH_RUN_IN_GAP}
+          />
           <BlogCard blog={child.blog} />
         </div>
       </div>
@@ -94,14 +104,14 @@ export const ProfileSearchTree = ({
       className={css({
         display: "flex",
         flexDirection: "column",
-        gap: "layout",
+        gap: SEARCH_TREE_VERTICAL_GAP,
         w: "full",
       })}
     >
       {tree.map((parent, index) => {
         // During active search, matching parents are forced open so match context
         // stays visible instead of being hidden behind collapsed state.
-        const isExpanded = isSearching ? true : (expanded[parent.id] ?? true);
+        const isExpanded = isSearching ? true : expanded[parent.id] ?? true;
         const showChildren = isExpanded && parent.children.length > 0;
         const isLastParent = index === tree.length - 1;
 
@@ -112,7 +122,7 @@ export const ProfileSearchTree = ({
             className={css({
               display: "flex",
               flexDirection: "column",
-              gap: "layout",
+              gap: "0",
             })}
           >
             <div
@@ -137,7 +147,11 @@ export const ProfileSearchTree = ({
                   marginLeft: TREE_PARENT_ROW_OFFSET,
                 }}
               >
-                <TreeBranch showTop={true} showBottom={!isLastParent} />
+                <TreeBranch
+                  showTop={true}
+                  showBottom={!isLastParent}
+                  bottomExtension={showChildren ? "0px" : TREE_BRANCH_RUN_IN_GAP}
+                />
                 <ProfileCategoryCard
                   category={parent}
                   isExpanded={isExpanded}
@@ -152,23 +166,59 @@ export const ProfileSearchTree = ({
             </div>
 
             {showChildren ? (
-              <div
-                className={css({
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "layout",
-                })}
-              >
-                {parent.children.map((child, index) => (
-                  <SearchChildNode
-                    key={child.id}
-                    child={child}
-                    rootContinues={!isLastParent}
-                    isFirst={index === 0}
-                    isLast={index === parent.children.length - 1}
-                  />
-                ))}
-              </div>
+              <>
+                <div
+                  data-testid="search-tree-section-gap-row"
+                  className={css({
+                    w: "full",
+                    display: "flex",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    pointerEvents: "none",
+                  })}
+                  style={{ height: SEARCH_ROOT_CATEGORY_GAP_PX }}
+                >
+                  <div
+                    className={css({
+                      display: "flex",
+                      flexDirection: "row",
+                      h: "full",
+                      justifyContent: "flex-start",
+                    })}
+                    style={{
+                      width: `calc(100% - ${TREE_PARENT_ROW_OFFSET})`,
+                      maxWidth: TREE_PARENT_CONTENT_MAX_WIDTH,
+                      marginLeft: TREE_PARENT_ROW_OFFSET,
+                    }}
+                  >
+                    <TreeParentChildGapConnector />
+                    <div
+                      aria-hidden="true"
+                      className={css({ flexShrink: 0 })}
+                      style={{
+                        width: `calc(${TREE_ROOT_GAP_WIDTH} - ${TREE_COLUMN_WIDTH})`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0",
+                  })}
+                >
+                  {parent.children.map((child, index) => (
+                    <SearchChildNode
+                      key={child.id}
+                      child={child}
+                      rootContinues={!isLastParent}
+                      isFirst={index === 0}
+                      isLast={index === parent.children.length - 1}
+                    />
+                  ))}
+                </div>
+              </>
             ) : null}
           </div>
         );

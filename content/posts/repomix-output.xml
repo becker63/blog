@@ -1,0 +1,3071 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+ai-release-reports.mdx
+bundles.mdx
+designing-for-two.mdx
+test.mdx.ignore
+the-firewall-doesnt-live-in-the-kernel.mdx
+tight-loops.mdx
+zed.mdx
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="ai-release-reports.mdx">
+---
+title: AI Agents Need Release Reports, Not Just Traces
+date: '24 April 2026'
+description: Turning agent changes into release decisions, not just traces and scores.
+tags: tech
+---
+
+AI agents are starting to look less like isolated model calls and more like software systems.
+
+They have prompts, tools, retrieval strategies, policies, runtime assumptions, model configs, scoring rules, and cost constraints. When one of those pieces changes, the important question is not just whether one run looked good.
+
+It is whether the candidate should replace the current system.
+
+Software teams already have a language for this. We compare branches against main. We run tests. We inspect diffs. We track regressions. We produce build artifacts. We gate deployments.
+
+Agent systems need a similar release boundary.
+
+A useful report for an agent change might look something like this:
+
+```text
+Agent Change Report
+
+Candidate: retrieval-policy-b
+Baseline: production-policy-a
+
+Decision: REVIEW
+
+Summary:
+  Candidate improved the primary score and reduced token usage,
+  but introduced regressions on protected cases.
+
+Changed:
+  retrieval policy, prompt bundle
+
+Evidence:
+  score improved
+  token cost decreased
+  protected regressions failed
+```
+
+That is the product shape I keep coming back to: not just a trace, not just a score, but a release report for an AI-system change.
+
+A trace tells you what happened.
+
+A score tells you how one dimension performed.
+
+A release report tells you whether a candidate system should ship — and why.
+
+## Start with the baseline
+
+The concrete system I’ve been working on is about agentic code search.
+
+The baseline is not “give the model a whole repository and hope it finds the right thing.” Better tools already exist.
+
+One of the tools I’m comparing against is **jCodeMunch**, an MCP server that exposes a codebase to an agent in a structured way. Instead of forcing the model to read entire files, it gives the agent tools for navigating symbols, definitions, outlines, references, and scoped code context.
+
+That fits a broader pattern I think is directionally correct:
+
+> The model should not have to rediscover structure that can be computed, stored, and reused.
+
+You can see this pattern in LLM wiki-style workflows, codebase graph tools, structured retrieval systems, and agent memory systems. The shared intuition is that raw context is expensive, and structured context compounds.
+
+For codebases, this matters a lot. Real software systems are not flat bags of files. They contain calls, imports, references, class hierarchies, modules, ownership boundaries, and naming conventions. Those relationships are navigational structure.
+
+So the first claim is not:
+
+> Codebases should be exposed structurally to agents.
+
+I think that is already the right direction.
+
+The more interesting question is what we can evaluate *on top* of that baseline.
+
+## The candidate: structured retrieval plus look-ahead
+
+The candidate feature I’m exploring is deterministic look-ahead.
+
+If a tool already exposes the codebase as structured data, can we do useful exploration on the model’s behalf before handing context back to it?
+
+Instead of asking the LLM to repeatedly discover nearby code through tool calls, can we build a graph of the codebase and explore a few steps ahead? Can we look two, three, or four call stacks outward from an initial anchor, rank what seems relevant, and return a smaller but more useful context bundle?
+
+The comparison is not:
+
+```text
+unstructured retrieval
+vs
+structured retrieval
+```
+
+It is closer to:
+
+```text
+structured retrieval
+vs
+structured retrieval + deterministic look-ahead
+```
+
+jCodeMunch gives the agent structured access to the codebase.
+
+The candidate I’m testing adds look-ahead over that structure.
+
+That is a small difference architecturally, but it creates a larger evaluation problem.
+
+Token reduction is important, but token reduction is not the whole release question. If look-ahead reduces tokens but worsens localization quality, it should not be promoted. If it improves average score but breaks important protected cases, it should not be promoted automatically. If it only works because the dataset, scorer, or runtime changed underneath the comparison, the result is not trustworthy.
+
+That is where Searchbench comes in.
+
+## Searchbench, briefly
+
+**Searchbench** is the harness I’m building to evaluate that candidate change.
+
+It compares a baseline code-search system against a candidate version with an added context-selection policy, such as graph look-ahead. It runs both against bounded code-localization tasks, collects traces and costs, scores the results, tracks regressions, and produces the evidence needed to decide whether the candidate should be promoted.
+
+The benchmark I’m currently using is the JetBrains LCA bug localization dataset from Hugging Face. That gives the project a real external task surface: given an issue or task, can an agent localize the relevant files, functions, or symbols efficiently?
+
+In simplified form, the loop looks like this:
+
+```text
+baseline structured retrieval
+→ candidate with look-ahead
+→ fixed task slice
+→ score report
+→ regression report
+→ promotion decision
+```
+
+That loop is the part I care about.
+
+## A Searchbench-shaped report
+
+The report I want Searchbench to produce is not “candidate got a better score.”
+
+It should look more like this:
+
+```text
+Searchbench Candidate Report
+
+Baseline:
+  structured code retrieval
+
+Candidate:
+  structured retrieval + graph look-ahead
+
+Decision:
+  REVIEW
+
+Summary:
+  Candidate improved graph-distance scores and reduced token usage,
+  but failed the protected-regression threshold.
+
+Result:
+  localization quality: improved
+  token usage: improved
+  regressions: needs review
+
+Recommendation:
+  Do not promote automatically.
+```
+
+This is still conceptual. The current harness is moving toward this shape, but this is the object I want to make concrete.
+
+The important thing is that the report treats the look-ahead policy as a release candidate.
+
+It changed something specific.
+
+It ran against a specific benchmark.
+
+It improved some dimensions.
+
+It regressed others.
+
+It produced a decision.
+
+That is much more useful than a score floating by itself.
+
+## The unit of optimization is bigger than I expected
+
+One thing that surprised me while building Searchbench is that many AI tools optimize a smaller unit than I expected.
+
+Tools like Langfuse, LangSmith, LangChain, and DSPy are useful. They give us traces, prompts, datasets, evaluators, workflows, and program-level optimization.
+
+But once I started building a real harness, the unit I needed to reason about was larger than a prompt, a trace, or even a single LM program.
+
+A candidate system version might change:
+
+```text
+policy.py
+prompt templates
+context-selection heuristics
+graph traversal behavior
+tool schemas
+model/provider settings
+runtime assumptions
+scoring reducers
+dataset slices
+```
+
+Any one of those changes can affect behavior.
+
+So when a run improves, I do not only want to know whether the output looked better. I want to know what changed, what stayed the same, what improved, what regressed, whether I can reproduce it, and whether the candidate should replace the current baseline.
+
+That is a different interface than a trace viewer.
+
+It is also a different interface than a prompt optimizer.
+
+Prompt optimization is one possible input to the system. It can produce a better candidate. But it does not, by itself, answer whether that candidate should ship.
+
+For example, imagine a prompt optimizer finds a version of a code-search prompt that uses fewer tokens. That sounds good until the localization benchmark shows that the agent now stops too early and misses the files that actually need to change. In that case, the optimized prompt is not “better” in the release sense. It is cheaper, but less useful for the task.
+
+That is the distinction I care about.
+
+A tool can optimize one part of the system and still produce a candidate that should not be promoted.
+
+## From scores to promotion decisions
+
+A score by itself is useful, but incomplete.
+
+A trace by itself is useful, but incomplete.
+
+Even a dashboard of scores over time is not quite the final object I want.
+
+The promotion rule is what gives the report teeth.
+
+For example:
+
+```text
+Promote only if:
+  primary score improves
+  token cost stays within threshold
+  no protected cases regress
+```
+
+Without a rule, scores are easy to rationalize. With a rule, the system can say:
+
+> This candidate is better on average, but not safe to promote.
+
+That is the kind of answer I want from AI evaluation tooling.
+
+## What existing tools bought me — and what they did not
+
+Existing tools are valuable. This is not a complaint that the ecosystem is useless.
+
+Langfuse is useful for traces, datasets, scores, and experiment visibility.
+
+LangSmith and related tools are useful for evaluating chains, agent runs, and application behavior.
+
+DSPy is useful for optimizing language-model programs against metrics.
+
+But the thing I found myself wanting was not only a better prompt, a better trace, or a better score.
+
+I wanted a higher-level release object that could say:
+
+```text
+This candidate changed something specific.
+It ran against a fixed task slice.
+It improved some metrics.
+It regressed some cases.
+It should or should not be promoted.
+```
+
+That is the layer I think is underdeveloped.
+
+## The broader systems shape
+
+The infrastructure instincts behind this are not new.
+
+Build systems already understand inputs, outputs, dependency graphs, caching, and reproducibility.
+
+CI systems already understand candidate changes, checks, failures, and release gates.
+
+Infrastructure control planes already understand desired state, observed state, reconciliation, and status.
+
+The AI ecosystem has many strong tools for traces, evals, prompts, retrieval, and workflows. But as agent systems become more complex, I think we will need more release-engineering-shaped tools around them.
+
+That requires artifacts, not just logs.
+
+Regressions, not just averages.
+
+Baselines, not just scores.
+
+Promotion rules, not just dashboards.
+
+## Where this is going
+
+I do not think this needs to start as a giant platform.
+
+The first useful version can be small:
+
+```text
+Run a baseline.
+Run a candidate.
+Compare them.
+Show what changed.
+Show what improved.
+Show what regressed.
+Make a promotion recommendation.
+```
+
+For Searchbench, that means a report over agentic code-search behavior.
+
+Eventually, the same shape could apply to other agent systems:
+
+```text
+coding agents
+retrieval agents
+support agents
+tool-using research agents
+workflow agents
+```
+
+Anywhere the system is complex enough that changing a prompt, policy, tool schema, retrieval strategy, or graph traversal heuristic can have non-obvious effects.
+
+The point is not to replace every eval platform, tracing tool, retrieval system, or agent framework.
+
+The point is to define the release boundary around an AI system.
+
+## The thesis
+
+AI agents need release reports, not just traces.
+
+A trace tells you what happened.
+
+A score tells you how one dimension performed.
+
+A release report tells you whether a candidate system should ship — and why.
+
+That is the object I’m trying to build toward.
+</file>
+
+<file path="bundles.mdx">
+---
+title: AI Evals Need Bundles, Not Just Platforms
+date: '2 May 2026'
+description: Making agent evaluation inspectable, reproducible, and portable with file-native release artifacts.
+tags: tech
+---
+
+The shape I wanted was smaller than a platform.
+
+```text
+baseline/candidate pair
+→ durable bundle
+→ next run amends the previous run
+```
+
+That is the object I kept reaching for while building SearchBench.
+
+In the last post, I argued that AI agents need release reports, not just traces.
+
+The basic claim was that agent systems are starting to look less like isolated model calls and more like software systems. They have prompts, tools, retrieval strategies, policies, runtime assumptions, model configs, scoring rules, and cost constraints. When one of those pieces changes, the important question is not only whether one run looked good. It is whether the candidate should replace the current system.
+
+That still feels right to me.
+
+But after pushing the Python version of SearchBench further, I ran into a second problem underneath it:
+
+where does that release report actually live?
+
+At first, the obvious answer was an evaluation platform. Langfuse already had datasets, traces, observations, scores, sessions, metadata, and experiment views. That was useful, and I used it heavily.
+
+The surprise was not that Langfuse had nowhere to put evaluation state.
+
+It had plenty of places for state to go.
+
+That was part of the problem.
+
+## The release object started to spread out
+
+A single localization evaluation had queryable scores, observation metadata, compact score context, score component state, predicted files, changed files, metric names, and task summaries.
+
+The code made that split explicit:
+
+```python
+# First, emit the queryable score objects.
+for component_name in LOCALIZATION_CANONICAL_COMPONENTS:
+    state = artifact.canonical_component_states[component_name]
+    score_name = f"{score_prefix}.{component_name}"
+
+    _emit_component_state_scores(
+        handle,
+        score_name=score_name,
+        state=state,
+        operation="localization_task.score",
+    )
+
+# Then attach the context that makes those scores meaningful.
+metadata = {
+    "score_summary": artifact.score_summary.model_dump(mode="json"),
+    "score_context": artifact.compact_score_context.model_dump(...),
+    "score_components": _component_state_metadata(...),
+    "predicted_files": list(predicted_files),
+    "changed_files": list(changed_files),
+    "score_metric_names": sorted(emitted_score_names),
+    "task_summary": dict(task_summary),
+}
+
+_update_observation_metadata(
+    handle,
+    metadata,
+    operation="localization_task.metadata",
+)
+```
+
+Nothing here is wrong. Scores should be queryable, and metadata should carry the context needed to interpret them.
+
+But that was the first place the release object started to spread out.
+
+The score lived in one part of the platform. The explanation of the score lived somewhere else.
+
+The split did not stop there. Once Langfuse became the hosted benchmark surface, run-level context entered the platform too: dataset identity, task selection, session grouping, and aggregate reporting.
+
+```python
+# The hosted run also needed platform-level identity.
+selection_meta = {
+    "selected_count": len(selected_tasks),
+    "offset": req.offset,
+    "limit": req.max_items,
+}
+
+run_session_id = resolve_session_id(req.session, run_id=req.dataset)
+
+# That identity propagated into the trace/session shape.
+with propagate_attributes(
+    trace_name="localization_experiment",
+    session_id=run_session_id,
+):
+    with get_langfuse_client().start_as_current_observation(
+        name="localization_experiment_dataset",
+        as_type="span",
+        metadata=serialize_observation_metadata(
+            {
+                "dataset": req.dataset,
+                "dataset_version": req.version,
+                "dataset_store": "langfuse",
+                "selection": selection_meta,
+                "projection": {"provided": bool(req.projection)},
+            }
+        ),
+    ) as dataset_span:
+        parent_trace = dataset_span
+
+        # Later, aggregates needed enough metadata to explain
+        # which hosted dataset slice they summarized.
+        _emit_experiment_dataset_aggregates(
+            dataset_span,
+            results,
+            extra_metadata={
+                "dataset": req.dataset,
+                "dataset_version": req.version,
+                "selection": selection_meta,
+            },
+        )
+```
+
+This is where the discomfort came from.
+
+The evaluation was visible, but it was not a single thing I could pick up.
+
+It was a relationship between scores, observations, traces, metadata, dataset state, session state, and application-side objects.
+
+Eventually I built an adapter object whose job was basically to hold the evaluation together long enough to emit it coherently:
+
+```python
+class EvaluationTelemetryArtifact(BaseModel):
+    # The local object that kept the evaluation coherent
+    # before it was split into platform scores and metadata.
+    score_bundle: ScoreBundle
+    score_context: ScoreContext
+    score_summary: ScoreBundle
+
+    metric_map: dict[str, float | bool]
+    canonical_component_states: dict[str, ScoreComponentTelemetryState]
+    compact_score_context: CompactScoreContext
+```
+
+Looking back, this was the sign.
+
+The Python version already wanted a bundle. It just did not have a file-native place to put one yet.
+
+## Where the evaluation starts to live
+
+This state distribution problem creates a softer kind of lock-in than an API key or a pricing page.
+
+The lock-in is not just that the data lives in someone else’s database. It is that the meaning of the evaluation starts to depend on the platform’s object model. Datasets live in one place. Traces live somewhere else. Scores attach to traces, observations, sessions, or dataset runs. Metadata carries whatever does not fit cleanly into the first-class objects. Comparison views are assembled by the platform on top.
+
+That is flexible, and it is useful while debugging.
+
+But it also means the evaluation is no longer a single thing you can pick up. It is a relationship between platform objects.
+
+Once that happens, changing the evaluation model becomes harder. You are not only changing your scorer or your dataset slice. You are changing how your system maps itself into the platform’s idea of traces, scores, runs, observations, datasets, and metadata.
+
+This matters more for agent systems than it does for simple model calls, because the unit of change is larger. A candidate system might change policy code, prompt templates, tool schemas, retrieval strategy, graph traversal behavior, model settings, runtime limits, scoring rules, and dataset slices.
+
+A trace can show what happened. A score can describe one dimension of performance. A dataset can preserve test inputs.
+
+Those are all useful objects, but none of them are quite the release object I wanted.
+
+The release object is the thing that answers a different question:
+
+> Should this candidate replace the baseline?
+
+SearchBench-Go is my attempt to keep the useful parts of that model while changing where authority lives.
+
+Langfuse can still observe the run.
+
+The bundle should own the evidence.
+
+## The tradeoff
+
+There is an obvious counterpoint here.
+
+If the release object becomes a bundle, and the evaluation model moves into files, does that make the system more static?
+
+In one sense, yes. That is part of the point.
+
+I want the release boundary to be more static than the runtime. The runtime can still call models, execute tools, talk to tracing providers, read datasets, materialize repos, and emit telemetry. That part of the system is allowed to be operational and messy.
+
+The comparison model should be different.
+
+The baseline, candidate, task slice, scoring objective, prompt bundle, runtime limits, and artifact outputs are the pieces I want to make legible. They are the pieces I want to diff. They are the pieces I want an agent, a reviewer, or my future self to understand quickly.
+
+That is why Pkl is appealing here. A later experiment can amend an earlier one, inherit the parts that stayed the same, and override the parts that changed. The result is still a file you can read, but it is not a pile of duplicated configuration.
+
+That is the trade I am choosing: make the release boundary legible, even if the runtime underneath it stays effectful.
+
+## Start with a run
+
+```pkl
+// experiments/local-ic-vs-jcodemunch/experiment.pkl
+
+amends "../../schema/SearchBenchExperiment.pkl"
+
+name = "local-ic-vs-jcodemunch-lca-dev"
+
+mode = "evaluator_only"
+
+dataset {
+  config = "py"
+  split = "dev"
+  maxItems = 5
+}
+
+systems {
+  baseline {
+    id = "jcodemunch-baseline"
+    name = "jCodeMunch baseline"
+    backend = "jcodemunch"
+  }
+
+  candidate {
+    id = "iterative-context-candidate"
+    name = "Iterative Context candidate"
+    backend = "iterative_context"
+
+    promptBundle {
+      name = "direct-structure"
+      version = "round-001"
+
+      systemPrompt = """
+      Use iterative-context to resolve the initial symbols, then follow direct
+      calls, imports, and references. Prefer the smallest context that explains
+      the likely changed files.
+      """
+    }
+
+    policy {
+      id = "candidate-policy-dev"
+      path = "policies/candidate_policy.py"
+    }
+  }
+}
+
+scoring {
+  objective = "scoring/localization-objective.pkl"
+}
+
+outputConfig {
+  reportFormat = "pretty"
+  bundleRoot = "artifacts/runs"
+
+  traces {
+    enabled = false
+  }
+}
+```
+
+This is the first shape SearchBench cares about: a **baseline/candidate pair**.
+
+In this run, the baseline is jCodeMunch and the candidate is iterative-context. The harness is not trying to answer whether either system is good in isolation. It is trying to answer whether the candidate should replace the baseline under a fixed task slice, scoring rule, and runtime envelope.
+
+That run produces a bundle.
+
+```text
+experiments/local-ic-vs-jcodemunch/artifacts/runs/example-round-001/
+  COMPLETE
+  resolved.json
+  report.json
+  report.txt
+  score.pkl
+  objective.json
+  metadata.json
+```
+
+Now start the next run.
+
+```pkl
+// experiments/optimize-ic/experiment.pkl
+
+amends "../local-ic-vs-jcodemunch/experiment.pkl"
+
+name = "optimize-ic-lca-dev"
+
+systems {
+  candidate {
+    id = "iterative-context-candidate-round-002"
+    name = "Iterative Context candidate round 002"
+    backend = "iterative_context"
+
+    promptBundle {
+      name = "graph-lookahead"
+      version = "round-002"
+
+      systemPrompt = """
+      Use iterative-context as a graph lookahead engine. Resolve likely anchors,
+      expand outward over calls, imports, and references, then prefer context
+      that reduces localization distance without wasting tokens.
+      """
+    }
+
+    policy {
+      id = "candidate-policy-round-002"
+      path = "policies/candidate_policy.py"
+    }
+  }
+}
+
+scoring {
+  objective = "scoring/localization-objective.pkl"
+}
+```
+
+This is the part that makes the interface feel different.
+
+The second experiment does not copy the first experiment. It **amends** it. The dataset stays the same. The evaluator stays the same. The output shape stays the same. The baseline stays jCodeMunch. Only the candidate changes: a new policy, a new prompt bundle, and a more explicit instruction to treat iterative-context as a graph lookahead engine.
+
+That run produces another bundle with the same shape.
+
+```text
+experiments/optimize-ic/artifacts/runs/example-round-002/
+  COMPLETE
+  resolved.json
+  report.json
+  report.txt
+  score.pkl
+  objective.json
+  metadata.json
+```
+
+There are two comparisons happening here.
+
+Inside each run, SearchBench compares a baseline against a candidate. In these examples, jCodeMunch stays as the fixed external baseline while iterative-context changes. That answers one question: does this candidate beat the control?
+
+Across runs, SearchBench also has lineage. The second bundle can be understood as a child of the first bundle. That answers a different question: did this candidate improve over the previous candidate?
+
+Those two relationships are easy to collapse together, but they are not the same. The baseline/candidate pair is the comparison inside a run. The parent/current relationship is the comparison across runs.
+
+That is why I like this shape. It lets SearchBench hold a stable external baseline while still tracking the evolution of the candidate system over time. Pkl’s `amends` makes that feel natural. Each round can inherit the previous experiment, override the parts that changed, and leave behind a new artifact for the next round.
+
+This sounds small, but it changes the shape of the system. Optimization history stops being something that only exists inside a running optimizer, a hosted dashboard, or a database row. Each step leaves behind a durable comparison artifact. The next run can point at the previous one directly, not as hidden state, but as evidence.
+
+For SearchBench, that boundary object is the bundle.
+
+## The bundle
+
+The bundle is the release object.
+
+It keeps the resolved experiment, structured report, human-readable report, score evidence, evaluated objective, and artifact hashes together in one directory.
+
+```text
+resolved.json
+report.json
+report.txt
+score.pkl
+objective.json
+metadata.json
+````
+
+The point is not that SearchBench writes a lot of files. The point is that the comparison leaves behind something durable.
+
+By the time the run is complete, “did this candidate beat the baseline?” is no longer only represented by logs, traces, or optimizer state. It exists as an artifact that can be inspected, copied, diffed, rendered, imported, and eventually visualized.
+
+That is the separation I want:
+
+```text
+platform → observes the run
+bundle   → preserves the release evidence
+```
+
+## The release rule is a file too
+
+The scoring objective is not the agent, the evaluator, the graph traversal policy, or the trace.
+
+It is the release rule.
+
+Go owns the comparison model, evidence projection, validation, and bundle writing. Pkl owns the visible scoring math over that evidence.
+
+Conceptually, the objective is just naming the values that matter:
+
+```pkl
+// scoring/localization-objective.pkl
+
+amends "../../schema/SearchBenchObjective.pkl"
+
+local currentQuality = current.localizationQuality.candidate
+local parentQuality = parent.localizationQuality.candidate
+local improvementVsParent = currentQuality - parentQuality
+
+local tokenEfficiency =
+  1.0 - min(current.usage.totalTokens, 250000) / 250000
+
+local regressionPenalty =
+  if (current.regressions.severeCount > 0) 0.0 else 1.0
+
+local finalScore =
+  ((currentQuality * 0.8) + (tokenEfficiency * 0.2)) *
+  regressionPenalty
+
+values = new {
+  intermediate("currentQuality", currentQuality)
+  intermediate("parentQuality", parentQuality)
+  intermediate("improvementVsParent", improvementVsParent)
+  intermediate("tokenEfficiency", tokenEfficiency)
+  penalty("regressionPenalty", regressionPenalty)
+  finalValue("final", finalScore)
+}
+
+final = "final"
+````
+
+The exact math is not the important part. I expect the scoring rules to change.
+
+The important part is that the meaning of “better” becomes inspectable. Current quality, parent quality, token efficiency, regressions, and the final score are named in a file instead of being hidden inside an optimizer callback or reconstructed from a dashboard.
+
+That file is not trying to replace the trace. It explains what the trace and report mean for promotion.
+
+Trace tooling is good at answering:
+
+> How did the agent behave?
+
+SearchBench is trying to make a different question concrete:
+
+> Should this candidate replace the baseline?
+
+## How this relates to traces and eval platforms
+
+I do not think this replaces the other layers of AI systems work.
+
+Agent-building posts teach us how to structure the system. Observability posts teach us how to see what happened. Eval-platform posts teach us how to score and compare runs.
+
+SearchBench bundles are about the release artifact that survives those systems.
+
+A trace helps you debug an agent run.
+
+A score helps you understand one dimension of performance.
+
+A dashboard helps you inspect trends and compare experiments.
+
+A bundle should preserve the evidence for a release decision.
+
+That is the distinction I care about. SearchBench is not trying to replace agent architecture, tracing, or hosted eval tooling. It is trying to make the comparison object durable enough that a candidate system can be understood outside the runtime that produced it.
+
+## Where this leaves platforms
+
+I do not think this means evaluation platforms are bad.
+
+The Python version of SearchBench would have been much harder to understand without Langfuse. The problem was not that the platform had too little structure. The problem was that, as the harness became more serious, the meaning of the evaluation started to depend on how I distributed state across that structure.
+
+That is the part I want to avoid in the Go version.
+
+The platform can still observe, store traces, show dashboards, and help debug. But the release object should be portable.
+
+It should be possible to run the harness locally, in CI, against hosted traces, against local tasks, or inside a future optimizer loop, and still get the same kind of artifact out the other side.
+
+A baseline/candidate pair goes in.
+
+A bundle comes out.
+
+That bundle can be read, hashed, diffed, rendered, imported by the next round, and eventually visualized.
+
+That is the larger systems shape I am trying to build toward.
+
+AI evals do not just need better traces.
+
+They need durable comparison artifacts.
+
+They need bundles.
+</file>
+
+<file path="designing-for-two.mdx">
+---
+title: Designing for two
+date: '31 December 2025'
+description: Designing control planes that separate expressive power from authority, trading generality for legibility in infrastructure coordination.
+tags: tech
+---
+
+Modern cloud work is hard. I’ve seen this firsthand from both sides — developers trying to ship features, and operators trying to keep systems coherent as they scale.
+
+In response, the industry has produced an enormous body of tooling to manage complexity. Entire subindustries now exist around scheduling, isolation, observability, and deployment. We have systems like Kubernetes and HashiCorp Nomad for scheduling, containers and microVMs for isolation, and observability stacks built on OpenTelemetry, Prometheus, and Grafana.
+
+These components are mature, powerful, and widely accessible. The internet has had time to grow up, and it shows. I’m genuinely proud of what this industry has built. The CNCF landscape is an incredible artifact of collective engineering effort.
+
+![cncf map](https://www.netlify.com/v3/img/blog/cncf-landscape-map-2020.jpg)
+
+But that pride comes with a quieter anxiety. The same ecosystem that demonstrates our success also reflects the cognitive and organizational burden placed on teams. Even the CNCF seems to acknowledge this — “Overwhelmed? Please see the CNCF Trail Map.”
+
+My read is that much of this tension comes from how we coordinate across such a vast surface area. Many of the tools we rely on are deliberately general-purpose: maximally expressive, broadly applicable, and flexible enough to model almost anything. In practice, however, real teams are heterogeneous. They consist of people with different intuitions, tolerances for abstraction, and relationships to code.
+
+Some engineers thrive inside a Turing-complete configuration language. Others prefer constrained, declarative systems. Some are comfortable writing shell glue; others actively avoid it. Generalist tools flatten these differences, often pushing complexity into shadow work — ad-hoc scripts, translation layers, and tests written to recover clarity the tooling itself cannot express.
+
+This project grew out of an attempt to address that tension more directly.
+
+---
+
+## Coordination as a design problem
+
+I approached these challenges by studying how existing tools resolve coordination in practice, and by experimenting with alternative ways of composing those tools to make their tradeoffs more legible.
+
+My project is motivated by a different core principle than much of the existing tooling: **less power, more understanding** — where power is the ability to express arbitrary behavior, and understanding is the ability to reason locally about outcomes.
+
+One way I’ve found it helpful to visualize this tradeoff space is:
+
+```mermaid
+quadrantChart
+    title Configuration Design Tradeoffs
+    x-axis Low Understanding --> High Understanding
+    y-axis Low Expressive Power --> High Expressive Power
+    quadrant-1 Powerful but Opaque
+    quadrant-2 Powerful and Legible
+    quadrant-3 Simple and Legible
+    quadrant-4 Simple but Limited
+    "Terraform (stateful IaC)": [0.55, 0.75]
+    "Pulumi (GP languages)": [0.25, 0.9]
+    "YAML + Bash": [0.8, 0.3]
+    "This Project": [0.85, 0.55]
+```
+
+> **Understanding** here means being able to predict, with confidence, how the system will behave when acted upon.
+
+> A **legible** system is one where the truth about behavior lives in artifacts you can read, rather than being buried inside program execution.
+
+The tension here is not technical capability, but how easily different people can share a correct mental model of the system.
+
+I first developed these intuitions in application systems, where state and behavior were tightly coupled and often implicit. In those environments, ad-hoc abstractions and localized logic made global reasoning difficult, even when individual components were well-designed. Systems that instead made dataflow explicit — modeling dependencies as directed graphs and centralizing state transitions — dramatically improved correctness and debuggability. The same tradeoffs reappear at infrastructure scale, where hidden execution paths and implicit authority have even larger consequences.
+
+The system I built exposes distinct interfaces for different audiences. These are designed to reinforce rather than obscure one another, while keeping both initial provisioning and ongoing operational change within a single, continuously reconciled control plane.
+
+Developers interact with it primarily through executable tests that assert deployment invariants. Operators work through schema-driven configuration that constrains and validates system shape. Hermetic build tooling ties these layers together without collapsing them into a single abstraction.
+
+This project is a design experiment. It is not battle-tested at scale and should not be used in production. The goal is not replacement, but exploration.
+
+There is also absolutely a time and a place for Terraform, YAML, and bash glue. Most organizations should coordinate around them. They have too much momentum to ignore, and they work extremely well for small to medium-sized teams.
+
+But if you’re in a position to experiment, it’s worth paying attention to newer tooling and methodologies that have emerged from larger organizations over the past few years. To make that concrete, it helps to look at how existing tools resolve this problem today.
+
+---
+
+## Preexisting tooling
+
+### Terraform
+
+Terraform has, for good reason, become the de facto coordination layer for cloud infrastructure. It was the primary catalyst for the widespread adoption of Infrastructure as Code, and it remains the most widely deployed tool discussed here.
+
+Terraform is pleasant to read. It borrows the most ergonomic parts of JSON, offers a simple static type system with solid editor support, and avoids unnecessary complexity. Its most important contribution, however, is its state model.
+
+In real-world deployments involving multiple teams, the world changes underneath you. Machines are reassigned. IP addresses expire. Ownership shifts. Configuration alone is not enough to describe reality.
+
+Terraform addresses this with a deceptively effective loop: refresh, plan, apply. Desired configuration is reconciled against stored state and the provider’s current view of the world. The resulting execution plan describes how to restore consistency, and the applied outcome becomes the new state.
+
+This model enables drift tolerance, shared ownership, and long-lived systems. It also enforces a clear tradeoff: coordination is centralized.
+
+The cost is operational. At any given moment, only one actor can safely perform the refresh–plan–apply cycle. Locks and workflows mitigate this, but do not remove the underlying constraint. For small teams this is often acceptable; for larger or more parallel organizations, the apply cycle becomes a scarce resource that shapes how work is planned and delegated.
+
+Terraform succeeds by becoming the system of record for reality — and that success inevitably shapes the organizations that adopt it.
+
+---
+
+### Pulumi
+
+Terraform’s push-based reconciliation model proved so effective that most subsequent tools preserved it. Pulumi is best understood as one such iteration.
+
+Rather than rejecting Terraform’s model, Pulumi reimplements it using general-purpose programming languages, shifting expressiveness and abstraction into user programs while keeping centralized state as the coordination primitive.
+
+Architecturally, Pulumi consists of a Go-based engine and a set of language hosts that communicate with it over a defined RPC protocol. User programs run as normal processes in languages like TypeScript, Python, Go, or C#, but instead of mutating infrastructure directly, they register intent with the engine. Dependency tracking, diffing, ordering, and state persistence remain centralized.
+
+This design is pragmatic and elegant. It allows Pulumi to support many languages without duplicating its core logic, and it lets organizations reuse their existing ecosystems wholesale. For application-centric teams, this is a powerful wedge.
+
+Pulumi’s defining feature is that infrastructure intent can be expressed using the full abstraction power of the host language. Loops, conditionals, helper functions, and classes are all available, and infrastructure definitions can live directly alongside application code.
+
+This is also where the core tradeoff appears.
+
+By allowing intent to be expressed as the result of general-purpose program execution, Pulumi moves a significant amount of authority out of the tool and into user code. The shape of the desired system no longer exists as a static artifact; it is produced indirectly, by running a program.
+
+In environments where infrastructure intent is primarily expressed through general-purpose code, authority tends to accumulate implicitly: in helper libraries, custom tooling, sidecar processes, and extension points that are difficult to inspect in isolation. Over time, onboarding becomes an exercise in reconstructing execution paths rather than reasoning about declared state. Even when individual components are well-designed, the system as a whole fragments into behavior that is correct but no longer legible.
+
+This raises the bar for control planes, automation, and auditability. Systems that sit above infrastructure definition depend on stable, statically analyzable interfaces. Operators and administrators need to inspect intent without replaying arbitrary execution.
+
+Pulumi does not make this impossible, but it enforces discipline culturally rather than structurally. In environments where application teams own infrastructure end-to-end, that tradeoff can be reasonable. My own interests lie elsewhere: in systems where control-plane boundaries are explicit, interfaces are static, and intent remains inspectable without executing arbitrary programs.
+
+---
+
+### CDK8s
+
+At first glance, CDK8s appears similar to Pulumi. Both allow infrastructure to be authored in general-purpose languages and primarily target application developers.
+
+The difference lies in scope and execution.
+
+CDK8s is not a general-purpose cloud framework. It does not manage state, perform reconciliation, or call provider APIs. Instead, it focuses narrowly on Kubernetes, allowing users to define resources using object-oriented abstractions and then synthesize those definitions into static YAML. Application and reconciliation are left explicitly to downstream systems.
+
+In that sense, CDK8s functions more like a compilation target than a control plane.
+
+This was initially very attractive. CDK8s is intentionally constrained, produces artifacts that are legible to operators, and integrates cleanly with GitOps workflows. It eliminates a class of configuration errors without obscuring the underlying manifests.
+
+Over time, however, two issues became difficult to ignore.
+
+First, the object-oriented abstractions sit at a noticeable semantic distance from the YAML they generate. Writing and reviewing configurations required frequent context switching between representations of the same intent. As configurations grew — especially when targeting systems like Crossplane — that indirection made local reasoning harder rather than easier.
+
+Second, CDK8s is explicitly an application-level abstraction over Kubernetes. Its strengths lie in ergonomic builders for well-known resources, not in serving as a substrate for control-plane-level composition across many CRDs.
+
+Those edges clarified what I was actually looking for: a system that preserves static, inspectable artifacts, but with a simpler and more direct evaluation model.
+
+---
+
+### YAML and bash
+
+At the far end of this spectrum sit YAML and shell scripts. Despite their limitations, they remain ubiquitous for a reason: they are flexible, transparent, and require very little machinery.
+
+The cost is that execution and reconciliation are pushed almost entirely onto the user. There is no shared state, no formal notion of intent, and no control plane mediating change. Invariants live in documentation and convention rather than in the system itself.
+
+For small teams, this tradeoff is often acceptable. As a general coordination model, however, YAML and bash offer few affordances for auditability, automation, or shared ownership. They expose execution without structure — powerful precisely because they make no promises.
+
+---
+
+## The system I built
+
+After evaluating Terraform, Pulumi, CDK8s, and raw YAML, I arrived at a conclusion that surprised me: these tools do not strain because they lack power, but because they collapse too many concerns into a single interface.
+
+Infrastructure systems serve multiple audiences at once. Application developers want leverage. Operators want legibility and predictability. Platform and security teams want auditability and enforceable constraints. Most tools optimize for one of these roles and ask the rest to adapt.
+
+This project explores a different approach: **separating power from authority**, and binding them back together through static, inspectable interfaces.
+
+[`https://github.com/becker63/static-control-plane/`](https://github.com/becker63/static-control-plane/)
+
+---
+
+### A constrained control plane
+
+At the center of the system is a Kubernetes-based control plane built on Crossplane. Unlike Terraform’s push-based apply loop, Crossplane exposes state continuously through Kubernetes objects. Desired and observed state live in the same substrate, making the system observable by default and naturally compatible with GitOps workflows.
+
+This continuous reconciliation model also collapses the traditional distinction between “Day 1” provisioning and “Day 2” operations. Initial creation, drift remediation, scaling, replacement, and upgrade are all expressed through the same declarative topology and observed through the same control plane. Rather than handing systems off from a provisioning phase to an operational phase, Crossplane treats infrastructure as a long-lived object whose lifecycle remains visible, auditable, and correctable over time.
+
+Crossplane’s native composition mechanisms are intentionally conservative. Rather than bypassing that constraint, I leaned into it.
+
+All composition logic in this system is written using **KCL**, a small, non-Turing-complete language with a deliberately narrow execution model. KCL always evaluates to either valid Kubernetes manifests or a hard error. There is no synthesis step, no intermediate representation, and no opaque compilation target. Evaluation happens directly inside the control plane via a FluxCD controller that executes KCL as part of reconciliation.
+
+This distinction matters.
+
+KCL is not used here as a code generation language. It is used as a **structured, executable configuration format** whose syntax and semantics closely mirror JSON and YAML. Given the same inputs, it deterministically emits the same resources — or fails loudly.
+
+These KCL functions act as **pure transformations over observed state**. They cannot perform I/O, spawn processes, or introduce side effects. They exist entirely within the reconciliation loop and can only emit declarative resources.
+
+In practice, this means the control plane evaluates configuration as data transformations, not as programs.
+
+The result is a control plane that is:
+
+- statically analyzable,
+    
+- auditable by non-programmers,
+    
+- and safe to automate aggressively.
+    
+
+Operators can read the emitted YAML. Reviewers can diff it. CI systems can validate it. There is no hidden execution model.
+
+---
+
+### Code where it belongs
+
+I did not want to give up the benefits of code entirely. Real systems require conditional logic, schema alignment, and cross-resource wiring that is brittle to express in raw YAML alone.
+
+To address this, the system introduces **code only at the edges**, where it can be reasoned about locally and executed outside the control plane.
+
+```mermaid
+flowchart LR
+    subgraph Inputs
+        A[Upstream APIs<br/>CRDs • Go Types • JSON Schema]
+    end
+
+    subgraph Build["Hermetic Build (Buck2 + Nix)"]
+        B1[Python Model<br/>Codegen]
+        B2[KCL Schema<br/>Codegen]
+        B3[Protocol / App<br/>Schema Codegen]
+    end
+
+    subgraph Outputs
+        C1[Typed Python Models]
+        C2[Typed KCL Schemas]
+    end
+
+    A --> B1 --> C1
+    A --> B2 --> C2
+    B3 --> C2
+```
+
+Schemas are generated from upstream sources — CRDs, Go structs, and JSON Schema — using hermetic build rules. These schemas are imported into KCL, providing strong typing and editor support without turning configuration into a general-purpose program.
+
+Executable tests assert invariants about system topology rather than imperatively provisioning infrastructure. Build tooling (Buck2 + Nix) ensures that schema generation and evaluation are reproducible and independent of developer machines.
+
+Crucially, none of this code runs as part of reconciliation.
+
+In other words:
+
+- **Code defines structure**, not outcomes.
+    
+- **Behavior emerges through reconciliation**, not scripts.
+    
+- **Authority flows through schemas**, not conventions.
+
+---
+
+These ideas become concrete at the boundaries of the system, where static intent meets a dynamic runtime. Configuration is authored as KCL functions that deterministically emit Kubernetes resources, while correctness is asserted through executable tests that observe reconciliation outcomes rather than driving provisioning imperatively. The goal is not to simulate Kubernetes, but to treat it as a system under observation whose behavior can be reasoned about through stable, inspectable artifacts.
+
+The examples below make this split explicit. KCL is used as a JSON-like, declarative format that deterministically emits Kubernetes resources and nothing else. Expressive logic and validation live in Python, backed by fully typed APIs that observe reconciliation outcomes rather than orchestrating them. This separation keeps intent readable, behavior testable, and authority out of scripts.
+
+```python
+import schemas.kcl.fluxcd_helm_controller_kcl.models.v2.helm_toolkit_fluxcd_io_v2_helm_release as fluxcd_release
+
+fluxcd_release.HelmRelease {
+    metadata.name = "traefik"
+    metadata.namespace = "traefik"
+    spec = {
+        interval = "10m"
+        chart = {
+            spec = {
+                chart = "traefik"
+                version = "21.2.0"
+                sourceRef = {
+                    kind = "HelmRepository"
+                    name = "traefik"
+                    namespace = "traefik"
+                }
+            }
+        }
+        install = {
+            createNamespace = True
+        }
+    }
+}
+```
+
+And its corresponding test.
+
+```python
+@make_kcl_named_test(["crossplane_release.k"], lambda kf: "helm_releases" in kf.path.parts)
+def e2e_frp_kuttl(crossplane_release: KFile) -> None:
+    # Run flux sync
+    subprocess.run(["flux", "run"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Parse HelmRelease from KCL output
+    result = Exec(crossplane_release.path).json_result
+    release = HelmRelease.model_validate(json.loads(result))
+    metadata = release.metadata
+
+    # Check required metadata fields
+    if not metadata or not metadata.namespace or not metadata.name:
+        raise ValueError("HelmRelease.metadata.namespace and name are required")
+
+    namespace_name = metadata.namespace
+    release_name = metadata.name
+
+    # Ensure namespace exists
+    try:
+        Namespace.get(name=namespace_name)
+        print(f"Namespace '{namespace_name}' already exists.")
+    except ResourceNotFound:
+        ns = Namespace.builder().metadata(lambda m: m.name(namespace_name)).build().create()
+        for event, _ in ns.watch():
+            if event == "ADDED":
+                print(f"Namespace '{namespace_name}' created.")
+                break
+
+    # Ensure HelmRelease exists
+    try:
+        HelmRelease.get(name=release_name, namespace=namespace_name)
+        print(f"HelmRelease '{release_name}' already exists.")
+    except ResourceNotFound:
+        for event, _ in release.create().watch(namespace=namespace_name):
+            if event == "ADDED":
+                print(f"HelmRelease '{release_name}' created.")
+                break
+```
+## Conclusion
+
+The tools we use to manage infrastructure are not neutral. They encode assumptions about who is allowed to act, how change is coordinated, and where authority lives. Over time, those assumptions shape teams as much as they shape systems.
+
+Terraform centralizes coordination. Pulumi maximizes expressive power. CDK8s constrains execution while preserving authoring flexibility. YAML and bash trade guarantees for immediacy. None of these approaches are wrong — but each makes a different trade between power, legibility, and control.
+
+The system described here explores a different point in that design space. By treating infrastructure coordination as a **control-plane problem**, and by insisting on static, inspectable interfaces between roles, it becomes possible to automate aggressively without obscuring intent.
+
+Infrastructure systems shape how teams think, collaborate, and make changes under pressure. By designing for legibility as carefully as we design for power, we can build control planes that more than just automate infrastructure — they make coordination itself easier.
+
+That tradeoff — **less power, more understanding** — is the one I’m most interested in exploring.
+</file>
+
+<file path="test.mdx.ignore">
+---
+title: Control Planes All the Way Down
+date: '4 February 2026'
+description: Seeing system layers as successive control planes, from human intent to kernel enforcement.
+tags: tech
+---
+
+One of the patterns I keep rediscovering is that modern infrastructure isn’t just “software controlling hardware.”
+
+It’s **control planes stacked on top of other control planes**.
+
+Each layer doesn’t directly do the work. It *describes* the work for the layer beneath it.
+
+```mermaid
+---
+title: Simple sample
+---
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
+
+```
+
+At the very top is something fuzzy and human:
+
+> “Block traffic from this IP.”  
+> “Spin up three replicas.”  
+> “Drop packets that don’t match this policy.”
+
+By the time that intention reaches the kernel, it’s no longer fuzzy. It’s bytes. Flags. Struct fields. Bitmasks.
+
+Somewhere between those two points, the system had to **translate meaning into mechanism**.
+
+
+
+```python
+import schemas.kcl.fluxcd_helm_controller_kcl.models.v2.helm_toolkit_fluxcd_io_v2_helm_release as fluxcd_release
+
+fluxcd_release.HelmRelease {
+    metadata.name = "traefik"
+    metadata.namespace = "traefik"
+    spec = {
+        interval = "10m"
+        chart = {
+            spec = {
+                chart = "traefik"
+                version = "21.2.0"
+                sourceRef = {
+                    kind = "HelmRepository"
+                    name = "traefik"
+                    namespace = "traefik"
+                }
+            }
+        }
+        install = {
+            createNamespace = True
+        }
+    }
+}
+```
+
+And its corresponding test.
+
+```python
+@make_kcl_named_test(["crossplane_release.k"], lambda kf: "helm_releases" in kf.path.parts)
+def e2e_frp_kuttl(crossplane_release: KFile) -> None:
+    # Run flux sync
+    subprocess.run(["flux", "run"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Parse HelmRelease from KCL output
+    result = Exec(crossplane_release.path).json_result
+    release = HelmRelease.model_validate(json.loads(result))
+    metadata = release.metadata
+
+    # Check required metadata fields
+    if not metadata or not metadata.namespace or not metadata.name:
+        raise ValueError("HelmRelease.metadata.namespace and name are required")
+
+    namespace_name = metadata.namespace
+    release_name = metadata.name
+
+    # Ensure namespace exists
+    try:
+        Namespace.get(name=namespace_name)
+        print(f"Namespace '{namespace_name}' already exists.")
+    except ResourceNotFound:
+        ns = Namespace.builder().metadata(lambda m: m.name(namespace_name)).build().create()
+        for event, _ in ns.watch():
+            if event == "ADDED":
+                print(f"Namespace '{namespace_name}' created.")
+                break
+
+    # Ensure HelmRelease exists
+    try:
+        HelmRelease.get(name=release_name, namespace=namespace_name)
+        print(f"HelmRelease '{release_name}' already exists.")
+    except ResourceNotFound:
+        for event, _ in release.create().watch(namespace=namespace_name):
+            if event == "ADDED":
+                print(f"HelmRelease '{release_name}' created.")
+                break
+```
+---
+
+## Each Layer Narrows Possibility
+
+Every control plane layer does the same job in a different form:
+
+- Take a **wide, expressive space** of human intent  
+- Project it into a **narrower, more rigid structure**
+- Pass that structure downward
+
+That projection is where most of the real engineering lives.
+
+```mermaid
+flowchart LR
+  A[Flexible Human Concepts] --> B[Validated API Schema]
+  B --> C[Strongly Typed Objects]
+  C --> D[Serialized Wire Format]
+  D --> E[Deterministic Kernel Behavior]
+```
+
+At each step:
+
+- Ambiguity is removed  
+- Invalid states are ruled out  
+- Freedom is traded for predictability  
+
+By the time we reach the bottom, there’s no room left for interpretation. Only execution.
+
+---
+
+## The Illusion of a “Single System”
+
+When we talk about “the firewall” or “the scheduler” or “the database,” we talk like it’s one thing.
+
+But what we really have is a **pipeline of representations**:
+
+1. A user-facing surface that captures intent  
+2. An intermediate language that normalizes it  
+3. A library or control client that structures it  
+4. A transport that encodes it  
+5. A runtime that enforces it  
+
+Each of those is its own system, with its own invariants, failure modes, and edge cases.
+
+The “system” is the *composition* of those layers.
+
+---
+
+## Where Bugs Actually Live
+
+When something goes wrong, it’s tempting to blame the bottom:
+
+> “The kernel did something weird.”  
+> “The runtime is buggy.”
+
+But in layered control planes, failures are often **translation failures**, not execution failures.
+
+```mermaid
+flowchart TD
+  A[User Intention] --> B[CLI Parses Flags]
+  B --> C[API Normalizes Fields]
+  C --> D[Library Builds Objects]
+  D --> E[Serializer Encodes Message]
+  E --> F[Kernel Executes]
+  F --> G[Unexpected Behavior]
+
+  G -.-> C
+  G -.-> D
+  G -.-> E
+```
+
+The kernel might be doing *exactly* what it was told — but what it was told might not be what the user *meant*.
+
+So debugging becomes a matter of asking:
+
+> **At which layer did the meaning change?**
+
+That’s a very different question than “what line of code is broken?”
+
+---
+
+## Designing With Control Planes in Mind
+
+Once you see systems this way, it changes how you design them.
+
+You start to think less about “features” and more about **boundaries between representations**:
+
+- Where do we validate?  
+- Where do we normalize?  
+- Where do we collapse many concepts into fewer primitives?  
+- Where do we freeze structure into bytes?
+
+The quality of a system often depends less on how powerful any single layer is, and more on how *cleanly* those layers connect.
+
+Control planes aren’t just a Kubernetes thing or a networking term.
+
+They’re a general pattern for turning human intent into machine behavior.
+
+And once you notice them, you start seeing them everywhere — stacked, nested, and translating all the way down.
+</file>
+
+<file path="the-firewall-doesnt-live-in-the-kernel.mdx">
+---
+title: The Firewall Doesn’t Live in the Kernel
+date: '20 February 2026'
+description: Tracing the path from human intent to packet-time execution, and examining how semantic authority shifts across libnftables, libnftnl, and firewalld.
+tags: tech
+---
+
+If you ask the average practitioner where the Linux firewall lives, they’ll probably say “the kernel” or “ring 0.” That’s a reasonable answer. In day-to-day operations, you don’t need to think much beyond that — you configure `nft`, maybe `ufw`, maybe `iptables`, and packets get filtered.
+
+Like most important systems, that answer is true — and incomplete.
+
+The packet filter executes in the kernel. But a surprising amount of structural work happens in user space before the kernel ever sees a rule.
+
+That userland code is what allows you to write something like:
+
+```nft
+table inet filter {
+  chain input {
+    type filter hook input priority 0;
+    policy drop;
+
+    ct state established,related accept
+    iif lo accept
+    tcp dport 22 accept
+  }
+}
+
+```
+
+which then gets transformed into representations we send to the kernel like this:
+
+```json
+{
+  "nftables": [
+    {
+      "table": {
+        "family": "inet",
+        "name": "filter"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "filter",
+        "name": "input",
+        "type": "filter",
+        "hook": "input",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "filter",
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "left": { "ct": { "key": "state" } },
+              "op": "in",
+              "right": {
+                "set": ["established", "related"]
+              }
+            }
+          },
+          { "accept": null }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "filter",
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "left": { "meta": { "key": "iifname" } },
+              "op": "==",
+              "right": "lo"
+            }
+          },
+          { "accept": null }
+        ]
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "filter",
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "left": { "payload": { "protocol": "tcp", "field": "dport" } },
+              "op": "==",
+              "right": 22
+            }
+          },
+          { "accept": null }
+        ]
+      }
+    }
+  ]
+}
+```
+
+By the time this representation is sent to the kernel, questions of _why_ a rule exists or _what policy it expressed_ are no longer available, only _what objects to install_.
+
+Between these representations, a privileged userland stack parses, normalizes, and lowers firewall rules. Userland isn’t just configuring the firewall — it’s compiling it.
+
+## The netfilter pipeline 
+
+Ok but what does that actually mean?
+
+To understand why this matters, it helps to look at the full path a firewall rule takes from human intent to kernel enforcement.
+
+At a high level, the netfilter pipeline looks like this:
+
+1. **Human intent**
+    
+2. **User-facing configuration**
+    
+3. **Userland compilation**
+    
+4. **Netlink serialization**
+    
+5. **Kernel validation and installation**
+    
+6. **Packet-time execution**
+    
+
+Each stage narrows what the system can _represent_, and each boundary shifts responsibility.
+
+### 1. Human intent
+
+This is the part everyone understands intuitively.
+
+You want to:
+
+- allow SSH,
+    
+- drop unsolicited traffic,
+    
+- permit established connections,
+    
+- maybe block a dynamic set of addresses.
+    
+
+Intent lives here. It’s contextual, policy-driven, and full of assumptions:
+
+- _Why_ a rule exists
+    
+- _What_ it’s protecting
+    
+- _What_ tradeoffs are acceptable
+    
+
+None of this is machine-checkable. It only exists in the operator’s head or in documentation.
+
+### 2. User-facing configuration
+
+Intent gets expressed through interfaces like:
+
+- nft syntax
+    
+- JSON APIs
+    
+- higher-level tools like `ufw` or `firewalld`
+    
+
+This layer still speaks in **policy language**:
+
+- chains have names that mean something to humans
+    
+- rules are ordered in ways that imply priority
+    
+- constructs like `ct state established,related` encode domain knowledge
+    
+
+Crucially, this layer is _lossy but still legible_. You can usually read a ruleset and understand what the author was trying to do.
+
+### 3. Userland compilation
+
+This is the step most people mentally collapse into “the kernel,” but it happens **before** the kernel sees anything.
+
+Here, userland libraries:
+
+- parse configuration
+    
+- resolve defaults
+    
+- normalize rule ordering
+    
+- expand shorthand
+    
+- construct explicit tables, chains, rules, expressions, and sets
+    
+- establish references between objects
+    
+- batch operations into atomic transactions
+
+The output is no longer “allow SSH” — it’s:
+
+- a rule object
+    
+- containing a sequence of expressions
+    
+- with registers, offsets, flags, and handles
+    
+- referencing other objects by name or ID
+    
+
+From this point on, the system no longer knows _why_ a rule exists — only _how_ to install it.
+
+### 4. Netlink serialization
+
+Once the in-memory object graph is complete, it is serialized into Netlink messages.
+
+This step is mechanical but irreversible:
+
+- structured objects become byte streams
+    
+- relationships become numeric references
+    
+- optional semantics become flags and attributes
+    
+
+Netlink does not carry intent.  
+It carries instructions.
+
+At this boundary, only structure remains.
+
+### 5. Kernel validation and installation
+
+The kernel receives the Netlink batch and performs validation:
+
+- are required attributes present?
+    
+- are types correct?
+    
+- are references resolvable?
+    
+- are constraints satisfied?
+    
+
+Importantly, the kernel is **not re-deriving policy**.  
+It assumes the userland knew what it was doing.
+
+If validation passes, the objects are installed atomically.  
+If it fails, the whole batch is rejected.
+
+This is enforcement, not interpretation.
+
+### 6. Packet-time execution
+
+Finally, at runtime:
+
+- packets traverse hooks
+    
+- chains are evaluated
+    
+- expressions execute in order
+    
+- state is consulted and mutated
+    
+
+This is the part most people mean when they say “the firewall lives in the kernel.”
+
+And they’re right — **execution** does.
+
+But by the time a packet hits this stage, every meaningful decision about structure, relationships, and semantics has already been fixed elsewhere.
+ 
+## Why should I care?
+
+Because **semantic authority** is a security boundary.
+
+By _semantic authority_, I mean the power to decide **what a configuration means** — not just whether it is syntactically valid, but how intent is interpreted, normalized, coerced, and ultimately made real.
+
+In the nftables stack, much of that authority sits in userland.  
+Policy is parsed, defaults are chosen, shorthand is expanded, and rules are normalized before the kernel ever sees them. The kernel enforces what it receives; it does not reinterpret it.
+
+That’s why disagreements between policy compilers matter.
+
+If `firewalld`, `libnftables`, `libnftnl`, and the kernel disagree about what a rule _means_, you don’t need memory corruption for the result to be security-relevant. You get policy confusion. Silent widening. Constraints erased. Defaults reintroduced. Classic confused-deputy failure modes — just expressed through configuration semantics instead of syscalls.
+
+That observation makes the stack worth exploring.
+
+In the process, I built a tool: a structured fuzzer designed specifically to explore what I’ve been calling userland compilation — the point where policy is lowered into concrete objects. This part of the stack is both highly privileged and surprisingly under-analyzed.
+
+My security instincts tend to focus on seams — the spaces in between. The boring parts. In complex systems, those layers are often load-bearing even when they don’t look like it. Over the course of my work, that pattern has shown up again and again, and I think it applies here too.
+
+What follows isn’t a polished exploit write-up. I’m going to show you some code, some structures, and the mental model I built by running this stack adversarially. The fuzzer was deliberately designed to be legible and transferable — opinionated enough that the Nim is pleasant to read, but not so clever that you need to be a C or kernel expert to follow along.
+
+I’m not a specialist bug hunter, and this wasn’t an attempt to become one overnight. Even though I ran the fuzzer for dozens of hours with instrumentation, metrics, and monitoring in place, the goal wasn’t primarily to find a crash.
+
+I don’t have pretty graphs or a polished corpus.
+
+What I _do_ have is a map of where semantic authority lives in this stack — and a research direction I think is worth handing to people who operate here full-time.
+
+So let’s look at some code.
+
+## Nftnl
+
+The specific library I targeted was **libnftnl**, which sits squarely in stage **(3) Userland compilation**.
+
+To make that concrete, here’s a minimal but complete example of what libnftnl actually does. This test constructs a table, a base chain, a rule, attaches an expression, and serializes the result into a Netlink message.
+
+```nim
+test "build table+base chain+rule+expr into nlmsg and pretty-print":
+  # Step 1: construct a table
+  var t = Table.create()
+  t.family = AF_INET
+  t.name = "filter"
+
+  # Step 2: construct a base chain
+  var c = Chain.create()
+  c.family = AF_INET
+  c.table = "filter"
+  c.name = "input"
+  c.typeName = "filter"
+  c.hooknum = NF_INET_LOCAL_IN.uint32
+  c.prio = 0'u32
+  c.policy = NF_ACCEPT
+
+  # Step 3: construct a rule
+  var r = Rule.create()
+  r.family = AF_INET
+  r.table = "filter"
+  r.chain = "input"
+
+  # Step 4: add a comparison expression
+  var e = CmpExpr.create()
+  e.sreg = 1'u32
+  e.op = NFT_CMP_EQ
+  e.data = @[0x12'u8, 0x34'u8]
+  addExpr(r, move e)
+
+  # Step 5: prepare Netlink message
+  let nlh =
+    newNlMsg(NFT_MSG_NEWRULE.cint, AF_INET.cint, NLM_F_CREATE or NLM_F_ACK, 1'u32)
+
+  # Step 6: serialize rule into Netlink payload
+  buildRuleMsg(nlh, r)
+
+  # Step 7: pretty-print the constructed rule
+  var buf = newString(4096)
+  let written = nftnl_rule_snprintf(
+    cast[ptr uint8](buf.cstring),
+    buf.len.csize_t,
+    r.raw,
+    NFTNL_OUTPUT_DEFAULT.uint32,
+    0'u32,
+  )
+  check written > 0
+```
+
+There are a few important things to notice here.
+
+First: **nothing here is “policy.”**  
+There is no notion of “allow SSH,” no default chains, no implicit behavior. We are manually constructing objects and wiring them together.
+
+Second: **libnftnl owns structure, not meaning.**  
+Tables, chains, rules, and expressions are heap-allocated objects. Attributes are set explicitly. Expressions are appended in order. Once attached, ownership transfers — note the `move e` when adding the expression to the rule.
+
+Third: **serialization is the end of the line.**  
+By the time `buildRuleMsg()` runs, every meaningful decision has already been made. The Netlink payload that falls out of this process contains instructions — not intent.
+
+This is libnftnl’s role in the stack.
+
+It does not decide _whether_ a rule makes sense.  
+It decides _how_ a rule is represented.
+
+It does not decide policy. It decides representation.
+
+### What This Test Is Really Showing
+
+There’s an important detail hiding in that integration test, and it’s easy to miss.
+
+If you look closely, **none of these objects actually reference each other in memory**.
+
+Take the table again:
+
+```nim
+var t = Table.create()
+t.family = AF_INET
+t.name = "filter"
+```
+
+The table is named `"filter"`. That’s it. There is no pointer to a chain list. No back-reference. No ownership relationship.
+
+Now look at the chain:
+
+```nim
+var c = Chain.create()
+c.family = AF_INET
+c.table = "filter"
+```
+
+The chain doesn’t _point_ to the table. It doesn’t hold a reference. It just stores the string `"filter"`.
+
+Same story for rules:
+
+```nim
+var r = Rule.create()
+r.family = AF_INET
+r.table = "filter"
+r.chain = "input"
+```
+
+Again: strings. Names. Labels.
+
+At this stage in userland, these objects are not wired together into a graph. They are **floating structures** that happen to agree on names. Any actual resolution — “this chain belongs to that table” — happens later, after serialization, inside the kernel.
+
+That’s not an accident. It’s the design.
+
+### libnftnl Objects Don’t Form a Graph
+
+This becomes even clearer if you look at how I wrapped libnftnl with RAII.
+
+Here’s the core of the wrapper:
+
+```nim
+template makeWrapper(typeName, structName, allocFn, freeFn: untyped) =
+  type `typeName`* = object
+    raw*: ptr `structName`
+
+  proc create*(_: type `typeName`): `typeName` =
+    `typeName`(raw: allocFn())
+
+  proc `=destroy`*(x: var `typeName`) =
+    if x.raw != nil:
+      freeFn(x.raw)
+      x.raw = nil
+
+  proc `=wasMoved`*(x: var `typeName`) =
+    x.raw = nil
+
+  proc `=copy`*(dst: var `typeName`, src: `typeName`) {.error.}
+
+  proc `=sink`*(dst: var `typeName`, src: `typeName`) =
+    if dst.raw == src.raw:
+      return
+    `=destroy`(dst)
+    dst.raw = src.raw
+```
+
+Each wrapper owns exactly one thing: a pointer to a libnftnl C struct.
+
+That’s it.
+
+There is:
+
+- no reference counting
+    
+- no parent/child linkage
+    
+- no shared ownership
+    
+- no way to “attach” a chain to a table in memory
+    
+
+Tables, chains, rules, sets — they are all allocated independently and exist side by side. The only thing tying them together is **string identity**, which is later interpreted by the kernel when the Netlink batch is applied.
+
+So for most of libnftnl, _nothing interesting happens in memory_.
+
+Objects are born. Fields are set. Eventually they’re serialized.
+
+### The One Place Structure Actually Forms
+
+There is exactly one place where this changes.
+
+```nim
+addExpr(r, move e)
+```
+
+This is the first time anything like a real graph appears.
+
+When you add an expression to a rule, ownership transfers. The rule takes possession of the expression. Internally, libnftnl links that expression into the rule’s expression list. From that moment on, lifetime, ordering, and structure actually matter.
+
+That’s the seam.
+
+Expressions don’t just describe values — they describe _execution_. They introduce registers, dependencies, sequencing, and implicit contracts about how the kernel will interpret the rule at packet time.
+
+Everything before expressions is mostly metadata.  
+Expressions are behavior.
+
+And unlike tables or chains, expressions are not just named and resolved later. They are _physically embedded_ into the rule structure that gets serialized.
+
+### Why This Is Where I Focused
+
+This is why my fuzzer primarily targeted expressions.
+
+Not because I thought expressions were “more unsafe” in the memory-corruption sense, but because they’re the **only place where userland meaning hardens into executable structure** before the kernel ever sees it.
+
+They’re the closest thing nftables has to a tiny, Turing-adjacent instruction stream:
+
+- load values into registers
+    
+- transform them
+    
+- compare them
+    
+- branch via verdicts
+    
+
+Even if this ended up being a dead end for exploitability — and it may well be — it’s still the point where semantic authority becomes concrete. If anything in this stack is going to surprise you, it’s here.
+
+And that’s why expressions are where the rest of this story lives.
+
+## The Protobuf → Expression Coercion Layer
+
+Once I decided to focus on expressions, I needed a way to generate them at scale.
+
+That’s where the fuzzer comes in — but before fuzzing, there’s an awkward, revealing step: **coercion**. Something has to take a structured, fuzzable representation and turn it into real libnftnl expression objects.
+
+This is the layer that does that.
+
+```nim
+proc toNftnlExpr*(x: pbraw.Expr): expresions.Expression =
+  var e: expresions.Expression
+
+  case ord(x.`type`)
+  of 1: # payload
+    e = expresions.Expression(expresions.PayloadExpr.create())
+    setU32(toRaw(e), payload.idPayloadDreg, x.dreg)
+    setU32(toRaw(e), payload.idPayloadBase, x.base)
+    setU32(toRaw(e), payload.idPayloadOffset, x.offset)
+    setU32(toRaw(e), payload.idPayloadLen, x.len)
+    if x.csum_type != 0'u32:
+      setU32(toRaw(e), payload.idPayloadCsumType, x.csum_type)
+    if x.csum_offset != 0'u32:
+      setU32(toRaw(e), payload.idPayloadCsumOffset, x.csum_offset)
+    if x.csum_flags != 0'u32:
+      setU32(toRaw(e), payload.idPayloadFlags, x.csum_flags)
+```
+
+And then it just… keeps going.
+
+`cmp`, `meta`, `bitwise`, `immediate`, `counter`, `ct`, `limit`, `quota`.
+
+Each case hand-assembles a different expression variant by selectively populating attributes on a raw libnftnl object.
+
+There are a few things worth noticing here.
+
+### Why This Code Looks the Way It Does
+
+This file was largely generated with the help of GPT and then iterated on through tests.
+
+At the time, that was the fastest way for me to faithfully enumerate the expression construction surface without imposing structure I didn’t yet understand. As I worked through the generated code, the reason became clear: nftables expressions don’t really want to be abstracted.
+
+Unlike tables, chains, or rules, expressions are the point where higher-level policy has already been lowered. By the time an expression is constructed, defaults have been chosen, shorthand has been expanded, and intent has already been collapsed into concrete attributes. What remains is not policy, but a space of mechanically valid configurations.
+
+That space is wide and irregular. Expressions expose many optional attributes whose meaning is defined by convention, and many constraints are only enforced very late in the pipeline. This is an expected property of a low-level serialization boundary: it is designed to accept already-decided structure, not to reinterpret it.
+
+As a result, the construction logic naturally takes on a procedural shape:
+
+> if the fuzzed input has this field set, copy it into the corresponding attribute.
+
+It isn’t elegant, and it isn’t meant to be. It reflects the fact that this layer is where semantic flexibility ends and executable structure begins.
+
+That shape turned out to be informative in its own right.
+
+---
+
+### This Is Not an AST
+
+The protobuf representation I used is deliberately flat. Heres what it looks like: 
+
+```protobuf
+message Expr {
+  uint32 type = 2;   // numeric discriminator
+
+  uint32 sreg = 3;
+  uint32 dreg = 4;
+  uint32 op   = 5;
+
+  bytes  data = 10;
+  bytes  mask = 11;
+  bytes  xor  = 12;
+
+  string str  = 13;
+
+  uint32 attr_mask = 14;
+}
+```
+
+There is no nesting.  
+No expression tree.  
+No typed variants.
+
+Every expression is the same shape: a numeric kind tag plus a grab-bag of optional fields whose meaning is defined entirely by convention.
+
+There is no nested structure, no expression tree, no typed hierarchy. Each `Expr` is just a bag of fields plus a numeric discriminator.
+
+That’s not an accident — it mirrors how libnftnl itself works.
+
+libnftnl expressions are not a rich algebraic data type. They’re closer to tagged records with optional attributes, where the meaning of each field depends entirely on the expression kind and on conventions that live outside the type system.
+
+As a result, the coercion layer isn’t _mapping structure to structure_.  
+It’s mapping **possibility space to convention**.
+
+Every `if x.foo != 0` is a guess about what “presence” means.  
+Every `setU32` is an assertion that this attribute makes sense for this expression.  
+Every omitted field is a semantic choice.
+
+### Why Protobuf? Why libprotobuf-mutator?
+
+The protobuf schema exists because the harness uses **libprotobuf-mutator** to drive structured fuzzing.
+
+Instead of mutating raw bytes, libprotobuf-mutator mutates instances of a protobuf message according to its schema. That guarantees syntactic validity while still exploring unusual field combinations. The fuzzer isn’t guessing at Netlink blobs — it’s generating structurally coherent expression descriptions.
+
+That distinction matters.
+
+Raw fuzzing would mostly exercise parser and validation failures. Structured mutation, guided by coverage, lets the harness explore combinations that are _valid at the type level_ but uncommon in practice — unusual register usage, optional attribute mixes, edge numeric values.
+
+The protobuf message defines the possibility space.  
+The coercion layer translates that space into real libnftnl expressions.
+
+From there, the rest of the stack has to live with whatever structure was generated.
+
+---
+
+### Coercion Is Where Meaning Leaks
+
+This coercion layer ended up being one of the most informative parts of the project.
+
+Not because it found a crash — but because it showed me how much _interpretive power_ lives here.
+
+By the time an expression reaches libnftnl:
+
+- defaults have already been chosen
+    
+- fields have already been omitted or filled
+    
+- structural shape has already been decided
+    
+
+The kernel doesn’t ask _why_ an attribute is present.  
+It just checks whether it’s allowed.
+
+That means every decision in this mapping function shapes what ultimately gets executed.
+
+---
+
+### Why This Layer Matters More Than It Looks
+
+At first glance, this coercion code looks mundane. It’s just field copying. There’s no clever algorithm, no deep invariants being enforced, no obvious “policy.”
+
+That’s exactly the point.
+
+This layer is where **possibility becomes commitment**.
+
+By the time a protobuf `Expr` reaches `toNftnlExpr`:
+
+- someone has decided which fields are even _representable_
+    
+- someone has decided what “unset” means (`0`, empty slice, empty string)
+    
+- someone has decided which combinations are worth emitting at all
+    
+
+Those decisions are not validated here. They’re _assumed_. And once they’re assumed, they’re baked into structure.
+
+This is the moment where a fuzzed, symbolic description turns into a concrete instruction stream.
+
+### Where Execution Actually Takes Shape
+
+It’s worth contrasting expressions with the rest of the nftables stack one more time.
+
+Tables, chains, and rules are largely **structural**. They are named containers with attributes: families, hooks, priorities, policies. In userland, they exist mostly as labeled objects that “float” until the kernel resolves them by name at commit time.
+
+Expressions are different.
+
+Expressions are the point where rules stop being declarative structure and start becoming **operational**.
+
+They:
+
+- introduce registers
+    
+- establish data flow between operations
+    
+- impose ordering
+    
+- encode control decisions via comparisons and verdicts
+    
+
+Taken together, a rule’s expression list is not just metadata — it is a small, ordered instruction stream that the kernel will later execute at packet time.
+
+This is the narrow sense in which expressions behave _program-like_: not because they are general-purpose or Turing-complete, but because they describe **sequenced computation over packet state** rather than static configuration.
+
+That distinction matters.
+
+It’s also why a coercion layer is unavoidable here. There is no single “default” representation for an expression. To construct one, you must decide how symbolic inputs map onto concrete operations: which registers are used, which attributes are emitted, which fields are omitted, and in what order everything appears.
+
+### This Is Also Where Things Get Dangerous (Conceptually)
+
+Nothing in this file is obviously unsafe.
+
+There’s no pointer arithmetic.  
+No manual memory management.  
+No unchecked casts.
+
+And yet, this is one of the most security-relevant files in the entire project.
+
+Why?
+
+Because **this is where ambiguity collapses**.
+
+Every time the code says:
+
+```nim
+if x.data.len > 0:
+  setBlob(...)
+```
+
+it is deciding:
+
+- whether “empty” means “unset” or “zero-length”
+    
+- whether the absence of data should suppress an attribute entirely
+    
+- whether the kernel will infer a default, or reject the object, or accept it silently
+    
+
+Those are not memory safety questions.  
+They’re _semantic questions_.
+
+And semantic bugs don’t crash. They widen.
+
+They produce rules that look fine, serialize cleanly, validate successfully — and don’t do what anyone thought they did.
+
+### A Necessary Reframing
+
+It’s tempting to treat libnftnl itself as _the_ semantic authority in the nftables stack. That’s not quite right.
+
+libnftnl does not decide what firewall policy _means_. It does not interpret intent, resolve high-level constructs, or enforce domain rules. Those decisions are made earlier — in tools like `nft`, `libnftables`, and system daemons such as `firewalld`.
+
+What libnftnl does is more constrained, and more dangerous in a different way: it is the last place where those decisions still exist as mutable structure.
+
+By the time a rule reaches libnftnl:
+
+- policy has already been lowered
+    
+- defaults have already been chosen
+    
+- shorthand has already been expanded
+    
+
+But the result is still _programmable_.
+
+libnftnl allows user space to assemble arbitrarily complex, internally consistent object graphs — including combinations that normal frontends would never emit — and then serialize them into a single atomic Netlink transaction.
+
+That makes libnftnl less of a policy engine and more of a **compiler backend**: libnftnl does not invent semantics; it serializes them.
+
+This is why it’s such a powerful tool for exploration and fuzzing — and why it’s a useful vantage point even if it isn’t the ultimate source of meaning.
+
+---
+
+Up to this point, I’ve treated libnftnl as a technical boundary: a place where meaning hardens into structure and ambiguity disappears.
+
+That framing is incomplete on its own.
+
+The real risk only appears once you ask a different question:
+
+**Who depends on that frozen structure being correct?**
+
+The answer is not just the kernel.
+
+It’s long-running, privileged daemons.
+
+## Enter firewalld
+
+If libnftnl is the point where structure freezes, firewalld is one of the systems that has to live with what was frozen.
+
+firewalld is not just a thin wrapper around nftables. It is a long-running daemon. It exposes zones and policies. It supports dynamic updates, reloads, rich rules, helpers, and sets. It is meant to stay up while the system evolves underneath it.
+
+That persistence changes the shape of the problem.
+
+When you run `nft`, you typically construct a transaction, send it, and exit. The process doesn’t have to remember what it did yesterday. It doesn’t have to reconcile what it thinks the world looks like with what the kernel actually contains. It simply issues a command.
+
+firewalld doesn’t get that luxury.
+
+It accepts high-level intent, lowers it into nftables JSON, submits it, and then continues operating under the assumption that its view of the world and the kernel’s view of the world are still aligned. Over time, it has to add rules, remove them, reorder them, reload configuration, and preserve invariants across those changes.
+
+Most of the time, this is invisible. Things appear to work the way you expect.
+
+What interested me was not whether firewalld is “correct,” but how it maintains that continuity. Where exactly does it decide that two rules are the same? How does it keep track of ordering? What does it assume about what the kernel returns?
+
+Those questions aren’t answered in documentation. They’re answered in code.
+
+Everything below comes directly from the firewalld repository, pinned to the following commit on `main` at the time of writing:
+
+```
+69ad16a4435a0b49b4196aa1a99ee963b72c4b69
+```
+
+Specifically:
+
+```
+firewalld/src/firewall/core/nftables.py
+```
+
+You can view the exact snapshot here:
+[https://github.com/firewalld/firewalld/commit/69ad16a4435a0b49b4196aa1a99ee963b72c4b69](https://github.com/firewalld/firewalld/commit/69ad16a4435a0b49b4196aa1a99ee963b72c4b69)
+
+This is the file where firewalld constructs and submits nftables JSON. It is the seam between high-level daemon state and the lower userland stack.
+
+There isn’t a single “authority function” here. The logic is distributed across helpers and transactional paths. But some functions make the shape of that responsibility easier to see than others.
+
+One of them is `build_set_policy_rules`.
+
+Before interpreting it, it’s better to just look at it.
+
+---
+
+## A Concrete Example: `build_set_policy_rules`
+
+Here’s the core of it, slightly reduced:
+
+```python
+def build_set_policy_rules(self, policy, policy_details):
+    rules = []
+
+    if policy == "PANIC":
+        rules.extend(self._build_add_table_rules(TABLE_NAME_POLICY))
+
+        for hook in ["prerouting", "output"]:
+            rules.append(
+                {
+                    "add": {
+                        "chain": {
+                            "family": "inet",
+                            "table": TABLE_NAME_POLICY,
+                            "name": "%s_%s" % ("raw", hook),
+                            "type": "filter",
+                            "hook": hook,
+                            "prio": -300 + NFT_HOOK_OFFSET - 1,
+                            "policy": "drop",
+                        }
+                    }
+                }
+            )
+```
+
+Even before looking at the rest of the function, a few things stand out.
+
+First, the priority arithmetic:
+
+```python
+"prio": -300 + NFT_HOOK_OFFSET - 1
+```
+
+`NFT_HOOK_OFFSET` is not a kernel constant. It’s defined in this file as a small integer — `10`. That means firewalld is deliberately shifting itself relative to the standard netfilter priority bands.
+
+It is not attaching at the canonical raw or filter priority.  
+It is choosing to sit slightly offset from them.
+
+That’s an opinion about ordering.
+
+Not a user-specified value.  
+Not something inherited from the kernel.  
+A decision made here.
+
+The same pattern shows up again in the `"DROP"` branch:
+
+```python
+"prio": 0 + NFT_HOOK_OFFSET - 1
+```
+
+Again, priority isn’t just passed through. It’s computed.
+
+That matters because hook priority controls evaluation order. If two chains attach to the same hook, the integer you pick decides who runs first. Being off by one is not cosmetic — it changes semantics.
+
+---
+
+Now look at what happens next in the `"DROP"` case:
+
+```python
+rules.append(self._build_set_policy_rules_ct_rule(True, hook))
+```
+
+That helper injects a conntrack rule for `ct state established,related`.
+
+The user didn’t request that explicitly. It’s not present in the high-level policy string. Firewalld inserts it to stabilize behavior across reloads.
+
+That’s another opinion.
+
+It’s deciding that a policy mode implies certain stateful behavior. The kernel will happily install whatever rule list it receives. It doesn’t know that this rule is “supporting” a policy abstraction. That relationship only exists here.
+
+---
+
+Further down, the policy string is translated into a concrete verdict expression:
+
+```python
+if d_policy == "ACCEPT":
+    expr_fragment = {"accept": None}
+elif d_policy == "DROP":
+    expr_fragment = {"drop": None}
+else:
+    expr_fragment = {
+        "reject": {"type": "icmpx", "expr": "admin-prohibited"}
+    }
+```
+
+The kernel never sees `"DROP"` as a semantic concept. It sees a verdict expression attached to a rule object.
+
+Here, firewalld decides:
+
+- which verdict to emit
+    
+- how to structure a reject
+    
+- which icmp expression to use
+    
+
+Those choices live entirely in user space.
+
+---
+
+Finally, notice the lifecycle control:
+
+```python
+elif policy == "ACCEPT":
+    rules += self._build_delete_table_rules(TABLE_NAME_POLICY)
+```
+
+Switching to `"ACCEPT"` doesn’t toggle a flag. It deletes an entire table. `_build_delete_table_rules` carefully sequences table creation and deletion to avoid errors, ensuring the transition is valid at the nftables layer.
+
+From the kernel’s perspective, this isn’t a policy mode change. It’s just objects appearing and disappearing.
+
+But step back and look at what this function actually does.
+
+Given a single high-level input like:
+
+```
+policy = "DROP"
+```
+
+firewalld doesn’t simply attach a verdict somewhere. It constructs an entire substructure: a dedicated table, base chains bound to specific hooks, priority values adjusted relative to kernel defaults, implicit conntrack rules inserted for stability, and finally the verdict rule that corresponds to the user’s policy.
+
+None of that structure is present in the original configuration token. It is synthesized here.
+
+To make that concrete, consider:
+
+```nft
+policy = "DROP"
+policy_details = {
+  INPUT: ACCEPT,
+  FORWARD: DROP,
+  OUTPUT: REJECT
+}
+```
+
+What ultimately gets installed resembles this:
+
+```mermaid
+graph TD
+    T["TABLE: firewalld_policy_drop"]
+
+    CI["filter_input<br/>hook=input<br/>prio=0 + OFFSET - 1"]
+    CF["filter_forward<br/>hook=forward<br/>prio=0 + OFFSET - 1"]
+    CO["filter_output<br/>hook=output<br/>prio=0 + OFFSET - 1"]
+
+    T --> CI
+    T --> CF
+    T --> CO
+
+```
+
+That tree does not exist in user configuration. It exists because firewalld constructed it.
+
+This isn’t accidental complexity. It’s the daemon doing real work: preserving expected semantics across reloads, positioning itself carefully in hook order, and translating abstract policy strings into concrete nftables objects.
+
+But that work isn’t just mechanical. The priority arithmetic (`NFT_HOOK_OFFSET - 1`) fixes a particular place in the hook ordering. The injected conntrack rule preserves one notion of continuity across transitions. The mapping from `"DROP"` or `"REJECT"` to concrete verdict expressions hardens abstract policy into specific behavior. Even the table deletion path encodes assumptions about how a policy change should unfold.
+
+None of these are memory safety issues. They’re structural commitments. And if those commitments ever drift relative to how libnftables normalizes JSON, how the kernel interprets hook priority, or how nftables itself evolves, the result isn’t a crash. It’s behavioral drift.
+
+And in a firewall, drift is often subtler — and harder to detect — than a segfault.
+
+---
+
+## Stabilizing the Stack
+
+By this point, three distinct userland layers have taken part in shaping firewall behavior:
+
+- `libnftables` lowers high-level configuration into structured JSON.
+    
+- `libnftnl` turns that structure into concrete objects and Netlink messages.
+    
+- `firewalld` expands abstract policy modes into tables, chains, priorities, and implicit helper rules.
+    
+
+The kernel enforces what it receives. But by the time enforcement begins, most of the meaningful structural decisions have already been made in user space.
+
+That shifts where the interesting questions live.
+
+If structure and ordering are largely determined before packet-time execution, then the seams between these layers become the natural place to look. Each layer assumes the previous one behaved sensibly. Each layer consumes structure that it did not originate. Each layer makes its own commitments about ordering, normalization, and lifecycle.
+
+Testing the kernel tells you whether execution is correct.
+
+Testing the seams tells you whether those assumptions hold.
+
+---
+
+## Toward a Research Direction
+
+The fuzzer I built was not designed to crash the kernel. It was designed to treat userland lowering as something worth exploring on its own.
+
+The concrete direction that emerges from this post is straightforward:
+
+Use low-level libraries like `libnftnl` to generate valid but unusual rule graphs. Feed them into higher-level consumers such as `firewalld` and observe how those systems reconcile what they see.
+
+That means:
+
+- Constructing edge-case expression sequences and rule layouts with `libnftnl`.
+    
+- Serializing them into valid nftables transactions.
+    
+- Introducing them into long-running daemons that assume a certain structural shape.
+    
+- Observing how those daemons normalize, track, reload, or reinterpret what they see.
+
+The goal isn’t memory corruption. It’s differential interpretation.
+
+If a daemon maintains its own internal model of rule identity, ordering, or lifecycle, what happens when it encounters structures that are valid at the nftables layer but outside the patterns it normally emits? Does it reconcile them cleanly? Does it collapse distinct structures into the same internal representation? Does it drift?
+
+This is not a claim that the stack is fragile. It is a claim that these seams are structurally significant and underexplored.
+
+And unlike kernel fuzzing, this direction does not require ring-0 exploits or deep C internals. It requires careful structure generation, controlled injection, and a willingness to treat userland policy engines as semantic interpreters rather than simple configuration tools.
+
+That is the research direction this work supports.
+
+---
+
+## Conclusion 
+
+The Linux firewall executes in the kernel. That isn’t controversial.
+
+What this exploration shows is that the structures the kernel executes are assembled earlier — in user space — by layers that parse, normalize, and translate policy into concrete rule graphs.
+
+`libnftables` lowers configuration.  
+`libnftnl` serializes structure.  
+`firewalld` expands higher-level abstractions into tables, chains, priorities, and helper rules.
+
+Each layer makes assumptions about ordering, identity, and lifecycle. Those assumptions don’t crash when they drift — they change behavior.
+
+The direction suggested here is simple: use lower-level libraries to generate valid but unusual nftables structures, introduce them into long-running consumers like `firewalld`, and observe how those systems reconcile what they see.
+
+Not to prove fragility.  
+Not to hunt for a segfault.
+
+But to understand where interpretation happens — and how stable it is.
+
+The kernel enforces.  
+User space shapes what gets enforced.
+
+That boundary is worth examining.
+</file>
+
+<file path="tight-loops.mdx">
+---
+title: Tight Loops
+date: '25 January 2026'
+description: How frontend instincts about tooling and feedback loops shaped a structured fuzzing workflow.
+tags: tech
+---
+
+Believe it or not, I used to be a frontend engineer. Fully in it. I built SPAs, wrote React, owned a fork of Chart.js, and fought with state-management libraries like Recoil back when they were still settling into their identities. I stitched together windowing systems like `react-mosaic`, pushed complexity around until something demoable emerged, and shipped anyway.
+
+That work was not a detour or a phase. The problems I was solving genuinely required the kinds of client-side architectures the modern web incentivizes, and I learned a lot inside that ecosystem. It shaped how I think about systems, collaboration, and speed.
+
+What made that work fast was not React itself or clever abstractions. It was the environment.
+
+Frontend development lives inside an unusually consistent runtime world. You expect a working CLI, predictable dev servers, hot reload, formatting, dependency management, and a setup path that other people have already walked many times before. You can spin something up quickly, share it immediately, and trust that it will behave roughly the same on someone else’s machine. The feedback loop is tight. You spend your time inside the problem instead of negotiating the environment.
+
+That experience permanently shaped how I work.
+
+I carry a strong bias toward productized systems: work that is runnable, legible, and intentional to someone who did not build it. Even when I am working deep in low-level or abstract layers of the stack, I instinctively wrap the work in tooling and structure so it can be entered, not just understood. What frontend taught me was not UI polish, it was how much speed comes from a consistent runtime environment and good tooling.
+
+You feel that same effect anywhere the setup path is taken seriously.
+
+A clean `Makefile`, a solid `CMake` setup, a Bash script that actually works, or even just honest setup docs do more than save time. They make the person behind the repository visible. You can see the effort spent deciding what should be explicit, what can be automated, and what assumptions are safe to make.
+
+That effort is not about eliminating complexity or ambiguity. It is about relocating it. When setup code is reliable and the environment is doing the bookkeeping, uncertainty moves out of your head and into something concrete you can inspect, change, and reason about.
+
+You can fork more casually.  
+You move things around with fewer hidden assumptions.
+
+That is what lets you explore novel state spaces faster.
+
+You know what else does that?
+
+---
+
+## Coverage-guided fuzzing
+
+Coverage-guided fuzzing is a way of turning program behavior into a search problem.
+
+The core loop is easy to describe but hard to make useful: generate inputs, observe execution, keep the ones that lead somewhere new. Coverage is just one heuristic for “newness” among many. It is not a guarantee of correctness or completeness. But it does enable a different workflow.
+
+Instead of manually enumerating cases or relying on intuition about where a system might break, you define a boundary, give the machine a signal, and let it explore. The tighter and more reliable that loop is, the more useful it becomes, not just for finding bugs, but for learning how a system behaves when pushed.
+
+What interested me here was not fuzzing as a security technique so much as the workflow it enabled. Small changes in setup, signal, or structure could radically change what parts of the system became reachable, and therefore knowable.
+
+---
+
+## Why `libnftnl` / `libmnl`
+
+The concrete system I ended up exploring was nftables’ userland stack, specifically `libnftnl` and `libmnl`.
+
+I did not set out to fuzz them.
+
+Originally, I was writing a small Nim wrapper around `libnftnl` for another project. I wanted something typed, ergonomic, and pleasant enough to use without constantly consulting C headers. As I worked through the API surface, a pattern started to emerge.
+
+This was not just a large or awkward API. It had many of the structural properties that make security-relevant code hard to reason about: deeply nested objects, implicit invariants, ownership rules that depend on call order, and quiet normalization between representations.
+
+At some point, the work stopped feeling like just binding a library and started feeling like mapping a boundary I realized was actually pretty important.
+
+I did not have a concrete exploit in mind, and I was not trying to produce a traditional vulnerability report. I was trying to understand the shape of the system well enough that other work could follow.
+
+---
+
+## The fuzzer
+
+Rather than fuzzing by generating arbitrary Netlink packets, I focused on the userland serialization path itself. The goal was not to bypass validation, but to explore the space of valid-looking structures and determine where the edges actually were.
+
+I treated the fuzzer less like a black box and more like an interactive system. Something you shape, iterate on, and live inside. Every bit of friction in the harness showed up immediately as slower exploration or weaker intuition about what the system was doing.
+
+Corpus quality and coverage curves absolutely matter here. They are what let a fuzzer push a system meaningfully over time. But coverage only becomes valuable when the artifacts it produces can be read, reasoned about, and shared.
+
+I spent time making the surface legible because I wanted the code itself to carry understanding. Instead of encoding my mental model in a separate writeup, I tried to encode it directly into the harness, the types, and the abstractions. That way, the artifacts the fuzzer produced could be interpreted by someone else without having to reconstruct all the context I had in my head.
+
+## Pretty macros
+
+The first place that legibility broke down was attribute handling.
+
+`libnftnl` exposes a large family of getters and setters for chain and rule attributes. Each attribute has an expected type, but that expectation lives in documentation, examples, and tribal knowledge rather than in the type system. Getting it wrong often doesn’t fail immediately — you just end up with malformed objects that behave strangely later, far away from the mistake.
+
+For interactive exploration, that’s a bad feedback loop. It makes it difficult to tell whether the system is behaving unexpectedly or whether you simply misunderstood it.
+
+I wanted to make those expectations explicit and enforce them mechanically.
+
+In Nim, that turned into a small macro-driven layer that does three things:
+
+- encodes the expected type of each attribute at compile time
+    
+- collapses raw get/set calls into a single interface
+    
+- fails early when I try to do something unsupported
+    
+
+I wrote the harness in Nim for practical reasons. `libnftnl` is a C library with strict ownership rules and a wide, loosely-typed surface. Nim’s ARC/RAII-style memory model let me wrap raw pointers in types that free automatically and prevent accidental copies, while still compiling down to straightforward C interop.
+
+Its compile-time macros made it possible to encode attribute invariants directly into the type system without adding runtime overhead. I wasn’t looking for a new ecosystem — just a way to make a C API behave like a structured interface while staying close to the metal.
+
+The goal wasn’t to make `libnftnl` “safe.” It was to make it easier to tell when the library was doing something surprising — and when it was behaving exactly as designed.
+
+## Property-style accessors and macro mechanics
+
+What I wanted was something that behaved like a property accessor.
+
+```nim
+let p = chain.policy
+chain.policy = NF_ACCEPT
+```
+
+That surface-level ergonomics mattered, but not because it was “nice.” It mattered because it let me collapse a wide, loosely typed C API into something I could reason about locally.
+
+At the center is a single macro that sits right at the boundary between “nice” code and raw C calls. The macro takes a chain, an attribute enum, and zero or one arguments. The number of arguments determines whether it expands into a getter or a setter.
+
+### Getter expansion
+
+In the getter case, the macro expands to something equivalent to:
+
+```nim
+rawGetAttr[expectedType(attr)](c.raw, attr.uint16)
+```
+
+`expectedType` is a compile-time mapping from attribute to type. For example, `NFTNL_CHAIN_NAME` maps to `string`, while `NFTNL_CHAIN_POLICY` maps to `uint32`. That mapping is resolved entirely at compile time.
+
+`rawGetAttr` then dispatches on that type, also at compile time, selecting the correct `libnftnl` getter. If I try to read an attribute using the wrong type, the code simply does not compile.
+
+### Setter expansion
+
+In the setter case, the macro expands to:
+
+```nim
+rawSetAttr(c.raw, attr.uint16, value)
+```
+
+`rawSetAttr` dispatches on the Nim type of `value`:
+
+- strings call `nftnl_chain_set_str`
+    
+- `uint32` calls `nftnl_chain_set_u32`
+    
+- `uint64` calls `nftnl_chain_set_u64`
+    
+- enums and other integers are coerced and width-checked
+    
+- anything else fails at compile time
+    
+
+So when I write:
+
+```nim
+chain.policy = NF_ACCEPT
+```
+
+what I actually get is compile-time validation that `policy` expects a `uint32`, that `NF_ACCEPT` is representable at that width, and a concrete call to the correct `libnftnl` setter, with no dynamic checks at runtime.
+
+To see why this matters, compare it to the equivalent C, simplified from the real examples in `libnftnl`:
+
+```c
+struct nftnl_chain *t = nftnl_chain_alloc();
+
+nftnl_chain_set_str(t, NFTNL_CHAIN_TABLE, argv[2]);
+nftnl_chain_set_str(t, NFTNL_CHAIN_NAME, argv[3]);
+
+if (is_base_chain) {
+    nftnl_chain_set_u32(t, NFTNL_CHAIN_HOOKNUM, hooknum);
+    nftnl_chain_set_u32(t, NFTNL_CHAIN_PRIO, prio);
+}
+```
+
+This code is correct only if you already know which setter matches which attribute, which widths are expected, and which combinations are valid. None of that is enforced by the type system, and most mistakes compile cleanly.
+
+The macro layer collapses that entire surface. It takes implicit expectations and makes them mechanical.
+
+Once this was in place, mutating chains stopped feeling like poking at a C API and started feeling like manipulating a data structure. That shift mattered because it changed how quickly I could explore without accumulating invisible errors, and therefore how quickly I could understand the system.
+
+---
+
+## One-click fuzzing
+
+All of that lived inside the harness. It mattered, but it wasn’t enough.
+
+Fuzzing lives or dies on how easy it is to run. If starting the fuzzer requires SSH, special permissions, or manual cleanup, the loop collapses.
+
+I wasn’t fuzzing on my own machine. I was running on shared hardware owned and maintained by a close friend — a very capable operator whose job is to keep those systems stable and predictable.
+
+The constraints were clear and reasonable: no root access, no hand-edited systemd units, no half-baked fuzzing setups living directly on a production host. I deferred to those boundaries deliberately. The work I do sits between layers and groups, and respecting the invariants of the environment is part of the job.
+
+### Three iterations of automation
+
+I didn’t get this right on the first try. It took three distinct iterations before the setup stopped fighting me.
+
+1. **I automated the build.**  
+    Reproducible builds of the fuzzer, the harness, and coverage-instrumented versions of `libnftnl` and `libmnl`. If I couldn’t rebuild deterministically, nothing else mattered.
+    
+2. **I automated observability.**  
+    Prometheus, Grafana, log parsing, coverage export. This helped — but it didn’t solve the real problem.
+    
+3. **The system OOM-killed itself.**
+    
+
+At that point, I stopped trying to tune around the issue and changed the shape of the problem.
+
+---
+
+## Containing the blast radius
+
+I moved the fuzzer into a dedicated microVM.
+
+That changed the situation in concrete ways:
+
+- hard memory caps via cgroups
+    
+- automatic worker scaling based on available RAM
+    
+- zram for short-lived memory spikes
+    
+- kernel tuning for sanitizer-heavy workloads
+    
+- the ability to crash and restart the entire environment without touching the host
+    
+
+The VM mounts a single shared directory via `virtiofs` for corpora and logs. That’s the only bridge. Everything else is isolated.
+
+From my friend’s perspective, this was suddenly acceptable.  
+From my perspective, it was liberating.
+
+Not because constraints disappeared, but because they were finally explicit and aligned.
+
+---
+
+## Scope
+
+This wasn’t a disciplined vulnerability discovery effort in the academic or professional security sense. I didn’t arrive with an intent to grind through minimization until an exploit fell out.
+
+What I did bring was a working mental model of a complicated userland boundary and a workflow designed to push the system far enough that its shape became apparent. The corpus and deeper forensic analysis that security researchers rightly care about are important — they’re just not what this piece is about.
+
+The next post focuses on the models this exploration produced: how objects are structured, where normalization happens, and why this surface deserves more deliberate attention.
+
+---
+
+## Closing
+
+This work made the fuzzer smarter and gave me more control as the user.
+
+By moving ambiguity into explicit boundaries — into code, tooling, and environment design — I could push the system harder without losing track of what it was doing or why. The loop tightened because I could see what was happening, intervene when it mattered, and trust the artifacts I was producing.
+
+That legibility is the result. It’s what made the exploration sustainable and sharable, and it’s what let the work continue without collapsing under its own complexity.
+</file>
+
+<file path="zed.mdx">
+---
+title: Running the Latest Zed on a Platform That Hates Me
+date: '9 May 2026'
+description: Getting bleeding-edge Zed running on NixOS, Asahi Linux, Wayland, and Apple Silicon because I wanted to try the new agent features before my package set caught up.
+tags: tech, nix, linux
+---
+
+I run NixOS on an M2 MacBook Air through Asahi Linux.
+
+This is already a strange thing to do.
+
+Then I decided I wanted the latest Zed.
+
+Not the latest Zed in `nixpkgs`. Not the latest Zed that had politely made its way through the packaging pipeline. I wanted the build close enough to upstream that I could try the new agent features while they still felt new.
+
+This is where the computer started negotiating with me.
+
+The machine is Apple Silicon. The graphics stack is Asahi. The display stack is Wayland. The package manager is Nix. The editor is moving quickly. Each layer is reasonable in isolation. Together, they form a small distributed system whose primary observable behavior is telling me that a shared library does not exist.
+
+At first, I tried the obvious escape hatch: wrap Zed's upstream Linux binary.
+
+That worked, briefly.
+
+`zed --version` reported the preview build I wanted:
+
+```text
+Zed preview 1.2.2
+```
+
+Then launching the actual editor started walking through the ancient Linux ritual:
+
+```text
+libXau.so.6: cannot open shared object file
+libmount.so.1: cannot open shared object file
+libselinux.so.1: cannot open shared object file
+libffi.so.7: cannot open shared object file
+```
+
+This is the moment where the problem changed shape.
+
+I did not really want "a command that runs Zed."
+
+I wanted my system to know what `zed` means.
+
+## Keep the interface boring
+
+The nice part is that my Home Manager config does not need to care about any of this.
+
+It just installs `zed`.
+
+```nix
+home.packages = with pkgs; [
+  zed
+];
+```
+
+That is the interface I want. It should be boring.
+
+My shell muscle memory should keep working. My launcher should keep working. The interesting part should happen underneath that name, in the overlay.
+
+That is where Nix feels right to me.
+
+The platform-specific nonsense gets pushed to the edge. The user-facing interface stays stable. The implementation can become as cursed as it needs to be.
+
+In the first version, that meant an overlay that unpacked the upstream preview tarball, exposed a raw Zed package, and then wrapped it in an FHS environment:
+
+```nix
+{ zed-preview-bin }:
+
+final: prev:
+
+let
+  zedPreviewRaw = prev.stdenvNoCC.mkDerivation {
+    pname = "zed-preview-bin";
+    version = "1.2.2";
+
+    src = zed-preview-bin;
+
+    nativeBuildInputs = [ prev.makeWrapper ];
+
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/opt $out/bin
+
+      if [ -d "$src/zed.app" ]; then
+        cp -R "$src/zed.app" "$out/opt/zed.app"
+      else
+        cp -R "$src" "$out/opt/zed.app"
+      fi
+
+      chmod -R u+w "$out/opt/zed.app"
+
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zed_raw"
+      makeWrapper "$out/opt/zed.app/bin/zed" "$out/bin/zeditor"
+
+      runHook postInstall
+    '';
+  };
+in
+{
+  zed_raw = zedPreviewRaw;
+
+  zed = prev.buildFHSEnv {
+    name = "zed";
+
+    targetPkgs = pkgs: with pkgs; [
+      zedPreviewRaw
+
+      glibc
+      gcc.cc
+      openssl
+      zlib
+      glib
+      gtk3
+      pango
+      cairo
+      gdk-pixbuf
+      fontconfig
+      freetype
+
+      libxkbcommon
+      wayland
+      libGL
+      vulkan-loader
+      alsa-lib
+    ];
+
+    runScript = "zed_raw";
+  };
+}
+```
+
+This is not beautiful code.
+
+But it made an important boundary explicit:
+
+```text
+zed     → the thing I use
+zed_raw → the upstream artifact underneath it
+```
+
+That split mattered later.
+
+Once the binary started asking for `libXau`, `libmount`, `libselinux`, and `libffi`, I did not have to go searching through my whole system for where Zed lived. The mess had a home.
+
+## The diagnostic became a package too
+
+Eventually, I got annoyed enough to stop discovering one missing library per launch.
+
+The binary already knows what it needs. Linux binaries carry this information around. The right move was not to keep guessing. The right move was to make the dependency report part of the flake.
+
+So the config grew a small diagnostic app:
+
+```nix
+packages.${system} = {
+  inherit (pkgs) zed_raw zed-deps-report;
+};
+
+apps.${system}.zed-deps-report = {
+  type = "app";
+  program = "${pkgs.zed-deps-report}/bin/zed-deps-report";
+};
+```
+
+And the script itself is just a little flashlight pointed at the editor binary:
+
+```nix
+zed-deps-report = prev.writeShellApplication {
+  name = "zed-deps-report";
+
+  runtimeInputs = with prev; [
+    patchelf
+    pax-utils
+    glibc
+  ];
+
+  text = ''
+    set -euo pipefail
+
+    ZED_EDITOR="${zedFromSource}/libexec/zed-editor"
+
+    if [[ ! -e "$ZED_EDITOR" ]]; then
+      echo "error: editor binary not found at: $ZED_EDITOR" >&2
+      echo "hint: build zed first: nix build .#zed_raw" >&2
+      exit 1
+    fi
+
+    echo "== Zed editor: $ZED_EDITOR"
+    echo
+
+    echo "== patchelf --print-needed"
+    patchelf --print-needed "$ZED_EDITOR" 2>/dev/null || {
+      echo "(patchelf failed — binary may be static or unsupported)" >&2
+    }
+
+    echo
+    echo "== ldd (direct dynamic deps)"
+    ldd "$ZED_EDITOR" 2>/dev/null || echo "(ldd unavailable or not a dynamic ELF)" >&2
+
+    echo
+    if command -v lddtree >/dev/null 2>&1; then
+      echo "== lddtree"
+      lddtree "$ZED_EDITOR"
+    else
+      echo "== lddtree: not available in PATH"
+    fi
+
+    echo
+    echo "== missing libraries (from ldd 'not found' lines)"
+    if ldd_out="$(ldd "$ZED_EDITOR" 2>/dev/null)"; then
+      missing="$(echo "$ldd_out" | grep 'not found' || true)"
+      if [[ -n "$missing" ]]; then
+        echo "$missing" >&2
+        exit 1
+      else
+        echo "none reported by ldd"
+      fi
+    else
+      echo "(skipped)" >&2
+    fi
+  '';
+};
+```
+
+Now the question is no longer:
+
+> What random `.so` will explode when I launch the editor?
+
+It is:
+
+```bash
+nix run .#zed-deps-report
+```
+
+That feels like the right direction.
+
+The failure becomes an artifact. The artifact becomes a command. The command becomes part of the system.
+
+## This is not just about Zed
+
+The funny part is that this tiny editor problem has the same shape as larger systems I keep caring about.
+
+There is a stable interface:
+
+```text
+zed
+```
+
+There is a fast-moving implementation underneath it:
+
+```text
+upstream Zed
+```
+
+There is a hostile runtime surface:
+
+```text
+Apple Silicon → Asahi → Wayland → NixOS → dynamic Linux libraries
+```
+
+And there is a boundary object that lets me keep the whole thing legible:
+
+```text
+flake input
+overlay
+package output
+diagnostic app
+```
+
+That is the part I like.
+
+Nix does not make this effortless. In some ways, Nix makes it more annoying, because every hidden assumption becomes explicit.
+
+But that is also why I like it.
+
+The missing libraries were always real. The runtime assumptions were always real. The difference is that now the assumptions have somewhere to live.
+
+They live in the overlay.
+
+They live in the flake input.
+
+They live in a command I can run again.
+
+## The rest of the machine is like this too
+
+This is not the only little wrapper in the config.
+
+For example, screenshots are not a desktop feature I hope exists. They are a small script made out of `grim`, `slurp`, `wl-copy`, and `tofi`:
+
+```nix
+(writeShellScriptBin "screenshot" ''
+  #!/usr/bin/env bash
+
+  mkdir -p "$HOME/Pictures"
+  FILE="$HOME/Pictures/$(date +'%Y-%m-%d_%H-%M-%S').png"
+
+  CHOICE=$(printf "Fullscreen\nRegion\nRegion → Clipboard\n" | tofi)
+
+  case "$CHOICE" in
+    "Fullscreen")
+      grim "$FILE"
+      ;;
+    "Region")
+      grim -g "$(slurp)" "$FILE"
+      ;;
+    "Region → Clipboard")
+      grim -g "$(slurp)" - | wl-copy
+      ;;
+  esac
+'')
+```
+
+Moonlight gets the same treatment. On this machine, it is not just "install Moonlight." It is "run Moonlight with the Asahi and Wayland assumptions made explicit":
+
+```nix
+(writeShellScriptBin "moonlight-asahi" ''
+  # Wayland + Asahi GPU environment
+  export QT_QPA_PLATFORM=wayland-egl
+  export QT_QPA_PLATFORMTHEME=qt5ct
+  export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+  export MOZ_ENABLE_WAYLAND=1
+  export NIXOS_OZONE_WL=1
+  export MESA_LOADER_DRIVER_OVERRIDE=asahi
+  export LIBVA_DRIVER_NAME=asahi
+  export VDPAU_DRIVER=va_gl
+  export XDG_SESSION_TYPE=wayland
+  export GDK_BACKEND=wayland
+
+  # Fix Moonlight audio on Asahi / PipeWire
+  export SDL_AUDIODRIVER=pulseaudio
+
+  DEFAULT_FLAGS=(
+    --no-audio-on-host
+    --audio-config stereo
+  )
+
+  if [ $# -eq 0 ]; then
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}"
+  else
+    exec ${pkgs.moonlight-qt}/bin/moonlight "''${DEFAULT_FLAGS[@]}" "$@"
+  fi
+'')
+```
+
+This is the real shape of the system.
+
+Not one clean abstraction.
+
+A bunch of small, explicit translations.
+
+## Why I like it
+
+The machine is hostile in a very particular way.
+
+It is not hostile because it is broken. It is hostile because every layer has a slightly different idea of what "normal Linux desktop application" means.
+
+Zed expects one shape.
+
+Wayland gives another.
+
+Asahi gives another.
+
+Nix gives another.
+
+Apple Silicon gives another.
+
+The job of the config is to keep those translations visible enough that I can keep moving.
+
+That is why this feels good to me.
+
+Not because it is elegant.
+
+Because it is inspectable.
+
+I can point at the thing that installs Zed. I can point at the thing that wraps Moonlight. I can point at the thing that takes screenshots. I can point at the command that explains which libraries the editor needs.
+
+The platform still hates me.
+
+But now it has to do it declaratively.
+</file>
+
+</files>
