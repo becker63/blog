@@ -22,10 +22,11 @@
     "2026-05-17": {
       "producerScheduledRuns": 4,
       "producerManualRuns": 0,
-      "aggregatorRuns": 0,
-      "estimatedInputTokens": 102046,
-      "estimatedOutputTokens": 11824,
-      "lastProducerRunAt": "2026-05-17T07:19:28.727Z"
+      "aggregatorRuns": 1,
+      "estimatedInputTokens": 128090,
+      "estimatedOutputTokens": 17329,
+      "lastProducerRunAt": "2026-05-17T07:19:28.727Z",
+      "lastAggregatorRunAt": "2026-05-17T14:18:45.713Z"
     }
   }
 }
