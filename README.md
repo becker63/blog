@@ -93,7 +93,13 @@ Run layout tests:
 bun test
 ```
 
-which runs **`nx run workspace:e2e`**. Chromium comes from the flake (`playwright-driver.browsers`), not from `playwright install`. Run e2e inside **`nix develop`** so `PLAYWRIGHT_BROWSERS_PATH` matches nixpkgs. `@playwright/test` is pinned via **`package.json` overrides** to keep Playwright’s expected Chromium **revision** aligned with nixpkgs; after `nix flake update`, bump Playwright only if the new `playwright-driver` matches (or refresh the pins together).
+which runs **`nx run workspace:e2e`**. The default dev shell includes Chromium for MDX/mermaid but **not** the Playwright browser bundle (so **`nix flake check`** stays fast). For Playwright tests, use the same nixpkgs browser bundle and enter the dev shell with it on the path, for example:
+
+```bash
+nix shell nixpkgs#playwright-driver.browsers --command nix develop
+```
+
+Do not use **`playwright install`** for CI parity — keep **`@playwright/test`** pinned via **`package.json` overrides** so Playwright’s Chromium **revision** stays aligned with nixpkgs; after **`nix flake update`**, bump Playwright only if the new `playwright-driver` matches (or refresh the pins together).
 
 ---
 
