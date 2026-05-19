@@ -1,0 +1,14 @@
+{
+  "name": "public-proof-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "public-proof-db": "*",
+    "public-proof-agent": "*",
+    "public-proof-content": "*",
+    "public-proof-core": "*",
+    "public-proof-platforms": "*",
+    "public-proof-reporting": "*"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "workspace",
+  "$schema": "./node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "root": ".",
+  "sourceRoot": ".",
+  "tags": ["scope:workspace", "type:tooling"],
+  "targets": {
+    "ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "parallel": false,
+        "commands": [
+          "nx run public-proof-core:check",
+          "nx run public-proof-core:test",
+          "nx run public-proof-admin-core:test",
+          "nx run public-proof-cli:check",
+          "nx run public-proof-jobs:check",
+          "nx run blog:build-app",
+          "tsc --noEmit -p tsconfig.json"
+        ]
+      }
+    },
+    "ci-automation": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "parallel": false,
+        "commands": [
+          "nx run automation:check-workflows",
+          "nx run workspace:actionlint",
+          "nx run workspace:typecheck",
+          "nx run automation:insight-test",
+          "nx run automation:insight-check"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "commands": [
+          "cd apps/blog && bunx next lint",
+          "ESLINT_USE_FLAT_CONFIG=true bunx eslint \"apps/blog/app/**/*.{ts,tsx}\" --config eslint/config/style-system.mjs --max-warnings 0"
+        ],
+        "parallel": false
+      }
+    },
+    "lint-admin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "ESLINT_USE_FLAT_CONFIG=true bunx eslint \"apps/blog/app/admin/**/*.{ts,tsx}\" \"apps/blog/app/components/admin/**/*.{ts,tsx}\" --config eslint/config/public-proof-admin.mjs --max-warnings 0"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "tsc --noEmit -p tsconfig.json"
+      }
+    },
+    "actionlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "actionlint .github/workflows/*.yml"
+      }
+    },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx playwright test --config apps/blog/playwright.config.ts"
+      }
+    }
+  }
+}

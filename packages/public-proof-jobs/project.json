@@ -1,0 +1,17 @@
+{
+  "name": "public-proof-jobs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-jobs/src",
+  "projectType": "library",
+  "tags": ["scope:public-proof", "type:lib"],
+  "targets": {
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "tsc --noEmit -p packages/public-proof-jobs/tsconfig.json"
+      },
+      "cache": true
+    }
+  }
+}

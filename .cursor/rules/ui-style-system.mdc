@@ -1,0 +1,14 @@
+---
+description: Enforce shared Panda + layout primitives (status bar, panes, shells).
+globs: apps/blog/app/**/*.tsx,apps/blog/app/**/*.ts,panda.config.ts,eslint/config/style-system.mjs,eslint/style-firewall.mjs,docs/ui-contract.md
+alwaysApply: false
+---
+
+# UI style system
+
+Agents must follow **`docs/ui-contract.md`**.
+
+- Status chrome: **`SiteStatusBar`** with `mode` and `row` only; **`layerStyle: "navbar"`** only in `SiteStatusBar.tsx`.
+- **Admin layout:** **`AdminShell`** → **`AdminMain`** wraps pages; **`AdminPanelGrid`** for 2-col dashboards; **`spacing` hierarchy** in `docs/ui-contract.md` — not ad-hoc CSS grids for panel groups.
+- Pane stacks: **`PaneParent`** or **`paneParent`** — do not duplicate the flex column + `gap` fingerprint in inline `css()`.
+- Run **`bun run lint`** and **`bun run lint:admin`** when editing admin paths.

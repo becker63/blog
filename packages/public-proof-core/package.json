@@ -1,0 +1,16 @@
+{
+  "name": "public-proof-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./audience": "./src/audience.ts",
+    "./manual-metric-form-schema": "./src/manual-metric-form-schema.ts",
+    "./metric-aggregate": "./src/metric-aggregate.ts",
+    "./paths": "./src/paths.ts"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

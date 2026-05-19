@@ -1,0 +1,17 @@
+{
+  "name": "public-proof-jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.43.1",
+    "public-proof-agent": "*",
+    "public-proof-content": "*",
+    "public-proof-core": "*",
+    "public-proof-db": "*",
+    "public-proof-platforms": "*"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "main",
+  "sync": {
+    "applyChanges": true
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/tests/**/*",
+      "!{projectRoot}/**/*.spec.ts"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/panda.config.ts",
+      "{workspaceRoot}/postcss.config.cjs",
+      "{workspaceRoot}/tsconfig.json"
+    ]
+  },
+  "targetDefaults": {
+    "build-app": {
+      "dependsOn": [
+        "prebuild"
+      ],
+      "cache": true
+    },
+    "typecheck": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default"
+      ]
+    },
+    "test": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/tests/**/*"
+      ]
+    },
+    "insight:test": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/packages/automation/**/*.ts"
+      ]
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheckTargetName": "typecheck",
+        "buildTargetName": "build",
+        "tsConfigName": "tsconfig.json"
+      }
+    },
+    {
+      "plugin": "@nx/next/plugin",
+      "options": {
+        "buildTargetName": "build-app",
+        "devTargetName": "dev-app",
+        "startTargetName": "start-app",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/playwright/plugin",
+      "options": {
+        "targetName": "e2e"
+      }
+    }
+  ],
+  "analytics": true
+}

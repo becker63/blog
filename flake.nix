@@ -1,5 +1,5 @@
 {
-  description = "Multi-platform dev shell with VSCode + Playwright browsers";
+  description = "Dev shell: Bun + Node + Playwright browsers from nixpkgs; pin @playwright/test so Chromium revision matches playwright-driver.browsers";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -22,8 +22,8 @@
       {
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
+            bun
             nodejs
-            pnpm
             git
             gh
             ripgrep
@@ -33,12 +33,12 @@
             repomix
             playwright-driver.browsers
             chromium
-            just
           ];
 
           shellHook = ''
             export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
             export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+            export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
             # Tell Puppeteer to use Nix Chromium
             export PUPPETEER_EXECUTABLE_PATH=${pkgs.chromium}/bin/chromium

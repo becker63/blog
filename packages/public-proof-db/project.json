@@ -1,0 +1,41 @@
+{
+  "name": "public-proof-db",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-db/src",
+  "projectType": "library",
+  "tags": ["scope:public-proof", "type:lib"],
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/public-proof-db",
+        "command": "bunx drizzle-kit generate --config drizzle.config.ts"
+      },
+      "cache": false
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/public-proof-db",
+        "command": "bunx tsx scripts/migrate.ts"
+      },
+      "cache": false
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/public-proof-db/src/check.ts"
+      },
+      "cache": false
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/public-proof-db",
+        "command": "bunx drizzle-kit studio --config drizzle.config.ts"
+      },
+      "cache": false
+    }
+  }
+}

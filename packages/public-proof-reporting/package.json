@@ -1,0 +1,14 @@
+{
+  "name": "public-proof-reporting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "public-proof-agent": "*",
+    "public-proof-core": "*",
+    "public-proof-platforms": "*"
+  }
+}

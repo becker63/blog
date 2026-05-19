@@ -1,0 +1,87 @@
+{
+  "name": "public-proof-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-cli/src",
+  "projectType": "application",
+  "tags": ["scope:public-proof", "type:app"],
+  "targets": {
+    "import-launch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/import-launch.ts --launch={args.launch}"
+      },
+      "cache": false,
+      "configurations": {
+        "persist": {
+          "command": "tsx packages/public-proof-cli/src/import-launch.ts --launch={args.launch} --persist-db"
+        }
+      }
+    },
+    "draft": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/draft-launch.ts --launch={args.launch}"
+      },
+      "outputs": ["{workspaceRoot}/data/public-proof/launches/{args.launch}/drafts"],
+      "cache": true
+    },
+    "reddit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/recommend-reddit.ts --launch={args.launch}"
+      },
+      "outputs": [
+        "{workspaceRoot}/data/public-proof/launches/{args.launch}/reddit-recommendations.md",
+        "{workspaceRoot}/data/public-proof/launches/{args.launch}/drafts/reddit.json"
+      ],
+      "cache": true
+    },
+    "community-plan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/recommend-reddit.ts --launch={args.launch}"
+      },
+      "outputs": [
+        "{workspaceRoot}/data/public-proof/launches/{args.launch}/reddit-recommendations.md",
+        "{workspaceRoot}/data/public-proof/launches/{args.launch}/drafts/reddit.json"
+      ],
+      "cache": true
+    },
+    "job-status": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/job-status.ts --job={args.job}"
+      }
+    },
+    "report": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/render-report.ts --launch={args.launch}"
+      },
+      "outputs": ["{workspaceRoot}/data/public-proof/launches/{args.launch}/report.md"],
+      "cache": true
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/publish-launch.ts --launch={args.launch}"
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-cli/src/check.ts"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --import tsx --test packages/public-proof-cli/src/**/*.test.ts packages/public-proof-core/src/**/*.test.ts packages/public-proof-content/src/**/*.test.ts packages/public-proof-agent/src/**/*.test.ts"
+      },
+      "cache": true
+    }
+  }
+}

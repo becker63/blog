@@ -1,0 +1,23 @@
+{
+  "name": "public-proof-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-core/src",
+  "projectType": "library",
+  "tags": ["scope:public-proof", "type:lib"],
+  "targets": {
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/public-proof-core/src/check.ts"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --import tsx --test packages/public-proof-core/src/**/*.test.ts"
+      },
+      "cache": true
+    }
+  }
+}

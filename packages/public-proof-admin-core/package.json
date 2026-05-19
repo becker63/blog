@@ -1,0 +1,18 @@
+{
+  "name": "public-proof-admin-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./events": "./src/events.ts",
+    "./admin-world": "./src/admin-world.ts",
+    "./scenario": "./src/scenario.ts",
+    "./streams": "./src/streams.ts",
+    "./fixture": "./src/fixture/admin-ui-world.ts"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2",
+    "zod": "^4.4.3"
+  }
+}

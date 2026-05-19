@@ -1,0 +1,16 @@
+{
+  "name": "public-proof-agent",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-agent/src",
+  "projectType": "library",
+  "tags": ["scope:public-proof", "type:lib"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --import tsx --test packages/public-proof-agent/src/**/*.test.ts"
+      },
+      "cache": true
+    }
+  }
+}

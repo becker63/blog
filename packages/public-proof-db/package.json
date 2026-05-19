@@ -1,0 +1,42 @@
+{
+  "name": "public-proof-db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./client": "./src/client.ts",
+    "./crypto": "./src/crypto.ts",
+    "./queries/accounts": "./src/queries/accounts.ts",
+    "./queries/admin-overview": "./src/queries/admin-overview.ts",
+    "./queries/agent-traces": "./src/queries/agent-traces.ts",
+    "./queries/audit-log": "./src/queries/audit-log.ts",
+    "./queries/drafts": "./src/queries/drafts.ts",
+    "./queries/import-launch": "./src/queries/import-launch.ts",
+    "./queries/launch-admin": "./src/queries/launch-admin.ts",
+    "./queries/launch-post-jobs": "./src/queries/launch-post-jobs.ts",
+    "./queries/launch-report-compile": "./src/queries/launch-report-compile.ts",
+    "./queries/launches": "./src/queries/launches.ts",
+    "./queries/metrics": "./src/queries/metrics.ts",
+    "./queries/notifications": "./src/queries/notifications.ts",
+    "./queries/posting-plan": "./src/queries/posting-plan.ts",
+    "./queries/reports": "./src/queries/reports.ts",
+    "./queries/scheduled-jobs": "./src/queries/scheduled-jobs.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "node --import tsx ./scripts/migrate.ts",
+    "db:studio": "drizzle-kit studio --config drizzle.config.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "drizzle-orm": "^0.43.1",
+    "public-proof-core": "*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.21.0",
+    "typescript": "*"
+  }
+}

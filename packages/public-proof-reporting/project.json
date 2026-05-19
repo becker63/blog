@@ -1,0 +1,7 @@
+{
+  "name": "public-proof-reporting",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/public-proof-reporting/src",
+  "projectType": "library",
+  "tags": ["scope:public-proof", "type:lib"]
+}

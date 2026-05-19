@@ -1,0 +1,13 @@
+{
+  "name": "public-proof-content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "public-proof-core": "*"
+  }
+}

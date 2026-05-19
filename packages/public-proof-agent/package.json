@@ -1,0 +1,15 @@
+{
+  "name": "public-proof-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.12",
+    "public-proof-core": "*",
+    "public-proof-db": "*",
+    "zod": "^4.4.3"
+  }
+}

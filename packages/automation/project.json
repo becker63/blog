@@ -1,0 +1,94 @@
+{
+  "name": "automation",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/automation/src",
+  "root": "packages/automation",
+  "tags": ["scope:automation", "type:tooling"],
+  "targets": {
+    "generate-workflows": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/generate-workflows.ts"
+      }
+    },
+    "check-workflows": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/check-workflows.ts"
+      }
+    },
+    "generate-insight": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/generate-insight.ts"
+      }
+    },
+    "generate-insight-ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/generate-insight.ts --ci"
+      }
+    },
+    "generate-insight-force-ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/generate-insight.ts --force --ci"
+      }
+    },
+    "aggregate-insights": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/aggregate-insights.ts"
+      }
+    },
+    "aggregate-insights-ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/aggregate-insights.ts --ci"
+      }
+    },
+    "secrets-setup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/github-secrets/setup.ts"
+      }
+    },
+    "insight-taste-profile": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/build-taste-profile.ts"
+      }
+    },
+    "insight-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "node --import tsx --test packages/automation/src/repo-insight/**/*.test.ts"
+      }
+    },
+    "insight-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/check.ts"
+      }
+    },
+    "insight-budget": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "bunx tsx packages/automation/src/repo-insight/cli/budget-status.ts"
+      }
+    }
+  }
+}

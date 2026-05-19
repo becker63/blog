@@ -18,10 +18,29 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/styled-system/*": ["./styled-system/*"],
+      "@/*": ["./apps/blog/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "apps/blog/next-env.d.ts",
+    "apps/blog/**/*.ts",
+    "apps/blog/**/*.tsx",
+    "apps/blog/.next/types/**/*.ts",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "packages/automation/**/*.ts",
+    "packages/automation/**/*.tsx",
+    "scripts/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "sat",
+    "blog",
+    "**/.next",
+    ".nx"
+  ],
+  "references": []
 }

@@ -1,0 +1,57 @@
+{
+  "externalWritingRoots": [
+    {
+      "name": "career-ops-writing-samples",
+      "path": "content/authoring/repo-insight-context/career-ops/writing-samples",
+      "include": ["*.mdx", "README.md"],
+      "enabled": true
+    }
+  ],
+  "externalProfileFiles": [
+    {
+      "name": "career-ops-profile-example",
+      "path": "content/authoring/repo-insight-context/career-ops/examples/dual-track-engineer-instructor/profile.yml",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-story-bank",
+      "path": "content/authoring/repo-insight-context/career-ops/interview-prep/story-bank.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-article-digest",
+      "path": "content/authoring/repo-insight-context/career-ops/article-digest.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-local-profile",
+      "path": "content/authoring/repo-insight-context/career-ops/config/profile.yml",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-cv",
+      "path": "content/authoring/repo-insight-context/career-ops/cv.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-profile-example-cv",
+      "path": "content/authoring/repo-insight-context/career-ops/examples/dual-track-engineer-instructor/cv.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-profile-example-config",
+      "path": "content/authoring/repo-insight-context/career-ops/config/profile.example.yml",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-profile-template",
+      "path": "content/authoring/repo-insight-context/career-ops/modes/_profile.template.md",
+      "enabled": true
+    },
+    {
+      "name": "career-ops-local-profile-md",
+      "path": "content/authoring/repo-insight-context/career-ops/modes/_profile.md",
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "blog",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/blog",
+  "targets": {
+    "prebuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx panda codegen && bunx panda cssgen --silent",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "dev-app": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "next dev --turbo",
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

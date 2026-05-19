@@ -1,4 +1,0 @@
-ignoredBuiltDependencies:
-  - puppeteer
-onlyBuiltDependencies:
-  - sqlite3

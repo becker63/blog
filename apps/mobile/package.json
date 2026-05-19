@@ -1,0 +1,9 @@
+{
+  "name": "public-proof-mobile",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Expo scaffold placeholder — follow README instructions to materialize bundles.",
+  "scripts": {
+    "start": "node -e \"console.error('Run bun create expo inside apps/mobile first — see README.md');process.exit(1)\""
+  }
+}
