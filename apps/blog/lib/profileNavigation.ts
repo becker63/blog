@@ -123,7 +123,6 @@ export const PROFILE_POST_CATEGORY_ASSIGNMENTS: Record<
   "ai-release-reports": "platform-social-infrastructure",
   bundles: "platform-social-infrastructure",
   "designing-for-two": "platform-social-infrastructure",
-  "searchbench-100x-context-reduction": "platform-social-infrastructure",
   zed: "security-systems",
 };
 

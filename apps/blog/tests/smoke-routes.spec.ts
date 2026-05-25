@@ -14,7 +14,6 @@ const PUBLIC_PATHS = [
   "/Blogs/ai-release-reports",
   "/Blogs/bundles",
   "/Blogs/designing-for-two",
-  "/Blogs/searchbench-100x-context-reduction",
   "/Blogs/the-firewall-doesnt-live-in-the-kernel",
   "/Blogs/tight-loops",
   "/Blogs/zed",
@@ -24,10 +23,9 @@ test.describe("public routes (no 5xx)", () => {
   for (const path of PUBLIC_PATHS) {
     test(`GET ${path}`, async ({ request }) => {
       const res = await request.get(path);
-      expect(
-        res.status(),
-        `${path} returned ${res.status()}`,
-      ).toBeLessThan(500);
+      expect(res.status(), `${path} returned ${res.status()}`).toBeLessThan(
+        500,
+      );
     });
   }
 });
