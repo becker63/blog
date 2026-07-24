@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { repoCatalogSchema, repoInsightBudgetStateSchema, repoInsightContextConfigSchema, repoInsightPollStateSchema } from "../model/schemas";
 import { listFiles } from "../storage/files";
-import { dataDir, relativeToRoot, repoCatalogPath, repoInsightBudgetStatePath, repoInsightContextPath, repoInsightPollStatePath, repoRoot, workflowsDir } from "../storage/paths";
+import { dataDir, relativeToRoot, repoCatalogPath, repoInsightBudgetStatePath, repoInsightContextPath, repoInsightPollStatePath, repoRoot } from "../storage/paths";
 
 const readJsonIfExists = async (filePath: string) => {
   try {
@@ -25,19 +25,6 @@ const validateJson = async () => {
 
   const budgetState = await readJsonIfExists(repoInsightBudgetStatePath);
   if (budgetState) repoInsightBudgetStateSchema.parse(budgetState);
-};
-
-const validateWorkflowDefinitions = async () => {
-  const files = await listFiles(workflowsDir, (filePath) => filePath.endsWith(".yml") || filePath.endsWith(".yaml"));
-  if (files.length === 0) throw new Error("No generated workflow files found.");
-
-  for (const file of files) {
-    const text = await readFile(file, "utf8");
-    const retiredOutputDir = ["content", "insights"].join("/");
-    if (text.includes(retiredOutputDir)) {
-      throw new Error(`Workflow still references retired generated-output dir: ${relativeToRoot(file)}`);
-    }
-  }
 };
 
 const validateNoGeneratedInsightStore = async () => {
@@ -67,7 +54,6 @@ const validateNoGeneratedInsightStore = async () => {
 
 const main = async () => {
   await validateJson();
-  await validateWorkflowDefinitions();
   await validateNoGeneratedInsightStore();
   console.log("Repo insight issue-only checks passed.");
 };

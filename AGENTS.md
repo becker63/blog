@@ -10,7 +10,7 @@
 
 ### Pre-commit (from `nix develop`)
 
-Enter **`nix develop`** so git-hooks installs **pre-commit**. With **`node_modules`** present after **`bun install`**, commits run **`tsc --noEmit -p tsconfig.json`** (same as **`nx run workspace:typecheck`**) then **`nx run workspace:lint`**, plus YAML/actionlint and whitespace hooks from **`flake.nix`**. Regenerate the hook config only by changing the flake / re-entering the shell; **`.pre-commit-config.yaml`** is gitignored.
+Enter **`nix develop`** so git-hooks installs **pre-commit**. With **`node_modules`** present after **`bun install`**, commits run **`tsc --noEmit -p tsconfig.json`** (same as **`nx run workspace:typecheck`**) then **`nx run workspace:lint`**, plus YAML and whitespace hooks from **`flake.nix`**. Regenerate the hook config only by changing the flake / re-entering the shell; **`.pre-commit-config.yaml`** is gitignored.
 
 ## Styling and layout
 

@@ -6,20 +6,6 @@
   "root": "packages/automation",
   "tags": ["scope:automation", "type:tooling"],
   "targets": {
-    "generate-workflows": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{workspaceRoot}",
-        "command": "bunx tsx packages/automation/src/generate-workflows.ts"
-      }
-    },
-    "check-workflows": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{workspaceRoot}",
-        "command": "bunx tsx packages/automation/src/check-workflows.ts"
-      }
-    },
     "generate-insight": {
       "executor": "nx:run-commands",
       "options": {
@@ -53,13 +39,6 @@
       "options": {
         "cwd": "{workspaceRoot}",
         "command": "bunx tsx packages/automation/src/repo-insight/cli/aggregate-insights.ts --ci"
-      }
-    },
-    "secrets-setup": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{workspaceRoot}",
-        "command": "bunx tsx packages/automation/src/github-secrets/setup.ts"
       }
     },
     "insight-taste-profile": {

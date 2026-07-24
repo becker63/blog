@@ -12,7 +12,6 @@ Repo Insight has one durable output: GitHub issues. The repository does not accu
 - `context/` reads `content/automation/repo-insight-context.json`, summarizes local writing plus configured `../career-ops` writing/profile sources, and caches only typed context capsules.
 - `adapters/` keeps Cursor SDK, GitHub repo discovery, and GitHub issue publishing isolated.
 - GitHub issues in this blog repo are the canonical store and review inbox for generated insights.
-- `workflows/definitions.ts` is the source of truth for generated GitHub Actions YAML.
 
 ## Commands
 
@@ -24,28 +23,25 @@ Run from the repo root with **Nx** (after **`bun install`**):
 - `bunx nx run automation:insight-taste-profile`
 - `bunx nx run automation:insight-check`
 - `bunx nx run automation:insight-budget`
-- `bunx nx run automation:generate-workflows`
-- `bunx nx run automation:check-workflows`
-- `bunx nx run workspace:actionlint`
 
 Use `nix develop` for the reproducible tool environment. **Nx targets** in `packages/automation/project.json` are the command surface.
 Repomix is provided by the Nix dev shell and is invoked with `--compress`; pack files stay in OS temp directories and are not committed.
 
-`bunx nx run automation:generate-insight` does not require a payload. Repo Insight uses scheduled polling from the blog repo, not source repo webhooks. No per-repo workflow installation is required.
+`bunx nx run automation:generate-insight` does not require a payload. Each invocation polls GitHub for accessible repository changes; it does not use source-repository webhooks.
 
-Poll state is stored in `content/automation/repo-insight-poll-state.json`. Normal scheduled runs skip Repomix and Cursor when no accessible repo has a new `pushedAt` value. Once a run wakes up, repo selection is stochastic by default. The latest commit is not automatically the focus. Cursor output is schema-validated. Near-miss JSON gets one schema repair attempt. Force mode samples uniformly too, requires one issue draft, and requires one created or reused GitHub issue. `no_insight` is invalid in force mode.
+Poll state is stored in `content/automation/repo-insight-poll-state.json`. Normal runs skip Repomix and Cursor when no accessible repo has a new `pushedAt` value. Once a run wakes up, repo selection is stochastic by default. The latest commit is not automatically the focus. Cursor output is schema-validated. Near-miss JSON gets one schema repair attempt. Force mode samples uniformly too, requires one issue draft, and requires one created or reused GitHub issue. `no_insight` is invalid in force mode.
 
-Budget state is stored in `content/automation/repo-insight-budget-state.json`. Repo Insight is designed to preserve Cursor for interactive coding first. Scheduled automation is opportunistic and cheap: normal scheduled producer runs are capped at 4 Cursor-backed runs per UTC day, and the daily aggregator is capped at 1 Cursor-backed run per UTC day. No-change producer wakeups exit before spending budget.
+Budget state is stored in `content/automation/repo-insight-budget-state.json`. Repo Insight is designed to preserve Cursor for interactive coding first. No-change producer runs exit before spending budget.
 
-## Secrets
+## Environment
 
-Run `bunx nx run automation:secrets-setup` from `nix develop` to configure GitHub Actions secrets and variables through the GitHub CLI. See `packages/automation/src/github-secrets/README.md`.
+Provide credentials in the shell when running the commands:
 
-- The insight workflow uses `GH_REPO_INSIGHT_TOKEN` to list and pack source repos.
+- `GH_REPO_INSIGHT_TOKEN` lists and packs source repos.
 - The Cursor SDK backend requires `CURSOR_API_KEY`; `CURSOR_MODEL` is optional and defaults to `composer-2`.
-- The insight workflow uses the blog repo `GITHUB_TOKEN` to open review issues in this repo.
+- `GITHUB_TOKEN` or `GH_TOKEN` opens and reads review issues in the blog repo.
 
-The repo-insight workflow needs `contents: write` and `issues: write`; source repos do not need workflows or secrets and never receive generated issues.
+The GitHub tokens need read access to source repositories and write access to issues in the blog repo.
 No external phone-notification service is required because GitHub issues drive GitHub Mobile and GitHub notification inboxes.
 
 ## Repo Catalog
@@ -83,7 +79,7 @@ Budget-related environment knobs:
 
 Compacted ProjectCapsules are cached under `.cache/repo-insight/capsules`. Raw Repomix packs and cloned repos stay temporary and are not cached.
 
-Author and writing context is configured in `content/automation/repo-insight-context.json`. The approved `career-ops` writing/profile context is vendored under `content/authoring/repo-insight-context/career-ops/` so GitHub Actions can read it without a sibling checkout. Generated `career-ops` outputs, reports, job descriptions, private tracker data, PDFs, and CV HTML/PDF outputs are not ingested.
+Author and writing context is configured in `content/automation/repo-insight-context.json`. The approved `career-ops` writing/profile context is vendored under `content/authoring/repo-insight-context/career-ops/` so the automation can read it without a sibling checkout. Generated `career-ops` outputs, reports, job descriptions, private tracker data, PDFs, and CV HTML/PDF outputs are not ingested.
 
 ## Adding A Source Repo
 
@@ -93,7 +89,7 @@ Author and writing context is configured in `content/automation/repo-insight-con
 
 ## Generated Insights
 
-The producer uses scheduled polling as a wake-up signal. If nothing changed, normal mode exits early before Cursor or Repomix work. If the daily scheduled budget is exhausted, it also exits before Cursor. If something changed and budget remains, it builds a candidate pool from changed repos, recently active repos, and pinned catalog repos. It then samples repos uniformly by default and packs only that sampled context window. Scheduled runs pack 3 repos by default, cap each pack at about 100k bytes, and cap the total packed input at about 300k bytes.
+The producer polls repository activity as a wake-up signal. If nothing changed, normal mode exits early before Cursor or Repomix work. If something changed, it builds a candidate pool from changed repos, recently active repos, and pinned catalog repos. It then samples repos uniformly by default and packs only that sampled context window. Runs pack 3 repos by default, cap each pack at about 100k bytes, and cap the total packed input at about 300k bytes.
 
 The sampled repos are not a ranked list. They are context for the curator. The final Cursor prompt explicitly says not to assume the newest repo or newest commit is the most important signal. The agent chooses the issue topic based on conceptual interest, evidence strength, and fit with Taylor's broader body of work. If no sampled repo produces a strong idea, normal mode returns `no_insight`.
 
@@ -111,10 +107,4 @@ To promote an insight, manually turn the issue into a polished post under `conte
 
 The digest body includes **`editorialDecisions`** (batch-level actions near the top) and per-cluster fields such as **`editorialDecision`**, **`whyThisIsOrIsNotInteresting`**, and **`profileConnection`**.
 
-Scheduled aggregation skips when fewer than 2 non-digest insight issues exist, when the daily aggregator budget is exhausted, or when the digest was updated less than 20 hours ago (rate limit). Successful CI runs append a short summary to **`GITHUB_STEP_SUMMARY`** when available.
-
-## Workflows
-
-Run `bunx nx run automation:generate-workflows` after changing `packages/automation/src/repo-insight/workflows/definitions.ts`. The generated YAML is committed so workflow behavior is reviewable, while `bunx nx run automation:check-workflows` prevents drift.
-
-`repo-insight.yml` runs hourly on schedule (`17 * * * *`) and can also be started manually (`workflow_dispatch` with optional `force=true`). Cron only polls GitHub for `pushedAt` changes (wake signal). Scheduled runs bail out before Cursor when nothing changed. Manual force skips that gate and bypasses producer **scheduled quota** (runs count as manual in budget state); use `--ignore-budget` locally only when you deliberately want runs without budget bookkeeping.
+Aggregation skips when fewer than 2 non-digest insight issues exist. Scheduled-mode callers can additionally enforce the daily aggregator budget and the 20-hour digest rate limit.
