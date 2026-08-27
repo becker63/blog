@@ -23,7 +23,6 @@
         preCommitCheck = git-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
-            actionlint.enable = true;
             check-yaml.enable = true;
             trim-trailing-whitespace.enable = true;
             end-of-file-fixer.enable = true;
@@ -51,7 +50,7 @@
       {
         # Intentionally no `checks.pre-commit-check` here: `nix flake check` sandbox has no
         # node_modules, so Nx/Bun hooks cannot run there. Local `git commit` uses the dev
-        # shell hook; CI should keep running `nx run workspace:*` in GitHub Actions.
+        # shell hook; other automation should keep running `nx run workspace:*`.
 
         # Single dev shell: keep `playwright-driver.browsers` out so `nix flake check` does not
         # pull a second Chromium bundle (flake check validates every devShell output). For e2e,
@@ -66,7 +65,6 @@
               ripgrep
               jq
               curl
-              actionlint
               repomix
               chromium
             ])

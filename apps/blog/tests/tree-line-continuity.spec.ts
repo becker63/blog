@@ -1,121 +1,343 @@
-import { test, expect } from '@playwright/test';
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
-/**
- * Test that tree lines connecting blog cards render continuously
- * with no gaps between cards at all viewport sizes.
- */
+const VIEWPORTS = [
+  { width: 375, height: 812 },
+  { width: 768, height: 1024 },
+  { width: 1280, height: 800 },
+  { width: 1440, height: 900 },
+] as const;
 
-const viewports = [
-    { name: 'mobile', width: 375, height: 812 },
-    { name: 'tablet', width: 768, height: 1024 },
-    { name: 'desktop', width: 1280, height: 800 },
-    { name: 'desktopLarge', width: 1920, height: 1080 },
-];
+const PX_TOLERANCE = 0.1;
 
-test.describe('Tree Line Continuity', () => {
-    for (const viewport of viewports) {
-        test(`tree lines connect without gaps at ${viewport.name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
-            await page.setViewportSize({ width: viewport.width, height: viewport.height });
-            await page.goto('/Search');
-            await page.waitForLoadState('networkidle');
+const expectNear = (actual: number, expected: number, message: string) => {
+  expect(Math.abs(actual - expected), message).toBeLessThanOrEqual(
+    PX_TOLERANCE,
+  );
+};
 
-            // Find blog cards by looking for links to /Blogs/
-            const blogLinks = await page.locator('a[href^="/Blogs/"]').all();
-            const cardCount = blogLinks.length;
+const requireBox = async (locator: Locator, message: string) => {
+  const box = await locator.boundingBox();
+  expect(box, message).not.toBeNull();
+  return box!;
+};
 
-            console.log(`\n--- Tree Line Analysis at ${viewport.name} ---`);
-            console.log(`Blog cards found: ${cardCount}`);
+const expectNoHorizontalOverflow = async (page: Page, label: string) => {
+  const overflow = await page.evaluate(() => {
+    const documentElement = document.documentElement;
+    const scrollRegion = document.querySelector<HTMLElement>(
+      '[data-testid="search-results-scroll-region"]',
+    );
+    return {
+      page: documentElement.scrollWidth - documentElement.clientWidth,
+      results: scrollRegion
+        ? scrollRegion.scrollWidth - scrollRegion.clientWidth
+        : 0,
+    };
+  });
 
-            if (cardCount < 2) {
-                console.log(`Only ${cardCount} cards found - skipping gap test`);
-                return;
-            }
+  expect(
+    overflow.page,
+    `page overflows horizontally in ${label}`,
+  ).toBeLessThanOrEqual(1);
+  expect(
+    overflow.results,
+    `result region overflows horizontally in ${label}`,
+  ).toBeLessThanOrEqual(1);
+};
 
-            // Get all vertical line segments (1px wide white elements)
-            const verticalLines = await page.evaluate(() => {
-                const elements: { top: number; bottom: number; left: number; height: number }[] = [];
+const expectInitialTreeGeometry = async (page: Page, label: string) => {
+  const groups = page.getByTestId("search-tree-parent-group");
+  const groupCount = await groups.count();
+  expect(
+    groupCount,
+    `expected multiple category groups in ${label}`,
+  ).toBeGreaterThan(1);
 
-                document.querySelectorAll('div').forEach((el) => {
-                    const style = window.getComputedStyle(el);
-                    const rect = el.getBoundingClientRect();
+  const rootLineBox = await requireBox(
+    page.getByTestId("tree-root-vertical-line"),
+    "root line",
+  );
 
-                    // Look for thin vertical line elements (1px wide, reasonably tall, white/visible)
-                    if (
-                        rect.width >= 0.5 && rect.width <= 2 &&
-                        rect.height > 20 &&
-                        (style.backgroundColor === 'rgb(255, 255, 255)' ||
-                            style.backgroundColor === 'white' ||
-                            style.background.includes('white') ||
-                            style.background.includes('rgb(255, 255, 255)'))
-                    ) {
-                        elements.push({
-                            top: Math.round(rect.top),
-                            bottom: Math.round(rect.bottom),
-                            left: Math.round(rect.left),
-                            height: Math.round(rect.height),
-                        });
-                    }
-                });
+  for (let groupIndex = 0; groupIndex < groupCount; groupIndex += 1) {
+    const group = groups.nth(groupIndex);
+    const groupBox = await requireBox(group, `category group ${groupIndex}`);
+    const parentCard = group.getByTestId("search-tree-parent-card");
+    const cardBox = await requireBox(parentCard, `category card ${groupIndex}`);
+    const parentHorizontal = group
+      .getByTestId("search-tree-parent-content")
+      .getByTestId("tree-branch-horizontal-line");
+    const parentHorizontalBox = await requireBox(
+      parentHorizontal,
+      `category branch ${groupIndex}`,
+    );
 
-                return elements;
-            });
+    expectNear(
+      parentHorizontalBox.y + parentHorizontalBox.height / 2,
+      cardBox.y + cardBox.height / 2,
+      `category branch is centered on card ${groupIndex} in ${label}`,
+    );
+    expectNear(
+      parentHorizontalBox.x,
+      rootLineBox.x + rootLineBox.width,
+      `category branch touches the root rail without overlapping in ${label}`,
+    );
 
-            console.log(`Vertical line segments found: ${verticalLines.length}`);
+    expectNear(
+      parentHorizontalBox.x + parentHorizontalBox.width,
+      cardBox.x,
+      `category branch reaches card ${groupIndex} in ${label}`,
+    );
 
-            if (verticalLines.length === 0) {
-                // If no lines found via computed style, try to find them by checking styled divs
-                console.log('No vertical lines detected via computed style - checking if tree lines exist in DOM');
+    if (groupIndex < groupCount - 1) {
+      const groupRailBox = await requireBox(
+        group.getByTestId("tree-group-root-rail"),
+        `root continuation ${groupIndex}`,
+      );
+      const nextGroupBox = await requireBox(
+        groups.nth(groupIndex + 1),
+        `next group ${groupIndex + 1}`,
+      );
 
-                // Take screenshot to verify visually
-                await page.screenshot({ path: `test-results/tree-lines-${viewport.name}.png` });
-                console.log(`Screenshot saved to test-results/tree-lines-${viewport.name}.png`);
-                return;
-            }
-
-            // Group lines by their left position (same vertical column)
-            const linesByColumn = new Map<number, typeof verticalLines>();
-            for (const line of verticalLines) {
-                // Use a tolerance of 5px for grouping lines in same column
-                let foundColumn = false;
-                for (const [key, _] of linesByColumn) {
-                    if (Math.abs(key - line.left) < 5) {
-                        linesByColumn.get(key)!.push(line);
-                        foundColumn = true;
-                        break;
-                    }
-                }
-                if (!foundColumn) {
-                    linesByColumn.set(line.left, [line]);
-                }
-            }
-
-            console.log(`Distinct line columns: ${linesByColumn.size}`);
-
-            // For each column, verify lines connect without significant gaps
-            let gapsFound = 0;
-            for (const [left, lines] of linesByColumn) {
-                // Sort by vertical position
-                lines.sort((a, b) => a.top - b.top);
-
-                // Check for gaps between consecutive segments
-                for (let i = 0; i < lines.length - 1; i++) {
-                    const current = lines[i];
-                    const next = lines[i + 1];
-                    const gap = next.top - current.bottom;
-
-                    // Allow tolerance for subpixel rendering and small layout variations
-                    const tolerance = 3;
-
-                    if (gap > tolerance) {
-                        gapsFound++;
-                        console.log(`⚠️ Gap of ${gap}px at column ${left} (line ${i} to ${i + 1})`);
-                    }
-                }
-            }
-
-            // Expect no gaps or report them
-            expect(gapsFound, `Found ${gapsFound} gaps in tree lines`).toBe(0);
-            console.log('✅ Tree lines are continuous with no gaps');
-        });
+      expectNear(
+        groupRailBox.x,
+        rootLineBox.x,
+        `root rail x remains fixed in ${label}`,
+      );
+      expectNear(
+        groupRailBox.y,
+        groupBox.y,
+        `root rail starts with group ${groupIndex} in ${label}`,
+      );
+      expectNear(
+        groupRailBox.y + groupRailBox.height,
+        nextGroupBox.y,
+        `root rail reaches category ${groupIndex + 1} in ${label}`,
+      );
+    } else {
+      const terminalRailBox = await requireBox(
+        group
+          .getByTestId("search-tree-parent-content")
+          .getByTestId("tree-branch-vertical-line"),
+        "terminal root rail",
+      );
+      expectNear(
+        terminalRailBox.x,
+        rootLineBox.x,
+        `terminal root rail stays aligned in ${label}`,
+      );
+      expectNear(
+        terminalRailBox.y,
+        groupBox.y,
+        `terminal root rail begins at the group in ${label}`,
+      );
+      expectNear(
+        terminalRailBox.y + terminalRailBox.height,
+        parentHorizontalBox.y + parentHorizontalBox.height / 2,
+        `terminal root rail ends on its branch axis in ${label}`,
+      );
     }
+
+    const childRows = group.getByTestId("search-tree-child-row");
+    const childCount = await childRows.count();
+    if (childCount === 0) continue;
+
+    let previousVerticalBottom: number | null = null;
+    for (let childIndex = 0; childIndex < childCount; childIndex += 1) {
+      const childRow = childRows.nth(childIndex);
+      const childCardBox = await requireBox(
+        childRow.getByTestId("search-tree-child-card"),
+        `child card ${childIndex}`,
+      );
+      expect(
+        await childRow
+          .getByTestId("search-tree-child-card")
+          .evaluate((element) => getComputedStyle(element).transform),
+        `child card ${childIndex} must not move independently of its rail`,
+      ).toBe("none");
+      const childRowBox = await requireBox(
+        childRow,
+        `child row ${childIndex}`,
+      );
+      const verticalBox = await requireBox(
+        childRow.getByTestId("tree-branch-vertical-line"),
+        `child rail ${childIndex}`,
+      );
+      const horizontalBox = await requireBox(
+        childRow.getByTestId("tree-branch-horizontal-line"),
+        `child branch ${childIndex}`,
+      );
+
+      expectNear(
+        horizontalBox.x + horizontalBox.width,
+        childCardBox.x,
+        `child branch reaches card ${childIndex} in ${label}`,
+      );
+      expectNear(
+        horizontalBox.x,
+        verticalBox.x + verticalBox.width,
+        `child branch touches its rail without overlapping in ${label}`,
+      );
+      expectNear(
+        horizontalBox.y + horizontalBox.height / 2,
+        childRowBox.y + childRowBox.height / 2,
+        `child branch is centered on row ${childIndex} in ${label}`,
+      );
+      expect(
+        verticalBox.x > cardBox.x && verticalBox.x < cardBox.x + cardBox.width,
+        `child rail should emerge from inside category card ${groupIndex} in ${label}`,
+      ).toBe(true);
+
+      if (childIndex === 0) {
+        expectNear(
+          verticalBox.y,
+          cardBox.y + cardBox.height,
+          `child rail starts at category card ${groupIndex} in ${label}`,
+        );
+      }
+      if (previousVerticalBottom !== null) {
+        expectNear(
+          verticalBox.y,
+          previousVerticalBottom,
+          `child sibling rails meet between rows ${childIndex - 1}/${childIndex} in ${label}`,
+        );
+      }
+      previousVerticalBottom = verticalBox.y + verticalBox.height;
+    }
+  }
+
+  await expectNoHorizontalOverflow(page, `${label} initial state`);
+};
+
+test.describe("Search tree geometry", () => {
+  for (const viewport of VIEWPORTS) {
+    const label = `${viewport.width}x${viewport.height}`;
+
+    test(`stays continuous through initial, scroll, collapse, and filter states at ${label}`, async ({
+      page,
+    }) => {
+      test.setTimeout(60_000);
+      await page.setViewportSize(viewport);
+      await page.goto("/Search");
+      await expect(
+        page.getByTestId("search-tree-parent-group").first(),
+      ).toBeVisible();
+
+      await expectInitialTreeGeometry(page, label);
+
+      const rootConnector = page.getByTestId("tree-root-vertical-line");
+      const connectorBefore = await requireBox(
+        rootConnector,
+        "root connector before scroll",
+      );
+      const scrollRegion = page.getByTestId("search-results-scroll-region");
+      await scrollRegion.evaluate((element) => {
+        element.scrollTop = 120;
+      });
+      await expect
+        .poll(() => scrollRegion.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(0);
+      const connectorAfter = await requireBox(
+        rootConnector,
+        "root connector after scroll",
+      );
+      const scrollRegionBox = await requireBox(
+        scrollRegion,
+        "results viewport after scroll",
+      );
+      const scrolledRootRail = await requireBox(
+        page
+          .getByTestId("search-tree-parent-group")
+          .first()
+          .getByTestId("tree-group-root-rail"),
+        "root rail after scroll",
+      );
+      expectNear(
+        connectorAfter.x,
+        connectorBefore.x,
+        `root connector x after scroll in ${label}`,
+      );
+      expectNear(
+        connectorAfter.height,
+        connectorBefore.height,
+        `root connector remains visible after scroll in ${label}`,
+      );
+      expectNear(
+        scrolledRootRail.x,
+        connectorAfter.x,
+        `scrolled content keeps the root rail aligned in ${label}`,
+      );
+      expect(
+        scrolledRootRail.y,
+        `root rail should enter above the clipped viewport in ${label}`,
+      ).toBeLessThanOrEqual(scrollRegionBox.y + PX_TOLERANCE);
+      expect(
+        scrolledRootRail.y + scrolledRootRail.height,
+        `root rail should cross the clipped viewport boundary in ${label}`,
+      ).toBeGreaterThanOrEqual(scrollRegionBox.y - PX_TOLERANCE);
+
+      await scrollRegion.evaluate((element) => {
+        element.scrollTop = 0;
+      });
+      const firstGroup = page.getByTestId("search-tree-parent-group").first();
+      await firstGroup.getByRole("button", { name: /^Collapse / }).click();
+      await expect(
+        firstGroup.getByTestId("search-tree-child-list"),
+      ).toHaveCount(0);
+      await expect(
+        firstGroup.getByTestId("tree-branch-vertical-line"),
+      ).toHaveCount(0);
+      const collapsedRail = await requireBox(
+        firstGroup.getByTestId("tree-group-root-rail"),
+        "collapsed rail",
+      );
+      const secondGroup = await requireBox(
+        page.getByTestId("search-tree-parent-group").nth(1),
+        "second category after collapse",
+      );
+      expectNear(
+        collapsedRail.y + collapsedRail.height,
+        secondGroup.y,
+        `collapsed category leaves no orphan rail in ${label}`,
+      );
+      await expectNoHorizontalOverflow(page, `${label} collapsed state`);
+
+      const input = page.getByTestId("search-root-input");
+      await input.fill("firewall");
+      await expect(page.getByTestId("search-tree-parent-group")).toHaveCount(1);
+      await expect(page.getByTestId("search-tree-child-row")).toHaveCount(1);
+      await expect(page.getByTestId("tree-group-root-rail")).toHaveCount(0);
+      await expect(page.getByTestId("search-tree-parent-card")).toContainText(
+        "Security / Systems Work",
+      );
+
+      const filteredGroup = page.getByTestId("search-tree-parent-group");
+      const filteredParentCard = await requireBox(
+        filteredGroup.getByTestId("search-tree-parent-card"),
+        "filtered parent card",
+      );
+      const filteredChildRail = await requireBox(
+        filteredGroup
+          .getByTestId("search-tree-child-row")
+          .getByTestId("tree-branch-vertical-line"),
+        "filtered child rail",
+      );
+      expectNear(
+        filteredChildRail.y,
+        filteredParentCard.y + filteredParentCard.height,
+        `filtered child rail stays attached in ${label}`,
+      );
+      await expectNoHorizontalOverflow(page, `${label} filtered state`);
+
+      await input.fill("no-result-for-this-query");
+      await expect(page.getByText("No matching entries.")).toBeVisible();
+      await expect(page.getByTestId("search-root-connector-row")).toHaveCount(
+        0,
+      );
+      await expect(page.getByTestId("search-tree-parent-group")).toHaveCount(0);
+      await expect(page.getByTestId("tree-branch-vertical-line")).toHaveCount(
+        0,
+      );
+      await expectNoHorizontalOverflow(page, `${label} no-result state`);
+    });
+  }
 });

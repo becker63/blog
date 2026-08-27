@@ -1,50 +1,68 @@
-import { css } from "../../../styled-system/css";
-import { motion } from "framer-motion";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { css, cx } from "../../../styled-system/css";
+import { PaneParent } from "../shared/PaneChild";
 
-/** Panda spacing token: same vertical gap everywhere on Search (root, sections, parent→children, siblings). */
-export const SEARCH_TREE_VERTICAL_GAP = "6";
-
-/**
- * Root spacer under the search field (px). Keep equal to theme spacing for
- * {@link SEARCH_TREE_VERTICAL_GAP} (default preset: `6` → 24px).
- */
+/** Rendered value of Panda spacing `6`; retained for browser contracts. */
 export const SEARCH_ROOT_CATEGORY_GAP_PX = 24;
 
-const LAYOUT_GAP_PX = 14;
-const FULL_LAYOUT_GAP = `${LAYOUT_GAP_PX}px`;
-
-/** Default vertical run-in (px string) for TreeBranch / TreeIndent segments. */
-export const TREE_BRANCH_RUN_IN_GAP = FULL_LAYOUT_GAP;
-
-const LINE_WIDTH = "1.5px";
+const FULL_ROW_GAP = "var(--spacing-6)";
+const HALF_ROW_GAP = "calc(var(--spacing-6) / 2)";
+const NODE_CONTENT_INSET = "var(--spacing-5)";
+const LINE_WIDTH = "1px";
+const HALF_LINE_WIDTH = "0.5px";
 const BRANCH_LENGTH = "28px";
 
-/** Reads white on the shell without harsh pure #fff. */
-export const TREE_LINE_COLOR = "rgba(255, 255, 255, 0.88)";
+/** Quiet enough to sit behind the pane surfaces while remaining legible. */
+const TREE_LINE_COLOR = "rgba(255, 255, 255, 0.58)";
 
-export const TREE_ROOT_GAP_WIDTH = "64px";
-export const TREE_COLUMN_WIDTH = `calc(0px + ${BRANCH_LENGTH})`;
-export const TREE_NODE_MAX_WIDTH = "800px";
-export const TREE_PARENT_ROW_MAX_WIDTH = TREE_NODE_MAX_WIDTH;
-export const TREE_CHILD_ROW_MAX_WIDTH = TREE_NODE_MAX_WIDTH;
-export const TREE_PARENT_ROW_OFFSET = "22px";
-/** Horizontal space between child indent column and branch column (grid lane). */
-export const TREE_CHILD_BRANCH_GAP = "22px";
-export const TREE_PARENT_CONTENT_MAX_WIDTH = `calc(${TREE_PARENT_ROW_MAX_WIDTH} - ${TREE_PARENT_ROW_OFFSET})`;
-export const TREE_CHILD_CONTENT_MAX_WIDTH = `calc(${TREE_CHILD_ROW_MAX_WIDTH} - ${TREE_PARENT_ROW_OFFSET})`;
+const TREE_COLUMN_WIDTH = BRANCH_LENGTH;
+const TREE_NODE_MAX_WIDTH = "800px";
 
-type Props = {
-  showTop: boolean;
-  showBottom: boolean;
-  showBranch?: boolean;
+const frameClass = css({
+  w: "full",
+  maxW: TREE_NODE_MAX_WIDTH,
+  mx: "auto",
+});
+
+const insetFrameClass = css({
+  ps: "5",
+  boxSizing: "border-box",
+});
+
+type TreeFrameProps = ComponentPropsWithoutRef<"div"> & {
+  /** Rail frames use the shared pane-content inset; surface frames do not. */
+  inset?: boolean;
 };
 
-const TreeGutter = ({ children }: { children?: React.ReactNode }) => (
+/**
+ * The one horizontal coordinate system used by the input, root connector, and
+ * result tree. Keeping max-width and rail inset here prevents independently
+ * centered rows from drifting when their containing layout changes.
+ */
+export function TreeFrame({
+  children,
+  className,
+  inset = true,
+  ...rest
+}: TreeFrameProps) {
+  return (
+    <div
+      {...rest}
+      data-tree-frame=""
+      className={cx(frameClass, inset ? insetFrameClass : undefined, className)}
+    >
+      {children}
+    </div>
+  );
+}
+
+const TreeGutter = ({ children }: { children?: ReactNode }) => (
   <div
+    aria-hidden="true"
     className={css({
-      flexShrink: 0,
-      width: TREE_COLUMN_WIDTH,
       position: "relative",
+      alignSelf: "stretch",
+      minH: 0,
       pointerEvents: "none",
     })}
   >
@@ -55,45 +73,31 @@ const TreeGutter = ({ children }: { children?: React.ReactNode }) => (
 const VerticalSegment = ({
   showTop,
   showBottom,
-  topExtension = FULL_LAYOUT_GAP,
-  bottomExtension = FULL_LAYOUT_GAP,
-  testId,
+  topExtension = HALF_ROW_GAP,
+  bottomExtension = HALF_ROW_GAP,
 }: {
   showTop: boolean;
   showBottom: boolean;
   topExtension?: string;
   bottomExtension?: string;
-  testId?: string;
 }) =>
   showTop || showBottom ? (
-    <motion.div
-      data-testid={testId}
-      initial={{ scaleY: 0 }}
-      animate={{ scaleY: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      style={{
-        transformOrigin: "top",
+    <div
+      data-testid="tree-branch-vertical-line"
+      className={css({
         position: "absolute",
-        left: 0,
+        insetInlineStart: 0,
         width: LINE_WIDTH,
-        background: TREE_LINE_COLOR,
-        top: showTop ? `-${topExtension}` : "50%",
-        bottom: showBottom ? `-${bottomExtension}` : "50%",
+        bg: TREE_LINE_COLOR,
+      })}
+      style={{
+        top: showTop ? `calc(-1 * ${topExtension})` : "50%",
+        bottom: showBottom ? `calc(-1 * ${bottomExtension})` : "50%",
       }}
     />
   ) : null;
 
-export const TreeIndent = ({ continues }: { continues: boolean }) => (
-  <TreeGutter>
-    <VerticalSegment
-      showTop={continues}
-      showBottom={continues}
-      testId="tree-indent-vertical-line"
-    />
-  </TreeGutter>
-);
-
-export const TreeBranch = ({
+const TreeBranch = ({
   showTop,
   showBottom,
   topExtension,
@@ -110,65 +114,217 @@ export const TreeBranch = ({
       showBottom={showBottom}
       topExtension={topExtension}
       bottomExtension={bottomExtension}
-      testId="tree-branch-vertical-line"
     />
-    <motion.div
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: 1 }}
-      transition={{ duration: 0.25, delay: 0.15 }}
-      style={{
-        transformOrigin: "left",
-        position: "absolute",
-        top: "50%",
-        left: 0,
-        height: LINE_WIDTH,
-        width: BRANCH_LENGTH,
-        background: TREE_LINE_COLOR,
-      }}
-    />
-  </TreeGutter>
-);
-
-export const TreeRootConnector = () => (
-  <TreeGutter>
-    <motion.div
-      data-testid="tree-root-vertical-line"
-      initial={{ scaleY: 0 }}
-      animate={{ scaleY: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      style={{
-        transformOrigin: "top",
-        position: "absolute",
-        left: "-6px",
-        top: 0,
-        bottom: 0,
-        width: LINE_WIDTH,
-        background: TREE_LINE_COLOR,
-      }}
-    />
-  </TreeGutter>
-);
-
-/** Vertical trunk in the gap between a parent category row and its child list (aligns with parent TreeBranch). */
-export const TreeParentChildGapConnector = () => (
-  <TreeGutter>
     <div
-      data-testid="tree-section-gap-vertical"
-      style={{
+      data-testid="tree-branch-horizontal-line"
+      className={css({
         position: "absolute",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: LINE_WIDTH,
-        background: TREE_LINE_COLOR,
+        height: LINE_WIDTH,
+        bg: TREE_LINE_COLOR,
+      })}
+      style={{
+        top: `calc(50% - ${HALF_LINE_WIDTH})`,
+        insetInlineStart: LINE_WIDTH,
+        width: `calc(${BRANCH_LENGTH} - ${LINE_WIDTH})`,
       }}
     />
   </TreeGutter>
 );
 
-export const TreeLines = ({ showTop, showBottom, showBranch = true }: Props) =>
-  showBranch ? (
-    <TreeBranch showTop={showTop} showBottom={showBottom} />
-  ) : (
-    <TreeIndent continues={showTop || showBottom} />
+type TreeBranchRowProps = ComponentPropsWithoutRef<"div"> & {
+  showTop: boolean;
+  showBottom: boolean;
+  topExtension?: string;
+  bottomExtension?: string;
+};
+
+/** A node row whose branch and content always share the same grid tracks. */
+function TreeBranchRow({
+  children,
+  className,
+  style,
+  showTop,
+  showBottom,
+  topExtension,
+  bottomExtension,
+  ...rest
+}: TreeBranchRowProps) {
+  return (
+    <div
+      {...rest}
+      className={cx(
+        css({
+          display: "grid",
+          w: "full",
+          minW: 0,
+        }),
+        className,
+      )}
+      style={{
+        ...style,
+        gridTemplateColumns: `${TREE_COLUMN_WIDTH} minmax(0, 1fr)`,
+      }}
+    >
+      <TreeBranch
+        showTop={showTop}
+        showBottom={showBottom}
+        topExtension={topExtension}
+        bottomExtension={bottomExtension}
+      />
+      {children}
+    </div>
   );
+}
+
+type TreeCategoryRowProps = ComponentPropsWithoutRef<"div"> & {
+  terminal: boolean;
+};
+
+/** Category branch; only the final category terminates the root rail. */
+export function TreeCategoryRow({
+  children,
+  terminal,
+  ...rest
+}: TreeCategoryRowProps) {
+  return (
+    <TreeBranchRow
+      {...rest}
+      showTop={terminal}
+      showBottom={false}
+      topExtension="0px"
+    >
+      {children}
+    </TreeBranchRow>
+  );
+}
+
+type TreeChildRowProps = ComponentPropsWithoutRef<"div"> & {
+  first: boolean;
+  last: boolean;
+};
+
+/** Child branch with run-ins derived from the real pane-stack gap. */
+export function TreeChildRow({
+  children,
+  first,
+  last,
+  ...rest
+}: TreeChildRowProps) {
+  return (
+    <TreeBranchRow
+      {...rest}
+      showTop={true}
+      showBottom={!last}
+      topExtension={first ? FULL_ROW_GAP : HALF_ROW_GAP}
+      bottomExtension={HALF_ROW_GAP}
+    >
+      {children}
+    </TreeBranchRow>
+  );
+}
+
+/** Stable line from the search pane to the scroll-region boundary. */
+export const TreeRootConnector = () => (
+  <div
+    aria-hidden="true"
+    className={css({
+      position: "relative",
+      h: "full",
+      width: TREE_COLUMN_WIDTH,
+      pointerEvents: "none",
+    })}
+  >
+    <div
+      data-testid="tree-root-vertical-line"
+      className={css({
+        position: "absolute",
+        insetInlineStart: 0,
+        top: 0,
+        bottom: 0,
+        width: LINE_WIDTH,
+        bg: TREE_LINE_COLOR,
+      })}
+    />
+  </div>
+);
+
+type TreeGroupProps = ComponentPropsWithoutRef<"div"> & {
+  continues: boolean;
+};
+
+/** A category subtree and its root-rail continuation through the real pane gap. */
+export function TreeGroup({
+  children,
+  className,
+  continues,
+  ...rest
+}: TreeGroupProps) {
+  return (
+    <div
+      {...rest}
+      className={cx(
+        css({
+          position: "relative",
+          w: "full",
+          minW: 0,
+        }),
+        className,
+      )}
+    >
+      {continues ? (
+        <div
+          data-testid="tree-group-root-rail"
+          aria-hidden="true"
+          className={css({
+            position: "absolute",
+            zIndex: 0,
+            insetInlineStart: 0,
+            top: 0,
+            width: LINE_WIDTH,
+            bg: TREE_LINE_COLOR,
+            pointerEvents: "none",
+          })}
+          style={{ bottom: `calc(-1 * ${FULL_ROW_GAP})` }}
+        />
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
+type TreeChildListProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
+  children: ReactNode;
+};
+
+/**
+ * The nested pane stack. Its rail aligns with the parent pane's content inset,
+ * so category padding and tree indentation cannot diverge independently.
+ */
+export function TreeChildList({
+  children,
+  className,
+  style,
+  ...rest
+}: TreeChildListProps) {
+  return (
+    <div
+      {...rest}
+      className={cx(
+        css({
+          position: "relative",
+          mt: "6",
+          minW: 0,
+        }),
+        className,
+      )}
+      style={{
+        ...style,
+        marginInlineStart: `calc(${TREE_COLUMN_WIDTH} + ${NODE_CONTENT_INSET})`,
+      }}
+    >
+      <PaneParent gap="6" className={css({ w: "full" })}>
+        {children}
+      </PaneParent>
+    </div>
+  );
+}

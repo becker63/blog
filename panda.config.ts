@@ -22,6 +22,10 @@ export default defineConfig({
         xl: "1280px",
         "2xl": "1536px",
       },
+      containerSizes: {
+        /** 800px tree frame plus a symmetric 10px classic-scrollbar gutter. */
+        searchTreeFrame: "820px",
+      },
       tokens: {
         spacing: {
           layout: { value: "{spacing.3}" }, // 12px

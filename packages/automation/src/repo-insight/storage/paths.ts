@@ -14,7 +14,6 @@ export const repoInsightContextPath = path.join(contentAutomationDir, "repo-insi
 export const repoInsightPollStatePath = path.join(contentAutomationDir, "repo-insight-poll-state.json");
 export const repoInsightBudgetStatePath = path.join(contentAutomationDir, "repo-insight-budget-state.json");
 export const tasteProfilePath = path.join(contentAutomationDir, "taste-profile.md");
-export const workflowsDir = path.join(repoRoot, ".github", "workflows");
 
 /** @deprecated Renamed to `contentAutomationDir`; kept for check.ts skips. */
 export const dataDir = contentAutomationDir;

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { css } from "../../../styled-system/css";
 import Link from "next/link";
 import Image from "next/image";
@@ -48,12 +47,8 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
       : blog.meta.description;
 
   return (
-    <motion.div
+    <div
       data-testid="search-tree-child-card"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
       className={css({
         flex: 1,
         minW: 0,
@@ -166,6 +161,6 @@ export const BlogCard = ({ blog }: { blog: BlogPost }) => {
         )}
       </Link>
       </PaneChild>
-    </motion.div>
+    </div>
   );
 };
