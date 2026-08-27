@@ -1,118 +1,177 @@
 import { expect, test } from "@playwright/test";
 
-const LOAD_WAIT_MS = 1500;
-test.describe("Search Root Gap", () => {
-  test("root gap vertical connector aligns with the first category vertical line", async ({
+const LOAD_WAIT_MS = 500;
+const PX_TOLERANCE = 0.1;
+
+const expectNear = (actual: number, expected: number, message: string) => {
+  expect(Math.abs(actual - expected), message).toBeLessThanOrEqual(
+    PX_TOLERANCE,
+  );
+};
+
+test.describe("Search root connector", () => {
+  test("connects the search pane to the first category on one shared rail", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/Search");
     await page.waitForTimeout(LOAD_WAIT_MS);
 
-    const rootVerticalLine = page.getByTestId("tree-root-vertical-line");
-    const parentVerticalLine = page
-      .locator('[data-testid="search-tree-parent-content"] [data-testid="tree-branch-vertical-line"]')
-      .first();
-
-    await expect(rootVerticalLine).toHaveCount(1);
-    await expect(parentVerticalLine).toHaveCount(1);
-
-    const rootVerticalBox = await rootVerticalLine.boundingBox();
-    const parentVerticalBox = await parentVerticalLine.boundingBox();
-
-    expect(rootVerticalBox).not.toBeNull();
-    expect(parentVerticalBox).not.toBeNull();
-
-    const xDelta = Math.abs(rootVerticalBox!.x - parentVerticalBox!.x);
-
-    expect(
-      xDelta,
-      "Expected the root gap vertical connector to align with the first category vertical line",
-    ).toBeLessThanOrEqual(2);
-  });
-
-  test("root gap becomes visually transparent after scroll except for the connector line", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/Search");
-    await page.waitForTimeout(LOAD_WAIT_MS);
-
-    const scrollRegion = page.getByTestId("search-results-scroll-region");
-    const connectorContent = page.getByTestId("search-root-connector-content");
+    const rootShell = page.getByTestId("search-root-shell");
     const connectorRow = page.getByTestId("search-root-connector-row");
+    const rootLine = page.getByTestId("tree-root-vertical-line");
+    const firstGroup = page.getByTestId("search-tree-parent-group").first();
+    const groupRail = firstGroup.getByTestId("tree-group-root-rail");
+    const parentCard = firstGroup.getByTestId("search-tree-parent-card");
+    const parentBranch = firstGroup
+      .getByTestId("search-tree-parent-content")
+      .getByTestId("tree-branch-horizontal-line");
 
-    await expect(connectorContent).toHaveCount(1);
-    await expect(connectorRow).toHaveCount(1);
+    await expect(rootLine).toBeVisible();
+    await expect(groupRail).toBeVisible();
 
-    await scrollRegion.evaluate((element) => {
-      element.scrollTop = 120;
-      element.dispatchEvent(new Event("scroll", { bubbles: true }));
-    });
+    const [
+      rootShellBox,
+      connectorRowBox,
+      rootLineBox,
+      groupBox,
+      railBox,
+      cardBox,
+      branchBox,
+    ] = await Promise.all([
+      rootShell.boundingBox(),
+      connectorRow.boundingBox(),
+      rootLine.boundingBox(),
+      firstGroup.boundingBox(),
+      groupRail.boundingBox(),
+      parentCard.boundingBox(),
+      parentBranch.boundingBox(),
+    ]);
 
-    await page.waitForTimeout(150);
+    expect(rootShellBox).not.toBeNull();
+    expect(connectorRowBox).not.toBeNull();
+    expect(rootLineBox).not.toBeNull();
+    expect(groupBox).not.toBeNull();
+    expect(railBox).not.toBeNull();
+    expect(cardBox).not.toBeNull();
+    expect(branchBox).not.toBeNull();
 
-    const metrics = await page.evaluate(() => {
-      const row = document.querySelector('[data-testid="search-root-connector-row"]');
-      const content = document.querySelector('[data-testid="search-root-connector-content"]');
-      if (!row || !content) {
-        return null;
-      }
-
-      const rowStyle = window.getComputedStyle(row);
-      const contentStyle = window.getComputedStyle(content);
-
-      return {
-        rowOpacity: rowStyle.opacity,
-        rowBackgroundColor: rowStyle.backgroundColor,
-        rowBoxShadow: rowStyle.boxShadow,
-        rowBackdropFilter: rowStyle.backdropFilter,
-        contentOpacity: contentStyle.opacity,
-        contentBackgroundColor: contentStyle.backgroundColor,
-        contentBoxShadow: contentStyle.boxShadow,
-        contentBackdropFilter: contentStyle.backdropFilter,
-      };
-    });
-
-    if (!metrics) {
-      throw new Error("Expected root gap row and content elements to exist");
-    }
-    expect(
-      Number(metrics.rowOpacity),
-      "Expected the root gap row itself to be visually gone after scroll",
-    ).toBe(0);
-    expect(metrics.rowBackgroundColor).toBe("rgba(0, 0, 0, 0)");
-    expect(metrics.rowBoxShadow).toBe("none");
-    expect(metrics.rowBackdropFilter).toBe("none");
-    expect(
-      Number(metrics.contentOpacity),
-      "Expected the root gap content wrapper to be visually gone after scroll",
-    ).toBe(0);
-    expect(metrics.contentBackgroundColor).toBe("rgba(0, 0, 0, 0)");
-    expect(metrics.contentBoxShadow).toBe("none");
-    expect(metrics.contentBackdropFilter).toBe("none");
+    expectNear(
+      rootLineBox!.y,
+      rootShellBox!.y + rootShellBox!.height,
+      "root line starts at pane",
+    );
+    expectNear(
+      rootLineBox!.y + rootLineBox!.height,
+      groupBox!.y,
+      "root line reaches the first category group",
+    );
+    expectNear(
+      rootLineBox!.x,
+      railBox!.x,
+      "root and category rails share an x coordinate",
+    );
+    expectNear(
+      connectorRowBox!.height,
+      24,
+      "root connector uses the pane-row gap",
+    );
+    expectNear(
+      branchBox!.x,
+      railBox!.x + railBox!.width,
+      "category branch starts at the root rail edge",
+    );
+    expectNear(
+      branchBox!.x + branchBox!.width,
+      cardBox!.x,
+      "category branch reaches its card",
+    );
   });
 
-  test("root gap line disappears when the results scroll", async ({ page }) => {
+  test("stays stable at the scroll boundary instead of collapsing", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/Search");
     await page.waitForTimeout(LOAD_WAIT_MS);
 
-    const rootConnectorRow = page.getByTestId("search-root-connector-row");
-    const rootConnectorLine = page.getByTestId("tree-root-vertical-line");
+    const rootShell = page.getByTestId("search-root-shell");
+    const connectorRow = page.getByTestId("search-root-connector-row");
+    const rootLine = page.getByTestId("tree-root-vertical-line");
     const scrollRegion = page.getByTestId("search-results-scroll-region");
-
-    await expect(rootConnectorRow).toHaveCount(1);
-    await expect(rootConnectorLine).toHaveCount(1);
+    const before = await Promise.all([
+      rootShell.boundingBox(),
+      connectorRow.boundingBox(),
+      rootLine.boundingBox(),
+    ]);
 
     await scrollRegion.evaluate((element) => {
       element.scrollTop = 120;
-      element.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
+    await expect
+      .poll(() => scrollRegion.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
 
-    await page.waitForTimeout(150);
+    const after = await Promise.all([
+      rootShell.boundingBox(),
+      connectorRow.boundingBox(),
+      rootLine.boundingBox(),
+    ]);
 
-    await expect(rootConnectorRow).toHaveCount(1);
-    await expect(rootConnectorLine).toHaveCount(0);
+    for (const box of [...before, ...after]) expect(box).not.toBeNull();
+    expectNear(
+      after[0]!.y,
+      before[0]!.y,
+      "search pane does not jump on result scroll",
+    );
+    expectNear(
+      after[1]!.y,
+      before[1]!.y,
+      "connector row does not jump on result scroll",
+    );
+    expectNear(
+      after[1]!.height,
+      before[1]!.height,
+      "connector row keeps its height",
+    );
+    expectNear(after[2]!.x, before[2]!.x, "root line stays on its rail");
+    expectNear(
+      after[2]!.height,
+      before[2]!.height,
+      "root line remains visible",
+    );
+  });
+
+  test("keeps every frame centered when classic scrollbar gutters are reserved", async ({
+    page,
+  }) => {
+    for (const viewport of [
+      { width: 1080, expectedGutter: "auto" },
+      { width: 1152, expectedGutter: "stable both-edges" },
+    ]) {
+      await page.setViewportSize({ width: viewport.width, height: 800 });
+      await page.goto("/Search");
+      await expect(page.getByTestId("search-tree-frame")).toBeVisible();
+
+      const rootBox = await page
+        .getByTestId("search-root-shell")
+        .boundingBox();
+      const connectorBox = await page
+        .getByTestId("search-root-connector-content")
+        .boundingBox();
+      const treeBox = await page.getByTestId("search-tree-frame").boundingBox();
+      const gutter = await page
+        .getByTestId("search-results-scroll-region")
+        .evaluate((element) => getComputedStyle(element).scrollbarGutter);
+
+      for (const box of [rootBox, connectorBox, treeBox]) {
+        expect(box).not.toBeNull();
+      }
+      expectNear(connectorBox!.x, rootBox!.x, "connector frame left edge");
+      expectNear(connectorBox!.width, rootBox!.width, "connector frame width");
+      expectNear(treeBox!.x, rootBox!.x, "result frame left edge");
+      expectNear(treeBox!.width, rootBox!.width, "result frame width");
+      expect(gutter).toBe(viewport.expectedGutter);
+    }
   });
 });
