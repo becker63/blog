@@ -6,19 +6,13 @@ https://becker63.digital/ | https://github.com/becker63
 
 I build tools that make complex software easier to inspect, reproduce, and improve. My work spans production HPC authentication, real-time electric-grid interfaces, reproducible build systems, and evaluation infrastructure for coding agents.
 
-PROFESSIONAL EXPERIENCE
-Ohio Supercomputer Center — Security & Infrastructure Documentation Intern | October 2024–November 2025
-- Investigated and documented a production HPC platform, tracing OIDC, JWT, and LDAP identity flows through Apache modules, Nginx per-user processes, and Lua authentication hooks.
-- Built a Docker reproduction of the authentication stack to debug behavior without privileged production access; investigated configuration layers and security-sensitive URL handling.
-- Turned authentication and infrastructure findings into reproducible debugging procedures and documentation for onboarding and platform maintenance.
-
-Tarigma Corporation — Frontend Engineer | 2021–2023
-- Built React/Recoil state coordination for real-time electric-grid incident analysis, synchronizing multiple relay data feeds for reliability-sensitive operator interfaces.
-- Extended Chart.js with draggable temporal annotations and implemented COMTRADE relay-data processing for electrical disturbance analysis.
-- Integrated dynamic windowed diagnostic layouts with react-mosaic, keeping timing, state consistency, and debugging clarity central to the interface.
-
-STEMTree — Programming Instructor | 2021–2023
-- Taught Python, JavaScript, React, and computer science concepts to students ages 10–16; helped students debug programs and development environments through hands-on instruction.
+TECHNICAL DEMOS & RECOGNITION
+AI Tinkerers Columbus — Technical Demo Presenter | June 2026: Presented SearchBench; featured as a Community Favorite in Top AI Demos #31.
+Demo: https://aitinkerers.org/talks/rsvp_t4IMPq7lJnc
+Roundup: https://post-training.aitinkerers.org/p/top-ai-demos-31
+PicoCTF, Carnegie Mellon University | 2024: Placed 57th of 1,329 teams.
+SkillsUSA Cybersecurity: Second place, state competition.
+US Cyber Challenge Cyber Camp | 2025: Selected for practical security training and CTF exercises.
 
 INDEPENDENT ENGINEERING & RESEARCH
 Attune — Independent engineering & research project
@@ -34,18 +28,24 @@ Source: https://github.com/becker63/searchbench-go
 - Built a Go/Pkl experiment surface and Python evaluation harness to compare coding-agent search strategies using typed tasks, scoring models, backend adapters, and reproducible run bundles.
 - Recorded search quality, token usage, cost, and classified failures so candidate strategies can be compared against a baseline with inspectable evidence.
 
+PROFESSIONAL EXPERIENCE
+Ohio Supercomputer Center — Security & Infrastructure Documentation Intern | October 2024–November 2025
+- Investigated and documented a production HPC platform, tracing OIDC, JWT, and LDAP identity flows through Apache modules, Nginx per-user processes, and Lua authentication hooks.
+- Built a Docker reproduction of the authentication stack to debug behavior without privileged production access; investigated configuration layers and security-sensitive URL handling.
+- Turned authentication and infrastructure findings into reproducible debugging procedures and documentation for onboarding and platform maintenance.
+
+Tarigma Corporation — Frontend Engineer | 2021–2023
+- Built React/Recoil state coordination for real-time electric-grid incident analysis, synchronizing multiple relay data feeds for reliability-sensitive operator interfaces.
+- Extended Chart.js with draggable temporal annotations and implemented COMTRADE relay-data processing for electrical disturbance analysis.
+- Integrated dynamic windowed diagnostic layouts with react-mosaic, keeping timing, state consistency, and debugging clarity central to the interface.
+
+STEMTree — Programming Instructor | 2021–2023
+- Taught Python, JavaScript, React, and computer science concepts to students ages 10–16; helped students debug programs and development environments through hands-on instruction.
+
 SELECTED INFRASTRUCTURE & SECURITY PROJECTS
 Static Control Plane: Modeled Crossplane/KCL infrastructure with Nix-pinned schema generation, GitOps resources, and automated validation before deployment.
 NixOS Infrastructure: Built declarative multi-node deployments, disk provisioning, Tailscale networking, a distributed builder, and a nix-serve binary cache.
 nftables Structure Fuzzer: Built structured Netlink mutation with Nim/C bindings, sanitizer instrumentation, and reproducible Nix/MicroVM test environments.
-
-TECHNICAL DEMOS & RECOGNITION
-AI Tinkerers Columbus — Technical Demo Presenter | June 2026: Presented SearchBench; featured as a Community Favorite in Top AI Demos #31.
-Demo: https://aitinkerers.org/talks/rsvp_t4IMPq7lJnc
-Roundup: https://post-training.aitinkerers.org/p/top-ai-demos-31
-PicoCTF, Carnegie Mellon University | 2024: Placed 57th of 1,329 teams.
-SkillsUSA Cybersecurity: Second place, state competition.
-US Cyber Challenge Cyber Camp | 2025: Selected for practical security training and CTF exercises.
 
 TECHNICAL SKILLS
 Languages: Go, Python, JavaScript/TypeScript, Flix, Java, Nim, Bash
