@@ -1,0 +1,148 @@
+{
+  "name": "Taylor Johnson",
+  "headline": "Software Engineer · Systems & Developer Tools",
+  "location": "New Albany, Ohio",
+  "email": "johnsontaylor6320@gmail.com",
+  "phone": "+1 220-246-8386",
+  "website": "https://becker63.digital/",
+  "github": "https://github.com/becker63",
+  "summary": "I build tools that make complex software easier to inspect, reproduce, and improve. My work spans production HPC authentication, real-time electric-grid interfaces, reproducible build systems, and evaluation infrastructure for coding agents.",
+  "experience": [
+    {
+      "organization": "Ohio Supercomputer Center",
+      "role": "Security & Infrastructure Documentation Intern",
+      "dates": "October 2024–November 2025",
+      "bullets": [
+        "Investigated and documented a production HPC platform, tracing OIDC, JWT, and LDAP identity flows through Apache modules, Nginx per-user processes, and Lua authentication hooks.",
+        "Built a Docker reproduction of the authentication stack to debug behavior without privileged production access; investigated configuration layers and security-sensitive URL handling.",
+        "Turned authentication and infrastructure findings into reproducible debugging procedures and documentation for onboarding and platform maintenance."
+      ]
+    },
+    {
+      "organization": "Tarigma Corporation",
+      "role": "Frontend Engineer",
+      "dates": "2021–2023",
+      "bullets": [
+        "Built React/Recoil state coordination for real-time electric-grid incident analysis, synchronizing multiple relay data feeds for reliability-sensitive operator interfaces.",
+        "Extended Chart.js with draggable temporal annotations and implemented COMTRADE relay-data processing for electrical disturbance analysis.",
+        "Integrated dynamic windowed diagnostic layouts with react-mosaic, keeping timing, state consistency, and debugging clarity central to the interface."
+      ]
+    },
+    {
+      "organization": "STEMTree",
+      "role": "Programming Instructor",
+      "dates": "2021–2023",
+      "bullets": [
+        "Taught Python, JavaScript, React, and computer science concepts to students ages 10–16; helped students debug programs and development environments through hands-on instruction."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Attune",
+      "context": "Independent engineering & research project",
+      "links": [
+        {
+          "label": "Source",
+          "url": "https://github.com/becker63/attune"
+        },
+        {
+          "label": "Interactive explanation",
+          "url": "https://atlas-live-five.vercel.app/"
+        }
+      ],
+      "bullets": [
+        "Built a typed repository-analysis instrument in Flix with Grit extraction and bounded Datalog queries; separated semantic policy from narrow Java/native interfaces and pinned the Bazel/Nix build.",
+        "Designed reproducible localization and review evaluations with gold-free prediction inputs, frozen receipts, exact memoization, and shared Bazel artifacts; integrated BuildBuddy remote caching and execution.",
+        "Measured scheduling and replay costs: historical AttuneFlix offline evaluation preserved results across 61 JS/TS cases while reducing 4,301 seconds of sequential shard work to 51.7 seconds of cold remote wall time; exact replay made no new provider calls.",
+        "Implemented independent semantic laws, renderer goldens, and documentation correspondence that regenerates six README examples through actual extraction and admission."
+      ]
+    },
+    {
+      "name": "SearchBench",
+      "context": "Coding-agent search evaluation harness",
+      "links": [
+        {
+          "label": "Source",
+          "url": "https://github.com/becker63/searchbench-go"
+        }
+      ],
+      "bullets": [
+        "Built a Go/Pkl experiment surface and Python evaluation harness to compare coding-agent search strategies using typed tasks, scoring models, backend adapters, and reproducible run bundles.",
+        "Recorded search quality, token usage, cost, and classified failures so candidate strategies can be compared against a baseline with inspectable evidence."
+      ]
+    }
+  ],
+  "additionalProjects": [
+    {
+      "name": "Static Control Plane",
+      "text": "Modeled Crossplane/KCL infrastructure with Nix-pinned schema generation, GitOps resources, and automated validation before deployment."
+    },
+    {
+      "name": "NixOS Infrastructure",
+      "text": "Built declarative multi-node deployments, disk provisioning, Tailscale networking, a distributed builder, and a nix-serve binary cache."
+    },
+    {
+      "name": "nftables Structure Fuzzer",
+      "text": "Built structured Netlink mutation with Nim/C bindings, sanitizer instrumentation, and reproducible Nix/MicroVM test environments."
+    }
+  ],
+  "recognition": [
+    {
+      "name": "AI Tinkerers Columbus — Technical Demo Presenter",
+      "date": "June 2026",
+      "text": "Presented SearchBench; featured as a Community Favorite in Top AI Demos #31.",
+      "links": [
+        {
+          "label": "Demo",
+          "url": "https://aitinkerers.org/talks/rsvp_t4IMPq7lJnc"
+        },
+        {
+          "label": "Roundup",
+          "url": "https://post-training.aitinkerers.org/p/top-ai-demos-31"
+        }
+      ]
+    },
+    {
+      "name": "PicoCTF, Carnegie Mellon University",
+      "date": "2024",
+      "text": "Placed 57th of 1,329 teams."
+    },
+    {
+      "name": "SkillsUSA Cybersecurity",
+      "text": "Second place, state competition."
+    },
+    {
+      "name": "US Cyber Challenge Cyber Camp",
+      "date": "2025",
+      "text": "Selected for practical security training and CTF exercises."
+    }
+  ],
+  "skills": [
+    {
+      "label": "Languages",
+      "text": "Go, Python, JavaScript/TypeScript, Flix, Java, Nim, Bash"
+    },
+    {
+      "label": "Systems & tooling",
+      "text": "Linux, Nix/NixOS, Bazel, BuildBuddy, Buck2, Docker, Git, CI/CD, Kubernetes, Crossplane, FluxCD"
+    },
+    {
+      "label": "Interfaces & evaluation",
+      "text": "React, Recoil, Chart.js, Grit, Datalog, typed experiment models, metrics, reproducible artifacts"
+    },
+    {
+      "label": "Infrastructure & security",
+      "text": "OIDC/JWT/LDAP, Linux networking, fuzzing, Prometheus/Grafana"
+    }
+  ],
+  "education": [
+    "Computer science coursework — Ohio State University, Newark",
+    "Cybersecurity program — Eastland-Fairfield Career & Technical Schools"
+  ],
+  "certifications": [
+    "CompTIA Security+",
+    "CompTIA Network+",
+    "TestOut Network Pro"
+  ]
+}

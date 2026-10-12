@@ -45,7 +45,8 @@
     "public-proof:cli:test": "nx run public-proof-cli:test",
     "public-proof:community-plan": "nx run public-proof-cli:community-plan",
     "public-proof:job-status": "nx run public-proof-cli:job-status",
-    "public-proof:seed-demo": "dotenv -e .env.local -- bunx tsx packages/public-proof-db/scripts/seed-demo-sample.ts"
+    "public-proof:seed-demo": "dotenv -e .env.local -- bunx tsx packages/public-proof-db/scripts/seed-demo-sample.ts",
+    "resume:build": "bun scripts/render-resume.mjs"
   },
   "dependencies": {
     "@apple/highlightjs-pkl": "^1.0.1",

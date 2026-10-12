@@ -17,7 +17,9 @@
     "sharedGlobals": [
       "{workspaceRoot}/panda.config.ts",
       "{workspaceRoot}/postcss.config.cjs",
-      "{workspaceRoot}/tsconfig.json"
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/content/resume.json",
+      "{workspaceRoot}/scripts/render-resume.mjs"
     ]
   },
   "targetDefaults": {

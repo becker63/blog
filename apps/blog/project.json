@@ -7,7 +7,7 @@
     "prebuild": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bunx panda codegen && bunx panda cssgen --silent",
+        "command": "bun scripts/render-resume.mjs && bunx panda codegen && bunx panda cssgen --silent",
         "cwd": "{workspaceRoot}"
       }
     },

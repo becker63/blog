@@ -48,6 +48,14 @@ export const ProfileIdentityPanel = () => {
 
         <p>{PROFILE_PANEL_COPY.summary}</p>
 
+        <p>
+          <a href="https://github.com/becker63/attune">Attune source</a>
+          {" · "}
+          <a href="https://atlas-live-five.vercel.app/">How Attune works</a>
+          {" · "}
+          <a href="https://github.com/becker63/searchbench-go">SearchBench</a>
+        </p>
+
         <hr />
 
         <ProfileWorkWithMe />

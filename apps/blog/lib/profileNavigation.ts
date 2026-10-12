@@ -58,17 +58,17 @@ export const PROFILE_PANEL_COPY = {
     "https://media.licdn.com/dms/image/v2/D4E35AQE5x00dVBomqQ/profile-framedphoto-shrink_200_200/B4EZxaLhS4IsAY-/0/1771039495656?e=1778529600&v=beta&t=CSc7v2PW1enN2Q2Ml61q6ut9W-E0G5KPnRfNoXTDp24",
   portraitAlt: "Portrait of Taylor Johnson",
   identity:
-    "I make opaque infrastructure and AI systems legible enough to debug, automate, and trust.",
+    "I build tools for understanding, testing, and improving software systems.",
   summary:
-    "I work where systems are powerful but hard to explain: auth stacks, Linux/networking boundaries, developer environments, AI coding agents, eval harnesses, and internal platforms. My usual output is the missing map — docs, tools, traces, reports, and visualizations that help teams understand what the system is doing and decide what to change next.",
+    "I build developer tools, reproducible systems, and evaluation infrastructure. My recent projects are Attune, a typed repository-analysis instrument, and SearchBench, a harness for coding-agent search strategies. Previously I investigated production HPC authentication at Ohio Supercomputer Center and built real-time electric-grid interfaces at Tarigma.",
 };
 
 export const PROFILE_WORK_WITH_ME_COPY: ProfileWorkWithMeCopy = {
-  title: "Work with me",
+  title: "I’m looking for engineering work",
   intro:
-    "I help teams make complex infrastructure, developer tooling, security boundaries, and AI workflows easier to understand, reproduce, and improve.",
+    "I’m interested in software engineering, developer tools, AI infrastructure, and platform teams. I bring production experience and independent work that is reproducible and open to inspection.",
   pricing:
-    "Typical starting point: $60/hr, with fixed-scope starter projects available for well-defined work.",
+    "I’m primarily looking for a full-time engineering role, and I’m open to focused projects with a clear engineering problem.",
   offerings: [
     {
       title: "System mapping sprint",
