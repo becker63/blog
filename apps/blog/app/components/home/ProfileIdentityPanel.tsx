@@ -49,11 +49,36 @@ export const ProfileIdentityPanel = () => {
         <p>{PROFILE_PANEL_COPY.summary}</p>
 
         <p>
+          I’m seeking a mid-level individual-contributor role in AI systems or
+          developer infrastructure, combining independent technical work with
+          delivery on a production engineering team.
+        </p>
+
+        <p>
           <a href="https://github.com/becker63/attune">Attune source</a>
           {" · "}
           <a href="https://atlas-live-five.vercel.app/">How Attune works</a>
           {" · "}
           <a href="https://github.com/becker63/searchbench-go">SearchBench</a>
+        </p>
+
+        <p>
+          My experiments include modifying llama.cpp embedding execution and
+          investigating DSPy executable-program optimization. Typed contracts,
+          compiler feedback, and repeatable tests help me decide which
+          optimizations are safe and useful.
+        </p>
+
+        <p>
+          Presented SearchBench at{" "}
+          <a href="https://aitinkerers.org/talks/rsvp_t4IMPq7lJnc">
+            AI Tinkerers Columbus in June 2026
+          </a>
+          ; featured as a Community Favorite in{" "}
+          <a href="https://post-training.aitinkerers.org/p/top-ai-demos-31">
+            Top AI Demos #31
+          </a>
+          .
         </p>
 
         <hr />

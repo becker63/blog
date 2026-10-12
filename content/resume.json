@@ -1,12 +1,12 @@
 {
   "name": "Taylor Johnson",
-  "headline": "Software Engineer · Systems & Developer Tools",
+  "headline": "Software Engineer · AI Systems & Developer Tools",
   "location": "New Albany, Ohio",
   "email": "johnsontaylor6320@gmail.com",
   "phone": "+1 220-246-8386",
   "website": "https://becker63.digital/",
   "github": "https://github.com/becker63",
-  "summary": "I build tools that make complex software easier to inspect, reproduce, and improve. My work spans production HPC authentication, real-time electric-grid interfaces, reproducible build systems, and evaluation infrastructure for coding agents.",
+  "summary": "Software engineer focused on making complex systems understandable and efficient through explicit representations, typed contracts, and reproducible tests. My work connects real-time grid state coordination, production HPC authentication, and AI evaluation and execution infrastructure.",
   "experience": [
     {
       "organization": "Ohio Supercomputer Center",
@@ -55,7 +55,7 @@
         "Built a typed repository-analysis instrument in Flix with Grit extraction and bounded Datalog queries; separated semantic policy from narrow Java/native interfaces and pinned the Bazel/Nix build.",
         "Designed reproducible localization and review evaluations with gold-free prediction inputs, frozen receipts, exact memoization, and shared Bazel artifacts; integrated BuildBuddy remote caching and execution.",
         "Measured scheduling and replay costs: historical AttuneFlix offline evaluation preserved results across 61 JS/TS cases while reducing 4,301 seconds of sequential shard work to 51.7 seconds of cold remote wall time; exact replay made no new provider calls.",
-        "Implemented independent semantic laws, renderer goldens, and documentation correspondence that regenerates six README examples through actual extraction and admission."
+        "Built an installable agent-tool contract pipeline using DeepSeek Harness and Typert, rejecting unsupported schemas; validated transport/tool boundaries alongside semantic laws, renderer checks, and six README examples regenerated from real extraction."
       ]
     },
     {
@@ -75,16 +75,24 @@
   ],
   "additionalProjects": [
     {
+      "name": "Local Inference Experiments",
+      "text": "Modified llama.cpp’s Qwen embedding path on Apple M2/Asahi Linux with Vulkan. Removed unnecessary language-model-head work, preserving bit-identical vectors in the tested comparison; throughput improved from ~72.2 to ~78.8 tokens/s (~9%)."
+    },
+    {
+      "name": "AI Program Optimization",
+      "text": "Investigated DSPy Flex/GEPA executable-program optimization and compiler-feedback validation; implemented compatibility patches for recursive tool schemas and NumPy lazy imports. Kept candidate selection separate from evaluation."
+    },
+    {
       "name": "Static Control Plane",
-      "text": "Modeled Crossplane/KCL infrastructure with Nix-pinned schema generation, GitOps resources, and automated validation before deployment."
+      "text": "Modeled Crossplane/KCL infrastructure with Nix-pinned schema generation, GitOps resources, and validation before deployment."
     },
     {
       "name": "NixOS Infrastructure",
-      "text": "Built declarative multi-node deployments, disk provisioning, Tailscale networking, a distributed builder, and a nix-serve binary cache."
+      "text": "Built declarative multi-node NixOS deployments with provisioning, Tailscale, distributed builds, and binary caching."
     },
     {
       "name": "nftables Structure Fuzzer",
-      "text": "Built structured Netlink mutation with Nim/C bindings, sanitizer instrumentation, and reproducible Nix/MicroVM test environments."
+      "text": "Built structured Netlink mutation with Nim/C bindings, sanitizers, and reproducible Nix/MicroVM tests."
     }
   ],
   "recognition": [
@@ -130,6 +138,10 @@
     {
       "label": "Interfaces & evaluation",
       "text": "React, Recoil, Chart.js, Grit, Datalog, typed experiment models, metrics, reproducible artifacts"
+    },
+    {
+      "label": "Testing & contracts",
+      "text": "pytest, Hypothesis, BasedPyright, Ruff, LibCST/Fixit, compiler feedback"
     },
     {
       "label": "Infrastructure & security",

@@ -58,9 +58,9 @@ export const PROFILE_PANEL_COPY = {
     "https://media.licdn.com/dms/image/v2/D4E35AQE5x00dVBomqQ/profile-framedphoto-shrink_200_200/B4EZxaLhS4IsAY-/0/1771039495656?e=1778529600&v=beta&t=CSc7v2PW1enN2Q2Ml61q6ut9W-E0G5KPnRfNoXTDp24",
   portraitAlt: "Portrait of Taylor Johnson",
   identity:
-    "I build tools for understanding, testing, and improving software systems.",
+    "Software engineer working on AI systems, developer tools, and reproducible execution.",
   summary:
-    "I build developer tools, reproducible systems, and evaluation infrastructure. My recent projects are Attune, a typed repository-analysis instrument, and SearchBench, a harness for coding-agent search strategies. Previously I investigated production HPC authentication at Ohio Supercomputer Center and built real-time electric-grid interfaces at Tarigma.",
+    "My work connects real-time grid-state coordination at Tarigma, production HPC authentication tracing at Ohio Supercomputer Center, and typed AI evaluation and execution in Attune and SearchBench. Across those domains, I use explicit representations, constrained interfaces, and repeatable experiments to understand behavior and measure improvements.",
 };
 
 export const PROFILE_WORK_WITH_ME_COPY: ProfileWorkWithMeCopy = {
